@@ -1,0 +1,45 @@
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
+
+export const productsTable = pgTable(
+  'products',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    description: text('description').notNull(),
+    price: varchar('price').notNull(),
+    originalPrice: numeric('original_price'),
+    category: varchar('category', { length: 100 }).notNull(),
+    unit: varchar('unit').notNull(),
+    weight: varchar('weight'),
+    farm: varchar('farm').notNull(),
+    origin: varchar('origin').notNull(),
+    isOrganic: boolean('is_organic').notNull(),
+    isSeasonal: boolean('is_seasonal'),
+    isFeatured: boolean('is_featured'),
+    isOnSale: boolean('is_on_sale'),
+    inStock: boolean('in_stock').default(true).notNull(),
+    rating: varchar('rating').notNull(),
+    reviewCount: integer('review_count'),
+    harvestDaysAgo: integer('harvest_days_ago'),
+    tags: text('tags').array(),
+    nutritionHighlights: text('nutrition_highlights').array(),
+    storageInstructions: text('storage_instructions'),
+    images: jsonb('images').$type<{ url: string; alt: string }[]>().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    slugidx: index('product_name_idx').on(table.slug),
+  })
+);

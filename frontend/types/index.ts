@@ -1,0 +1,247 @@
+import { number } from "zod";
+
+export interface ProductImage {
+  alt: string;
+  url: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: string;
+  originalPrice: string | null;
+  category: string;
+  unit: string;
+  weight: string;
+  farm: string;
+  origin: string;
+  isOrganic: boolean;
+  isSeasonal: boolean;
+  isFeatured: boolean;
+  isOnSale: boolean;
+  inStock: boolean;
+  rating: string;
+  reviewCount: number;
+  harvestDaysAgo: number;
+  tags: string[];
+  nutritionHighlights: string[];
+  storageInstructions: string;
+  images: ProductImage[];
+}
+
+export interface CategoryMeta {
+  bg: string;
+  img: string;
+}
+
+/////////////////////////////////////////////////////////// API RESPONSE ////////////////////////////////////////////////////////////////
+
+export interface ApiResponse<T> {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: T;
+}
+
+/////////////////////////////////////////////////////////// PRODUCT TYPES  ////////////////////////////////////////////////////////////////
+
+export interface ProductsApiResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: Product[];
+  pagination: {
+    totalItems: number;
+    currentPage: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface ProductImage {
+  url: string;
+  alt: string;
+}
+
+/////////////////////////////////////////////////////////// USER TYPE ////////////////////////////////////////////////////////////////
+
+export interface UserApi {
+  success: string;
+  statusCode: number;
+  message: string;
+  data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+    isVerified: boolean;
+    createdAt: Date;
+  };
+  accessToken: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+/////////////////////////////////////////////////////////// CART TYPES ////////////////////////////////////////////////////////////////
+
+export interface GuestCart {
+  product: Product;
+  quantity: number;
+}
+
+export interface CartItems {
+  id: string;
+  productId: string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  unit: string;
+  farm: string;
+  isOrganic: boolean;
+  pricePence: number;
+  quantity: number;
+}
+
+// export interface Cart {
+//   items: CartItem[];
+//   subtotal: number;
+//   shipping: number;
+//   tax: number;
+//   total: number;
+// }
+
+export interface CartApi {
+  id: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  items: {
+    id: string;
+    productId: string;
+    name: string;
+    slug: string;
+    imageUrl: string;
+    unit: string;
+    farm: string;
+    isOrganic: boolean;
+    pricePence: number;
+    quantity: number;
+  }[];
+}
+
+export interface Totals {
+  subtotalPence: number;
+  discountPence: number;
+  deliveryPence: number;
+  totalPence: number;
+  subtotal: string;
+  discount: string;
+  delivery: string;
+  total: string;
+  itemCount: number;
+  appliedCoupon: {
+    code: string;
+  };
+}
+
+/////////////////////////////////////////////////////////// ORDER TYPES ////////////////////////////////////////////////////////////////
+
+// export interface Order {
+//   id: string;
+//   createdAt: Date;
+//   status: "processing" | "shipped" | "delivered" | "cancelled";
+//   items: CartItem[];
+//   address: Address;
+//   subtotal: number;
+//   shipping: number;
+//   tax: number;
+//   total: number;
+//   trackingNumber?: string;
+//   estimatedDelivery?: string;
+// }
+
+export interface OrderItems {
+  id: string;
+  orderId: string;
+  image: string;
+  productName: string;
+  productId: string;
+  quantity: number;
+  unitPriceCents: string;
+  totalPriceCents: string;
+}
+
+export interface CustomerOrder {
+  id: string;
+  orderNumber: string;
+  status: string;
+  subtotalCents: number;
+  deliveryNotes?: string;
+  shippingFee: number;
+  stripeSessionId: string;
+  customerEmail: string;
+  discountAmount: number;
+  userId: string;
+  totalCents: number;
+  currency?: number;
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    phone1: string;
+    phone2?: string;
+    state: string;
+    streetAddress: string;
+  };
+  createdAt: Date;
+}
+
+export interface SingleOrder {
+  items: OrderItems[];
+  order: CustomerOrder;
+}
+
+export interface AllOrders {
+  id: string;
+  status: string;
+  createdAt: Date;
+  totalCents: number;
+  orderNumber: string;
+  items: OrderItems[];
+  subtotalCents: number;
+}
+
+export interface OrderSession {
+  orderNumber: string;
+}
+
+export interface Address {
+  id: string;
+  firstName: string;
+  lastName?: string;
+  phone1: string;
+  phone2?: string;
+  streetAddress: string;
+  state: string;
+  isDefault: boolean;
+}
+
+/////////////////////////////////////////////////////////// UWISHLISTSER TYPE ////////////////////////////////////////////////////////////////
+
+export interface WishlistApi extends Product {
+  wishlistId: string;
+}
+
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+}
