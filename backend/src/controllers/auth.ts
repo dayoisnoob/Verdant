@@ -142,4 +142,13 @@ export class AuthController {
 
     res.json(new ApiResponse(200, result.message));
   }
+
+  static async updateUser(req: Request, res: Response) {
+    const userId = req.user!.id;
+
+    const result = await AuthService.updateUser(userId, req.body);
+    res.json(
+      new ApiResponse(200, 'User successfully updated', result.updatedUser)
+    );
+  }
 }

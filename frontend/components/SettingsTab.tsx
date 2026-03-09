@@ -11,6 +11,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
+import { UserData } from "@/types";
+import { updateProfile } from "@/lib/api";
+import { ApiError } from "@/util";
+import { toast } from "sonner";
+import { useAuthStore } from "@/store/store";
 
 // ── Validation schemas ─────────────────────────────────────────────────────
 
@@ -18,8 +23,6 @@ const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Enter a valid email"),
-  phone: z.string().min(6, "Enter a valid phone number"),
-  postcode: z.string().min(3, "Enter a valid postcode"),
 });
 
 const passwordSchema = z
@@ -93,22 +96,13 @@ function NotificationRow({
   );
 }
 
-// ── Settings tab ──────────────────────────────────────────────────────────
-// Replace MOCK_USER with your real user from useAuthStore / useAuth hook
-const MOCK_USER = {
-  firstName: "Amara",
-  lastName: "Thompson",
-  email: "amara@email.com",
-  phone: "+44 7712 345678",
-  postcode: "SE1 7PB",
-  isVerified: true,
-};
+export default function SettingsTab({ user }: { user: UserData }) {
+  const setUser = useAuthStore((s) => s.setUser);
 
-export default function SettingsTab({ user }) {
-  console.log(user);
   const {
     register: rProfile,
     handleSubmit: handleProfile,
+    setError,
     formState: {
       errors: profileErrors,
       isSubmitting: savingProfile,
@@ -126,10 +120,22 @@ export default function SettingsTab({ user }) {
   const [profileSaved, setProfileSaved] = useState(false);
 
   const onSaveProfile = async (data: ProfileForm) => {
-    // TODO: await patchUser(data)
-    console.log("save profile", data);
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 2500);
+    console.log("Saving...");
+    try {
+      const res = await updateProfile(data);
+      setUser(res.data);
+      toast.success(res.message);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2500);
+    } catch (err) {
+      if (err instanceof ApiError && err.errors) {
+        for (const { field, message } of err.errors) {
+          setError(field as keyof ProfileForm, { message });
+        }
+      } else {
+        toast.error("Something went wrong, please try again");
+      }
+    }
   };
 
   const {
@@ -194,20 +200,12 @@ export default function SettingsTab({ user }) {
                 type="email"
                 className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark pr-24"
               />
-              {MOCK_USER.isVerified && (
+              {user.isVerified && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[0.6rem] bg-green-pale text-green font-bold uppercase tracking-wider px-2 py-1 rounded-full">
                   Verified
                 </span>
               )}
             </div>
-          </Field>
-
-          <Field label="Phone" error={profileErrors.phone?.message}>
-            <input
-              {...rProfile("phone")}
-              type="tel"
-              className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark"
-            />
           </Field>
         </div>
 

@@ -21,22 +21,23 @@ export class AddressController {
     const userId = req.user!.id;
     const { addressId } = req.params;
 
-    const result = await AddressService.setDefaultAddress(
-      userId,
-      addressId as string
-    );
-    res.json(new ApiResponse(200, result.message));
+    await AddressService.setDefaultAddress(userId, addressId as string);
+    res.json(new ApiResponse(200, 'Default address updated'));
   }
 
   static async updateAddress(req: Request, res: Response) {
     const userId = req.user!.id;
     const { addressId } = req.query;
 
-    const result = await AddressService.updateAddress(
-      userId,
-      addressId as string,
-      req.body
-    );
+    await AddressService.updateAddress(userId, addressId as string, req.body);
     res.json(new ApiResponse(200, 'Address successfully updated'));
+  }
+
+  static async removeAddress(req: Request, res: Response) {
+    const userId = req.user!.id;
+    const { addressId } = req.query;
+
+    await AddressService.removeAddress(userId, addressId as string);
+    res.json(new ApiResponse(200, 'Address successfully removed'));
   }
 }

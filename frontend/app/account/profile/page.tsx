@@ -55,11 +55,8 @@ export type StatusConfig = typeof STATUS_CONFIG;
 type Tab = "overview" | "orders" | "saved" | "addresses" | "settings";
 
 export default function ProfilePage() {
-  const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
   const user = useAuthStore((state) => state.user);
-
-  console.log(user);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["orders"],
@@ -88,12 +85,6 @@ export default function ProfilePage() {
 
   const result = orders.reduce((acc, ord) => acc + ord.totalCents, 0);
   const totalSpent = (result / 100).toFixed(2);
-
-  const handleSave = () => {
-    // TODO: call PATCH /auth/me with `form`
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-  };
 
   const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "overview", label: "Overview", icon: <SquareChartGantt /> },
@@ -347,11 +338,11 @@ export default function ProfilePage() {
 
           {tab === "saved" && <Wishlist items={wishlist} />}
 
-          {/* SETTINGS */}
-          {tab === "settings" && <SettingsTab user={user} />}
-
           {/* ADDRESSES */}
           {tab === "addresses" && <AddressesTab />}
+
+          {/* SETTINGS */}
+          {tab === "settings" && <SettingsTab user={user} />}
         </div>
       </main>
 

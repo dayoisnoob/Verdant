@@ -86,7 +86,7 @@ export class AddressService {
         );
     });
 
-    return { message: 'Default address updated' };
+    return;
   }
 
   static async updateAddress(userId: string, addressId: string, data: Address) {
@@ -115,13 +115,34 @@ export class AddressService {
     const [updatedAddress] = await db
       .update(addressesTable)
       .set(metadata)
-      .where(
-        and(eq(addressesTable.userId, userId), eq(addressesTable.id, addressId))
-      )
+      .where(eq(addressesTable.id, addressId))
       .returning();
 
     if (!updatedAddress) {
       throw new ApiError(500, 'Error updating address');
+    }
+
+    return;
+  }
+  static async removeAddress(userId: string, addressId: string) {
+    const [existing] = await db
+      .select()
+      .from(addressesTable)
+      .where(
+        and(eq(addressesTable.userId, userId), eq(addressesTable.id, addressId))
+      );
+
+    if (!existing) {
+      throw new ApiError(404, 'Address not found');
+    }
+
+    const [removedAddress] = await db
+      .delete(addressesTable)
+      .where(eq(addressesTable.id, addressId))
+      .returning();
+
+    if (!removedAddress) {
+      throw new ApiError(500, 'Error deleting address');
     }
 
     return;

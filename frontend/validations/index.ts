@@ -21,5 +21,23 @@ export const checkoutSchema = z.object({
   deliveryNotes: z.string().optional(),
 });
 
+const nigerianPhoneRegex = /^[789]\d{9}$/;
+
+export const addressSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().optional(),
+  phone1: z
+    .string()
+    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number e.g. 8012345678"),
+  phone2: z
+    .string()
+    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number e.g. 8012345678")
+    .optional()
+    .or(z.literal("")),
+  streetAddress: z.string().min(5, "Enter a full street address"),
+  state: z.string().min(1, "State is required"),
+});
+
 export type RegistrationForm = z.infer<typeof registrationSchema>;
 export type CheckoutForm = z.infer<typeof checkoutSchema>;
+export type AddressFormData = z.infer<typeof addressSchema>;

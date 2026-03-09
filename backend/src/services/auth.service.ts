@@ -18,6 +18,7 @@ import { AuthTokens, TempToken } from '../utils/auth/tokens.util.ts';
 import type {
   LoginInput,
   SignupInput,
+  updateInput,
 } from '../validations/auth.validations.ts';
 import { sendMail } from './email.service.ts';
 
@@ -659,5 +660,34 @@ export class AuthService {
     return {
       message: `Password was successfully changed`,
     };
+  }
+
+  static async updateUser(userId: string, data: updateInput) {
+    const [existing] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId));
+
+    if (!existing) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    const [updatedUser] = await db
+      .update(usersTable)
+      .set(data)
+      .where(eq(usersTable.id, userId))
+      .returning({
+        firstName: usersTable.firstName,
+        lastName: usersTable.lastName,
+        email: usersTable.email,
+        isVerified: usersTable.emailVerified,
+        createdAt: usersTable.createdAt,
+      });
+
+    if (!updatedUser) {
+      throw new ApiError(500, 'Error updating address');
+    }
+
+    return { updatedUser };
   }
 }

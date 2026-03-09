@@ -56,5 +56,12 @@ export const changePasswordSchemaValidation = z
     path: ['confirmNewPassword'],
   });
 
+export const updateUserSchema = z.object({
+  firstName: z.string().min(2).trim(),
+  lastName: z.string().min(2).trim().optional(),
+  email: z.string().email('please enter a valid email').trim().toLowerCase(),
+});
+
 export type SignupInput = z.infer<typeof signupSchemaValidation>;
 export type LoginInput = z.infer<typeof loginSchemaValidation>;
+export type updateInput = z.infer<typeof updateUserSchema>;

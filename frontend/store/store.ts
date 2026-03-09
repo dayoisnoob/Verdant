@@ -176,6 +176,9 @@ export const useAuthStore = create<AuthStore>()(
 
       login: (user, accessToken) =>
         set({ user, accessToken, isLoggedIn: true }),
+
+      setUser: (data) => set({ user: data }),
+
       logout: () => set({ user: null, isLoggedIn: false, accessToken: null }),
     }),
     { name: "be-bold" },

@@ -19,6 +19,7 @@ import {
   resendEmailSchemaValidation,
   resetPasswordSchemaValidation,
   signupSchemaValidation,
+  updateUserSchema,
 } from '../validations/auth.validations.ts';
 
 const router = Router();
@@ -74,6 +75,12 @@ router.post(
   changePasswordLimiter,
   validateInput(changePasswordSchemaValidation),
   AuthController.changePassword
+);
+
+router.patch(
+  '/profile',
+  validateInput(updateUserSchema),
+  asyncHandler(AuthController.updateUser)
 );
 
 export default router;

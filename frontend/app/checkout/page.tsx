@@ -9,6 +9,7 @@ import {
   getCartTotal,
   getUserAddresses,
 } from "@/lib/api";
+import { NIGERIAN_STATES } from "@/lib/constants";
 import { useAuthStore } from "@/store/store";
 import { ApiError } from "@/util";
 import { CheckoutForm, checkoutSchema } from "@/validations";
@@ -21,47 +22,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-const NIGERIAN_STATES = [
-  "Abia",
-  "Adamawa",
-  "Akwa Ibom",
-  "Anambra",
-  "Bauchi",
-  "Bayelsa",
-  "Benue",
-  "Borno",
-  "Cross River",
-  "Delta",
-  "Ebonyi",
-  "Edo",
-  "Ekiti",
-  "Enugu",
-  "FCT — Abuja",
-  "Gombe",
-  "Imo",
-  "Jigawa",
-  "Kaduna",
-  "Kano",
-  "Katsina",
-  "Kebbi",
-  "Kogi",
-  "Kwara",
-  "Lagos",
-  "Nasarawa",
-  "Niger",
-  "Ogun",
-  "Ondo",
-  "Osun",
-  "Oyo",
-  "Plateau",
-  "Rivers",
-  "Sokoto",
-  "Taraba",
-  "Yobe",
-  "Zamfara",
-];
-
-// ── Reusable field wrapper ────────────────────────────────────────────────
 function Field({
   label,
   optional,
@@ -89,7 +49,6 @@ function Field({
   );
 }
 
-// ── Phone input with +234 prefix ──────────────────────────────────────────
 function PhoneInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="flex border border-[#e5e5e5] rounded-xl overflow-hidden focus-within:border-green focus-within:ring-2 focus-within:ring-green/10 transition-all bg-white">
@@ -105,7 +64,6 @@ function PhoneInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
-// ── Delivery notes card ───────────────────────────────────────────────────
 function DeliveryNotes({
   register,
 }: {
@@ -134,7 +92,6 @@ function DeliveryNotes({
   );
 }
 
-// ── Pay / continue button ─────────────────────────────────────────────────
 function PayButton({
   loading,
   disabled,
@@ -165,7 +122,6 @@ function PayButton({
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const router = useRouter();
 

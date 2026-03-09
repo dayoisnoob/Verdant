@@ -75,18 +75,20 @@ export interface ProductImage {
 //////////////////////////////////////////
 /////////////// USER TYPES ///////////////
 //////////////////////////////////////////
+export interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isVerified: boolean;
+  createdAt: Date;
+}
+
 export interface UserApi {
   success: string;
   statusCode: number;
   message: string;
-  data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-    isVerified: boolean;
-    createdAt: Date;
-  };
+  data: UserData;
   accessToken: string;
 }
 
@@ -286,6 +288,7 @@ export interface AuthStore {
     firstName: string;
     lastName: string;
     email: string;
+    role: string;
     isVerified: boolean;
     createdAt: Date;
   } | null;
@@ -294,6 +297,7 @@ export interface AuthStore {
   signUpEmail: string;
 
   setEmail: (email: string) => void;
+  setUser: (data: UserData) => void;
   login: (
     user: {
       firstName: string;

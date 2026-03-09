@@ -1,4 +1,3 @@
-import { AddressFormData } from "@/components/AddressCard";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
 import {
   Address,
@@ -12,10 +11,11 @@ import {
   SingleOrder,
   Totals,
   UserApi,
+  UserData,
   WishlistApi,
 } from "@/types";
 import { handleApiError } from "@/util";
-import { RegistrationForm } from "@/validations";
+import { AddressFormData, RegistrationForm } from "@/validations";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "${BASE_URL}";
 
@@ -103,14 +103,11 @@ export const updateProfile = async (data: {
   firstName: string;
   lastName?: string;
   email: string;
-}) => {
-  return apiFetch<{ data: { id: string; name: string; email: string } }>(
-    "/api/auth/profile",
-    {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    },
-  );
+}): Promise<ApiResponse<UserData>> => {
+  return apiFetch("/api/auth/profile", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 };
 
 export const changePassword = async (data: {
@@ -232,7 +229,9 @@ export const getUserAddresses = async (): Promise<ApiResponse<Address[]>> => {
   });
 };
 
-export const setDefaultAddress = async (addressId: string) => {
+export const setDefaultAddress = async (
+  addressId: string,
+): Promise<ApiResponse<Address[]>> => {
   return apiFetch(`/api/address/${addressId}/set-default`, {
     method: "PATCH",
   });
@@ -244,10 +243,18 @@ export const updateUserAddresses = async ({
 }: {
   addressId: string;
   data: AddressFormData;
-}): Promise<ApiResponse<Address[]>> => {
+}): Promise<ApiResponse<null>> => {
   return apiFetch(`/api/address?addressId=${addressId}`, {
     method: "PATCH",
     body: JSON.stringify(data),
+  });
+};
+
+export const removeAddress = async (
+  addressId: string,
+): Promise<ApiResponse<null>> => {
+  return apiFetch(`/api/address?addressId=${addressId}`, {
+    method: "DELETE",
   });
 };
 

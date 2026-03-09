@@ -28,4 +28,6 @@ router.patch(
   asyncHandler(AddressController.updateAddress)
 );
 
+router.delete('/', asyncHandler(AddressController.removeAddress));
+
 export default router;

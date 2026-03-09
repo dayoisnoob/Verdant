@@ -1,148 +1,15 @@
 "use client";
 
-import { NIGERIAN_STATES } from "@/lib/constants";
+import { removeAddress, setDefaultAddress } from "@/lib/api";
+import { Address } from "@/types";
+import { AddressFormData, addressSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Pencil, Star, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-// ── Types ──────────────────────────────────────────────────────────────────
-export interface Address {
-  id: string;
-  firstName: string;
-  lastName?: string;
-  phone1: string;
-  phone2?: string;
-  streetAddress: string;
-  state: string;
-  isDefault: boolean;
-}
-
-// ── Schema ─────────────────────────────────────────────────────────────────
-const nigerianPhoneRegex = /^[789]\d{9}$/;
-
-export const addressSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().optional(),
-  phone1: z
-    .string()
-    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number e.g. 8012345678"),
-  phone2: z
-    .string()
-    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number e.g. 8012345678")
-    .optional()
-    .or(z.literal("")),
-  streetAddress: z.string().min(5, "Enter a full street address"),
-  state: z.string().min(1, "State is required"),
-});
-
-export type AddressFormData = z.infer<typeof addressSchema>;
-
-export function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[0.65rem] font-bold uppercase tracking-wider text-verdant-muted">
-        {label}
-      </label>
-      {children}
-      {error && <p className="text-[0.7rem] text-red-500 mt-0.5">{error}</p>}
-    </div>
-  );
-}
-
-export const inputCls =
-  "border border-[#e8e8e8] rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]";
-
-export function AddressFields({
-  register,
-  errors,
-}: {
-  register: ReturnType<typeof useForm<AddressFormData>>["register"];
-  errors: Partial<Record<keyof AddressFormData, { message?: string }>>;
-}) {
-  return (
-    <>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="First name" error={errors.firstName?.message}>
-          <input
-            {...register("firstName")}
-            type="text"
-            placeholder="First Name"
-            className={inputCls}
-          />
-        </Field>
-        <Field label="Last name (optional)" error={errors.lastName?.message}>
-          <input
-            {...register("lastName")}
-            type="text"
-            placeholder="Last Name"
-            className={inputCls}
-          />
-        </Field>
-      </div>
-
-      <Field label="Street address" error={errors.streetAddress?.message}>
-        <input
-          {...register("streetAddress")}
-          type="text"
-          placeholder="Street Address"
-          className={inputCls}
-        />
-      </Field>
-
-      <Field label="State" error={errors.state?.message}>
-        <select {...register("state")} className={inputCls}>
-          <option value="">Select state</option>
-          {NIGERIAN_STATES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Phone" error={errors.phone1?.message}>
-          <div className="flex">
-            <span className="flex items-center px-3.5 bg-[#f5f5f5] border border-r-0 border-[#e8e8e8] rounded-l-xl text-sm text-verdant-muted font-medium">
-              +234
-            </span>
-            <input
-              {...register("phone1")}
-              type="tel"
-              placeholder="8012345678"
-              className={`${inputCls} rounded-l-none flex-1`}
-            />
-          </div>
-        </Field>
-        <Field label="Alt phone (optional)" error={errors.phone2?.message}>
-          <div className="flex">
-            <span className="flex items-center px-3.5 bg-[#f5f5f5] border border-r-0 border-[#e8e8e8] rounded-l-xl text-sm text-verdant-muted font-medium">
-              +234
-            </span>
-            <input
-              {...register("phone2")}
-              type="tel"
-              placeholder="8012345678"
-              className={`${inputCls} rounded-l-none flex-1`}
-            />
-          </div>
-        </Field>
-      </div>
-    </>
-  );
-}
+import { AddressFields } from "./AddressFields";
 
 export default function AddressCard({
   address,
@@ -154,6 +21,7 @@ export default function AddressCard({
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isRemovingAddress, setIsRemovingAddress] = useState(false);
 
   const fullName = [address.firstName, address.lastName]
     .filter(Boolean)
@@ -169,29 +37,35 @@ export default function AddressCard({
     defaultValues: {
       firstName: address.firstName,
       lastName: address.lastName ?? "",
-      phone1: address.phone1,
-      phone2: address.phone2 ?? "",
+      phone1: address.phone1.replace(/^\+234/, ""),
+      phone2: address.phone2?.replace(/^\+234/, "") ?? "",
       streetAddress: address.streetAddress,
       state: address.state,
     },
   });
 
-  //   const { mutate: makeDefault, isPending: settingDefault } = useMutation({
-  //     mutationFn: () => setDefaultAddress(address.id),
-  //     onSuccess: () => {
-  //       qc.invalidateQueries({ queryKey: ["addresses"] });
-  //       toast.success("Default address updated");
-  //     },
-  //   });
+  const handleSetDefault = async (id: string) => {
+    try {
+      const res = await setDefaultAddress(id);
+      qc.invalidateQueries({ queryKey: ["addresses"] });
+      toast.success(res.message);
+    } catch {
+      toast.error("Failed to update default address");
+    }
+  };
 
-  //   const { mutate: remove, isPending: deleting } = useMutation({
-  //     mutationFn: () => deleteUserAddress(address.id),
-  //     onSuccess: () => {
-  //       qc.invalidateQueries({ queryKey: ["addresses"] });
-  //       toast.success("Address removed");
-  //     },
-  //     onError: () => toast.error("Failed to remove address"),
-  //   });
+  const handleRemoveAddress = async (id: string) => {
+    setIsRemovingAddress(true);
+    try {
+      const res = await removeAddress(id);
+      qc.invalidateQueries({ queryKey: ["addresses"] });
+      toast.success(res.message);
+    } catch {
+      toast.error("Failed to remove address");
+    } finally {
+      setIsRemovingAddress(false);
+    }
+  };
 
   const onSubmit = async (data: AddressFormData) => {
     await onEdit(address.id, data);
@@ -259,7 +133,7 @@ export default function AddressCard({
           <div className="flex items-center gap-2 pl-[3.25rem] flex-wrap">
             {!address.isDefault && (
               <button
-                // onClick={() => makeDefault()}
+                onClick={() => handleSetDefault(address.id)}
                 // disabled={settingDefault}
                 className="flex items-center gap-1.5 text-[0.7rem] text-verdant-muted border border-[#e8e8e8] px-3 py-1.5 rounded-full hover:border-green hover:text-green transition-all disabled:opacity-50"
               >
@@ -291,8 +165,8 @@ export default function AddressCard({
                   Sure?
                 </span>
                 <button
-                  //   onClick={() => remove()}
-                  //   disabled={deleting}
+                  onClick={() => handleRemoveAddress(address.id)}
+                  disabled={isRemovingAddress}
                   className="text-[0.7rem] bg-red-50 text-red-500 border border-red-200 px-3 py-1.5 rounded-full hover:bg-red-100 transition-all disabled:opacity-50"
                 >
                   {/* {deleting ? "Removing…" : "Yes, remove"} */}

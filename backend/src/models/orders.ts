@@ -40,7 +40,8 @@ export const ordersTable = pgTable(
     // couponId: uuid('coupon_id').references(() => couponsTable.id),
 
     shippingAddressId: uuid('shipping_address_id').references(
-      () => addressesTable.id
+      () => addressesTable.id,
+      { onDelete: 'set null' }
     ),
     shippingFee: integer('shipping_fee'),
 

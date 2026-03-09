@@ -38,6 +38,8 @@ export const ORDER_STATUS_CONFIG: Record<
 
 export const ORDER_PREVIEW_LIMIT = 4;
 
+export const MAX_ADDRESSES = 5;
+
 export const NIGERIAN_STATES = [
   "Abia",
   "Adamawa",

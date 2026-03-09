@@ -1,67 +1,15 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { getUserAddresses, updateUserAddresses } from "@/lib/api";
+import { MAX_ADDRESSES } from "@/lib/constants";
+import { Address } from "@/types";
+import { AddressFormData } from "@/validations";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import AddressCard, {
-  Address,
-  AddressFields,
-  AddressFormData,
-  addressSchema,
-} from "@/components/AddressCard";
-import {
-  addUserAddress,
-  getUserAddresses,
-  updateUserAddresses,
-} from "@/lib/api";
-import { ApiError } from "@/util";
-
-function AddAddressForm({ onSuccess }: { onSuccess: () => void }) {
-  const qc = useQueryClient();
-
-  const {
-    register,
-    handleSubmit,
-    setError,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<AddressFormData>({ resolver: zodResolver(addressSchema) });
-
-  const onSubmit = async (data: AddressFormData) => {
-    try {
-      await addUserAddress(data);
-      qc.invalidateQueries({ queryKey: ["addresses"] });
-      toast.success("Address added");
-      reset();
-      onSuccess();
-    } catch (err) {
-      if (err instanceof ApiError && err.errors) {
-        for (const { field, message } of err.errors) {
-          setError(field as keyof AddressFormData, { message });
-        }
-      } else {
-        toast.error("Something went wrong, please try again");
-      }
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <AddressFields register={register} errors={errors} />
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full bg-green text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(45,106,79,0.28)] disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none mt-1"
-      >
-        {isSubmitting ? "Adding…" : "Add Address"}
-      </button>
-    </form>
-  );
-}
+import AddressCard from "./AddressCard";
+import { AddAddressForm } from "./AddressFields";
 
 export default function AddressesTab() {
   const qc = useQueryClient();
@@ -78,8 +26,7 @@ export default function AddressesTab() {
     toast.success("Address updated");
   };
 
-  const MAX = 5;
-  const canAdd = addresses.length < MAX;
+  const canAdd = addresses.length < MAX_ADDRESSES;
 
   return (
     <div className="max-w-xl flex flex-col gap-6">
@@ -90,7 +37,7 @@ export default function AddressesTab() {
             My Addresses
           </h2>
           <p className="text-xs text-verdant-muted mt-1">
-            {addresses.length} of {MAX} saved
+            {addresses.length} of {MAX_ADDRESSES} saved
           </p>
         </div>
         {canAdd && !adding && (
@@ -179,8 +126,8 @@ export default function AddressesTab() {
       {/* Cap notice */}
       {!canAdd && !adding && (
         <p className="text-xs text-verdant-muted text-center">
-          You&apos;ve reached the maximum of {MAX} saved addresses. Remove one
-          to add another.
+          You&apos;ve reached the maximum of {MAX_ADDRESSES} saved addresses.
+          Remove one to add another.
         </p>
       )}
     </div>
