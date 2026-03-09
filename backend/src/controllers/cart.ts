@@ -15,7 +15,7 @@ export class CartController {
     const userId = req.user!.id;
     const { productId, quantity = 1 } = req.body;
 
-    const item = await CartService.addItem(userId, productId, quantity);
+    const item = await CartService.addItem(userId, productId, Number(quantity));
 
     res.json(new ApiResponse(201, 'Item added successfully', item));
   }
@@ -50,9 +50,9 @@ export class CartController {
 
   static async removeItem(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { itemId } = req.params;
+    const { productId } = req.params;
 
-    await CartService.removeItem(userId, itemId as string);
+    await CartService.removeItem(userId, productId as string);
     res.json(new ApiResponse(200, 'Item removed successfully'));
   }
 

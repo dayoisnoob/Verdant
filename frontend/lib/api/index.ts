@@ -161,6 +161,27 @@ export const updateItem = async ({
   });
 };
 
+export const addItemToCartApi = async ({
+  productId,
+  quantity,
+}: {
+  productId: string;
+  quantity: number;
+}): Promise<ApiResponse<CartApi>> => {
+  return apiFetch("/api/cart/items/", {
+    method: "POST",
+    body: JSON.stringify({ productId, quantity }),
+  });
+};
+
+export const removeItemFromCartApi = async (
+  productId: string,
+): Promise<ApiResponse<CartApi>> => {
+  return apiFetch(`/api/cart/items/${productId}`, {
+    method: "DELETE",
+  });
+};
+
 export const mergeGuestCart = async (
   data: {
     productId: string;

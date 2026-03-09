@@ -86,14 +86,14 @@ export class CartService {
     return { quantity: updated.quantity };
   }
 
-  static async removeItem(userId: string, itemId: string) {
+  static async removeItem(userId: string, productId: string) {
     const cart = await CartService.getOrCreateCart(userId);
 
     await db
       .delete(cartItemsTable)
       .where(
         and(
-          eq(cartItemsTable.id, itemId),
+          eq(cartItemsTable.productId, productId),
           eq(cartItemsTable.cartId, cart.id as string)
         )
       );
@@ -133,10 +133,12 @@ export class CartService {
       ? await CouponService.applyCoupon(userId, couponCode, subtotalPence)
       : null;
 
-    const discountPence = result?.discount ?? 0;
+    const discountPence = Math.min(result?.discount ?? 0, subtotalPence);
     const discountedSubtotal = subtotalPence - discountPence;
     const deliveryPence = discountedSubtotal >= 10000 ? 0 : 499;
     const totalPence = discountedSubtotal + deliveryPence;
+
+    console.log(subtotalPence, discountPence, deliveryPence, totalPence);
 
     return {
       subtotalPence,

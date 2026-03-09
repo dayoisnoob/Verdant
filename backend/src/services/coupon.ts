@@ -98,6 +98,13 @@ export class CouponService {
       throw new ApiError(403, 'usage limit reached');
     }
 
+    if (
+      existing.discountType === 'fixed' &&
+      existing.discountValue * 100 >= subtotal
+    ) {
+      throw new ApiError(400, 'Your subtotal is too low for this coupon');
+    }
+
     const userRedemptions = await db
       .select()
       .from(couponRedemptionsTable)

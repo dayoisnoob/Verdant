@@ -1,3 +1,4 @@
+import { addItemToCartApi, getCart, removeItemFromCartApi } from "@/lib/api";
 import { CartApi, CartItems, Product } from "@/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -90,7 +91,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
     }));
 
     try {
-      // await cartApi.addItem(product.id, quantity);
+      await addItemToCartApi({ productId: product.id, quantity });
     } catch {
       set((state) => ({
         items: state.items.filter((i) => i.productId !== product.id),
@@ -101,10 +102,17 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
   setCart: (cart) =>
     set({ items: cart.items, couponCode: cart.couponCode ?? "" }),
 
-  removeItem: (id: string) => {
+  removeItem: async (id: string) => {
     set((state) => ({
       items: state.items.filter((i) => i.productId !== id),
     }));
+
+    try {
+      await removeItemFromCartApi(id);
+    } catch {
+      const cart = await getCart();
+      useCartStore.getState().setCart(cart.data);
+    }
   },
 
   clearCart: () => set({ items: [] }),

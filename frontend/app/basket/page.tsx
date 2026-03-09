@@ -1,11 +1,11 @@
 "use client";
 
 import Footer from "@/components/Footer";
+import MightLike from "@/components/MightLike";
 import Navbar from "@/components/Navbar";
 import { useCart } from "@/hooks";
 import {
   applyCouponApi,
-  getCart,
   getCartTotal,
   getProducts,
   updateItem,
@@ -26,18 +26,7 @@ export default function CartPage() {
     updateQuantity,
     applyCoupon: applyCouponToStore,
   } = useCart();
-
-  const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const [total, setTotal] = useState<number | null>(null);
-  const [delivery, setDelivery] = useState<number | null>(null);
-
-  const [couponError, setCouponError] = useState("");
-  const [couponSuccess, setCouponSuccess] = useState("");
-
-  const discountedSubtotal = Number(subtotal) - discount;
-  const { shippingFee, totalAmount } = calculateOrderTotal(discountedSubtotal);
 
   const { data: PRODUCTS } = useQuery({
     queryKey: ["products"],
@@ -46,6 +35,16 @@ export default function CartPage() {
       return res.data;
     },
   });
+
+  const [coupon, setCoupon] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [couponError, setCouponError] = useState("");
+  const [couponSuccess, setCouponSuccess] = useState("");
+  const [total, setTotal] = useState<number | null>(null);
+  const [delivery, setDelivery] = useState<number | null>(null);
+
+  const discountedSubtotal = Number(subtotal) - discount;
+  const { shippingFee, totalAmount } = calculateOrderTotal(discountedSubtotal);
 
   if (!PRODUCTS) return null;
   const SUGGESTED = PRODUCTS.filter((p) => p.isFeatured).slice(0, 3);
@@ -58,6 +57,10 @@ export default function CartPage() {
     const newQuantity = currentQuantity + delta;
     updateQuantity(itemId, delta);
     await updateItem({ itemId, newQuantity });
+  };
+
+  const handleRemoveItem = async (id: string) => {
+    removeItem(id);
   };
 
   const handleCoupon = async () => {
@@ -78,6 +81,8 @@ export default function CartPage() {
       const discountApi = parseFloat((res.data.discountPence / 100).toFixed(2));
       const totalApi = parseFloat((res.data.totalPence / 100).toFixed(2));
       const deliveryApi = parseFloat((res.data.deliveryPence / 100).toFixed(2));
+
+      console.log(discountApi, totalApi, deliveryApi);
 
       setDiscount(discountApi);
       setTotal(totalApi);
@@ -114,9 +119,10 @@ export default function CartPage() {
           </h1>
           <p className="text-verdant-muted mt-2 text-sm">
             {cartItems.length} item{cartItems.length !== 1 ? "s" : ""} ·{" "}
-            {subtotal >= 10000
-              ? "🎉 Free delivery unlocked"
-              : `£${(10000 - subtotal).toFixed(2)} away from free delivery`}
+            {cartItems.length > 0 &&
+              (subtotal / 100 >= 100
+                ? "🎉 Free delivery unlocked"
+                : `£${100 - subtotal / 100} away from free delivery`)}
           </p>
         </div>
 
@@ -256,7 +262,7 @@ export default function CartPage() {
 
                     {/* Remove */}
                     <button
-                      onClick={() => removeItem(p.productId)}
+                      onClick={() => handleRemoveItem(p.productId)}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-[#ccc] hover:bg-red-50 hover:text-red-400 transition-colors flex-shrink-0"
                     >
                       <svg
@@ -346,8 +352,6 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {/* Promo code */}
-                {/* Promo code */}
                 <div className="px-5 md:px-6 pb-4 md:pb-5">
                   <div
                     className={`flex gap-2 rounded-full overflow-hidden px-1 py-1 border transition-colors ${
@@ -433,44 +437,7 @@ export default function CartPage() {
           </div>
         )}
 
-        {/* ── You Might Also Like ── */}
-        <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-12 md:py-16 border-t border-green/10">
-          <h2 className="font-playfair font-bold text-verdant-dark text-xl md:text-2xl mb-6 md:mb-8">
-            You might also like
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {SUGGESTED.map((p) => (
-              <Link
-                key={p.slug}
-                href={`/product/${p.slug}`}
-                className="bg-white rounded-2xl overflow-hidden border border-green/10 flex gap-4 p-4 items-center hover:border-green-light hover:shadow-sm transition-all duration-200 group"
-              >
-                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0">
-                  <Image
-                    src={p.images[0].url}
-                    alt={p.images[0].alt}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[0.65rem] text-[#aaa] uppercase tracking-wider mb-0.5 hidden sm:block">
-                    {p.farm}
-                  </div>
-                  <div className="font-playfair font-bold text-verdant-dark text-sm md:text-base leading-tight truncate">
-                    {p.name}
-                  </div>
-                  <div className="text-green font-semibold text-sm mt-1">
-                    £{p.price}
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-green flex items-center justify-center text-white text-lg flex-shrink-0 group-hover:bg-green-mid transition-colors">
-                  +
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {cartItems.length > 0 && <MightLike suggested={SUGGESTED} />}
       </main>
 
       <Footer />
