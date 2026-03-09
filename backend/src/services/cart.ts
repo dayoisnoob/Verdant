@@ -101,7 +101,6 @@ export class CartService {
     return;
   }
 
-  /** Wipe all items — call this after an order is placed. */
   static async clearCart(userId: string) {
     const cart = await CartService.getOrCreateCart(userId);
 
@@ -187,13 +186,3 @@ export class CartService {
     return { ...created, items: [] };
   }
 }
-
-// import { cartController } from './controllers/cart.controller';
-
-// router.get('/cart', authMiddleware, cartController.getCart);
-// router.get('/cart/total', authMiddleware, cartController.getTotal);
-// router.post('/cart/items', authMiddleware, cartController.addItem);
-// router.patch('/cart/items/:itemId', authMiddleware, cartController.updateItem);
-// router.delete('/cart/items/:itemId', authMiddleware, cartController.removeItem);
-// router.delete('/cart', authMiddleware, cartController.clearCart);
-// router.post('/cart/merge', authMiddleware, cartController.mergeGuestCart);
