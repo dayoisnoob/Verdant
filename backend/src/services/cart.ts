@@ -185,4 +185,27 @@ export class CartService {
 
     return { ...created, items: [] };
   }
+
+  static async applyCouponToCart(userId: string, couponCode: string) {
+    const cart = await CartService.getOrCreateCart(userId);
+
+    const [updated] = await db
+      .update(cartsTable)
+      .set({ couponCode, updatedAt: new Date() })
+      .where(eq(cartsTable.id, cart.id as string))
+      .returning();
+
+    if (!updated) {
+      throw new ApiError(500, 'Error applying coupon code');
+    }
+  }
+
+  static async removeCouponFromCart(userId: string) {
+    const cart = await CartService.getOrCreateCart(userId);
+
+    await db
+      .update(cartsTable)
+      .set({ couponCode: null, updatedAt: new Date() })
+      .where(eq(cartsTable.id, cart.id as string));
+  }
 }

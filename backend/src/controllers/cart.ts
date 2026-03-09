@@ -7,9 +7,8 @@ export class CartController {
     const userId = req.user!.id;
 
     const result = await CartService.getCart(userId);
-    const message = 'Cart retrieved successfully';
 
-    res.json(new ApiResponse(200, message, result));
+    res.json(new ApiResponse(200, 'Cart retrieved successfully', result));
   }
 
   static async addItem(req: Request, res: Response) {
@@ -78,22 +77,20 @@ export class CartController {
     res.json({ success: true, data: cart });
   }
 
-  static async applyCouponToCart() {
-    const cart = await CartService.getOrCreateCart(userId);
+  static async applyCouponToCart(req: Request, res: Response) {
+    const userId = req.user!.id;
+    const { coupon } = req.query;
 
-    await db
-      .update(cartsTable)
-      .set({ couponCode, updatedAt: new Date() })
-      .where(eq(cartsTable.id, cart.id as string));
+    await CartService.applyCouponToCart(userId, coupon as string);
+
+    res.json(new ApiResponse(200, 'Coupon successfully applied to cart'));
   }
 
-  // Also clear it when removed
-  static async removeCouponFromCart(userId: string) {
-    const cart = await CartService.getOrCreateCart(userId);
+  static async removeCouponFromCart(req: Request, res: Response) {
+    const userId = req.user!.id;
 
-    await db
-      .update(cartsTable)
-      .set({ couponCode: null, updatedAt: new Date() })
-      .where(eq(cartsTable.id, cart.id as string));
+    await CartService.removeCouponFromCart(userId);
+
+    res.json(new ApiResponse(200, 'Coupon successfully removed from cart'));
   }
 }

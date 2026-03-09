@@ -6,7 +6,6 @@ import { useState } from "react";
 
 export const useAuthCart = () => {
   const items = useCartStore((state) => state.items);
-
   const itemCount = items.length;
   const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = Number(

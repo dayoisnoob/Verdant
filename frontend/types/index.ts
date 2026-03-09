@@ -120,6 +120,7 @@ export interface CartItems {
 export interface CartApi {
   id: string;
   userId: string;
+  couponCode: string;
   createdAt: Date;
   updatedAt: Date;
   items: {

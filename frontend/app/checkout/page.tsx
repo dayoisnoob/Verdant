@@ -5,10 +5,10 @@ import { useCart } from "@/hooks";
 import {
   addUserAddress,
   createCheckoutSession,
+  getCartTotal,
   getUserAddress,
 } from "@/lib/api";
-import { calculateOrderTotal } from "@/lib/api/helpers";
-import { useAuthStore, useCartStore } from "@/store/store";
+import { useAuthStore } from "@/store/store";
 import { ApiError } from "@/util";
 import { CheckoutForm, checkoutSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,9 +65,15 @@ export default function CheckoutPage() {
   const user = useAuthStore((state) => state.user);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
-  const { items: cartItems, subtotal, couponCode, discount } = useCart();
+  const { items: cartItems, couponCode } = useCart();
 
-  console.log(subtotal, couponCode, discount);
+  const { data: cart } = useQuery({
+    queryKey: ["cartTotal", couponCode],
+    queryFn: async () => {
+      const res = await getCartTotal(couponCode);
+      return res.data;
+    },
+  });
 
   const hydrated = useAuthStore.persist.hasHydrated();
 
@@ -93,9 +99,6 @@ export default function CheckoutPage() {
   const [manualSelection, setManualSelection] = useState<string | null>(null);
   const selectedAddressId = manualSelection ?? defaultAddress?.id ?? null;
 
-  const discountedSubtotal = Number(subtotal) - discount;
-  const { shippingFee, totalAmount } = calculateOrderTotal(discountedSubtotal);
-
   const {
     register,
     handleSubmit,
@@ -107,6 +110,16 @@ export default function CheckoutPage() {
   });
 
   if (!hydrated || !isLoggedIn) return null;
+
+  if (!cart) return null;
+
+  const subtotal = Number((cart?.subtotalPence / 100).toFixed(2));
+  const discount = Number((cart?.discountPence / 100).toFixed(2));
+  const shippingFee = Number((cart?.deliveryPence / 100).toFixed(2));
+  const total = Number((cart?.totalPence / 100).toFixed(2));
+
+  // const discountedSubtotal = Number(subtotal) - discount;
+  // const { shippingFee, totalAmount } = calculateOrderTotal(discountedSubtotal);
 
   const proceedToPayment = async (
     addressId: string,
@@ -467,7 +480,7 @@ export default function CheckoutPage() {
                       <div className="text-xs text-verdant-muted">{i.unit}</div>
                     </div>
                     <div className="text-xs md:text-sm font-semibold text-verdant-dark flex-shrink-0">
-                      £{(i.pricePence * i.quantity).toFixed(2)}
+                      £{((i.pricePence / 100) * i.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}
@@ -476,7 +489,7 @@ export default function CheckoutPage() {
               <div className="px-5 md:px-6 py-4 md:py-5 border-t border-[#f0f0f0] flex flex-col gap-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-verdant-muted">Subtotal</span>
-                  <span className="font-medium">£{subtotal.toFixed(2)}</span>
+                  <span className="font-medium">£{subtotal}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm">
@@ -493,9 +506,7 @@ export default function CheckoutPage() {
                   <span
                     className={`font-medium ${shippingFee === 0 ? "text-green" : ""}`}
                   >
-                    {shippingFee === 0
-                      ? "Free 🎉"
-                      : `£${shippingFee.toFixed(2)}`}
+                    {shippingFee === 0 ? "Free 🎉" : `£${shippingFee}`}
                   </span>
                 </div>
 
@@ -504,7 +515,7 @@ export default function CheckoutPage() {
                   <span className="font-semibold text-verdant-dark">Total</span>
                   <div className="text-right">
                     <div className="font-playfair font-bold text-green text-xl md:text-2xl">
-                      £{totalAmount.toFixed(2)}
+                      £{total}
                     </div>
                     <div className="text-[0.65rem] text-verdant-muted">
                       incl. VAT

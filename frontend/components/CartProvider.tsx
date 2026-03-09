@@ -12,7 +12,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
     const rehydrate = async () => {
       const cart = await getCart();
-      useCartStore.getState().setCart(cart.data.items);
+      useCartStore.getState().setCart(cart.data);
     };
 
     rehydrate();

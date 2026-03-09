@@ -51,7 +51,7 @@ export const login = async (data: Login) => {
   useGuestCartStore.getState().clearCart();
 
   const cart = await getCart();
-  useCartStore.getState().setCart(cart.data.items);
+  useCartStore.getState().setCart(cart.data);
 };
 
 export const registerApi = async (data: RegistrationForm) => {
@@ -135,7 +135,7 @@ export interface Login {
 // ----------------------------------------------------------------------------------------------
 
 export const getCart = async (): Promise<ApiResponse<CartApi>> => {
-  return apiFetch("/api/cart", {
+  return apiFetch<ApiResponse<CartApi>>("/api/cart", {
     method: "GET",
   });
 };
@@ -170,6 +170,14 @@ export const mergeGuestCart = async (
   return apiFetch("/api/cart/merge", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+};
+
+export const applyCouponApi = async (
+  couponCode: string,
+): Promise<ApiResponse<CartApi>> => {
+  return apiFetch(`/api/cart/coupon?coupon=${couponCode}`, {
+    method: "PATCH",
   });
 };
 
@@ -248,7 +256,7 @@ export const createCheckoutSession = async ({
 }: {
   items: {
     name: string;
-    price: string;
+    price: number;
     quantity: number;
     image: string;
     productId: string;

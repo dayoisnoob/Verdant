@@ -3,7 +3,13 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useCart } from "@/hooks";
-import { getCartTotal, getProducts, updateItem } from "@/lib/api";
+import {
+  applyCouponApi,
+  getCart,
+  getCartTotal,
+  getProducts,
+  updateItem,
+} from "@/lib/api";
 import { calculateOrderTotal } from "@/lib/api/helpers";
 import { useAuthStore } from "@/store/store";
 import { ApiError } from "@/util";
@@ -78,6 +84,7 @@ export default function CartPage() {
       setDelivery(deliveryApi);
 
       if (discountApi > 0) {
+        await applyCouponApi(coupon);
         setCouponSuccess("Coupon applied successfully!");
         applyCouponToStore(coupon, res.data.discountPence);
       } else {

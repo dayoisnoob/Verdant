@@ -1,4 +1,4 @@
-import { CartItems, Product } from "@/types";
+import { CartApi, CartItems, Product } from "@/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -8,7 +8,7 @@ interface AuthCartStore {
   discount: number;
 
   addItem: (product: Product, quantity?: number) => void;
-  setCart: (cartItems: CartItems[]) => void;
+  setCart: (cartItems: CartApi) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -98,7 +98,8 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
     }
   },
 
-  setCart: (cartItems) => set({ items: cartItems }),
+  setCart: (cart) =>
+    set({ items: cart.items, couponCode: cart.couponCode ?? "" }),
 
   removeItem: (id: string) => {
     set((state) => ({
