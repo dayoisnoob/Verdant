@@ -77,4 +77,23 @@ export class CartController {
     const cart = await CartService.mergeGuestCart(userId, items);
     res.json({ success: true, data: cart });
   }
+
+  static async applyCouponToCart() {
+    const cart = await CartService.getOrCreateCart(userId);
+
+    await db
+      .update(cartsTable)
+      .set({ couponCode, updatedAt: new Date() })
+      .where(eq(cartsTable.id, cart.id as string));
+  }
+
+  // Also clear it when removed
+  static async removeCouponFromCart(userId: string) {
+    const cart = await CartService.getOrCreateCart(userId);
+
+    await db
+      .update(cartsTable)
+      .set({ couponCode: null, updatedAt: new Date() })
+      .where(eq(cartsTable.id, cart.id as string));
+  }
 }

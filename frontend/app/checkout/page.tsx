@@ -62,12 +62,12 @@ const NIGERIAN_STATES = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { subtotal } = useCart();
   const user = useAuthStore((state) => state.user);
-  const basket = useCartStore((state) => state.items);
-  const discount = useCartStore((state) => state.discount);
-  const couponCode = useCartStore((state) => state.couponCode);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
+  const { items: cartItems, subtotal, couponCode, discount } = useCart();
+
+  console.log(subtotal, couponCode, discount);
 
   const hydrated = useAuthStore.persist.hasHydrated();
 
@@ -112,12 +112,12 @@ export default function CheckoutPage() {
     addressId: string,
     deliveryNotes?: string,
   ) => {
-    const items = basket.map((i) => ({
-      name: i.product.name,
-      price: i.product.price,
+    const items = cartItems.map((i) => ({
+      name: i.name,
+      price: i.pricePence,
       quantity: i.quantity,
-      image: i.product.images[0].url,
-      productId: i.product.id,
+      image: i.imageUrl,
+      productId: i.productId,
     }));
 
     console.log(items);
@@ -447,27 +447,27 @@ export default function CheckoutPage() {
               </div>
 
               <div className="px-5 md:px-6 py-4 md:py-5 flex flex-col gap-3 md:gap-4">
-                {basket.map(({ product: p, quantity }) => (
-                  <div key={p.slug} className="flex items-center gap-3">
+                {cartItems.map((i) => (
+                  <div key={i.slug} className="flex items-center gap-3">
                     <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden flex-shrink-0">
                       <Image
-                        src={p.images[0].url}
-                        alt={p.images[0].alt}
+                        src={i.imageUrl}
+                        alt={i.name}
                         fill
                         className="object-cover"
                       />
                       <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-green text-white text-[0.55rem] md:text-[0.6rem] font-bold rounded-full flex items-center justify-center">
-                        {quantity}
+                        {i.quantity}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs md:text-sm font-medium text-verdant-dark truncate">
-                        {p.name}
+                        {i.name}
                       </div>
-                      <div className="text-xs text-verdant-muted">{p.unit}</div>
+                      <div className="text-xs text-verdant-muted">{i.unit}</div>
                     </div>
                     <div className="text-xs md:text-sm font-semibold text-verdant-dark flex-shrink-0">
-                      £{(parseFloat(p.price) * quantity).toFixed(2)}
+                      £{(i.pricePence * i.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}

@@ -112,11 +112,6 @@ export class CartService {
     return { success: true };
   }
 
-  /**
-   * Merge a guest cart (from localStorage) into the user's DB cart.
-   * Call this immediately after login/signup.
-   * Guest items are an array of the same payload shape as addItem.
-   */
   static async mergeGuestCart(
     userId: string,
     guestItems: { productId: string; quantity: number }[]

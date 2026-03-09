@@ -22,6 +22,7 @@ interface GuestCartStore {
   items: CartItems[];
   couponCode: string;
   discount: number;
+
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;

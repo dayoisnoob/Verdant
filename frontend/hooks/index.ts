@@ -28,11 +28,8 @@ export const useGuestCart = () => {
   return { itemCount, totalQuantity, subtotal };
 };
 
-// hooks/useCart.ts
 export const useCart = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-
-  console.log(isLoggedIn);
 
   const authCart = useAuthCart();
   const guestCart = useGuestCart();
@@ -66,13 +63,12 @@ export const useWishlist = () => {
       const res = await getUserWishlist();
       return res.data;
     },
-    staleTime: 1000 * 60 * 5, // treat as fresh for 5 mins
+    staleTime: 1000 * 60 * 5,
   });
 
   return { wishlist, isLoading };
 };
 
-// hooks/useWishlistToggle.ts
 export const useWishlistToggle = (productId: string, isWishlisted: boolean) => {
   const queryClient = useQueryClient();
   const [optimistic, setOptimistic] = useState<boolean | null>(null);
