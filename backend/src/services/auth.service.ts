@@ -212,7 +212,6 @@ export class AuthService {
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       email: updatedUser.email,
-      role: updatedUser.role,
       isVerified: updatedUser.isVerified,
       createdAt: updatedUser.createdAt,
     };

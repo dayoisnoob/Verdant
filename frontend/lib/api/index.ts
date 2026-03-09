@@ -1,3 +1,4 @@
+import { AddressFormData } from "@/components/AddressCard";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
 import {
   Address,
@@ -225,7 +226,7 @@ export const addUserAddress = async (
   });
 };
 
-export const getUserAddress = async (): Promise<ApiResponse<Address[]>> => {
+export const getUserAddresses = async (): Promise<ApiResponse<Address[]>> => {
   return apiFetch("/api/address", {
     method: "GET",
   });
@@ -234,6 +235,19 @@ export const getUserAddress = async (): Promise<ApiResponse<Address[]>> => {
 export const setDefaultAddress = async (addressId: string) => {
   return apiFetch(`/api/address/${addressId}/set-default`, {
     method: "PATCH",
+  });
+};
+
+export const updateUserAddresses = async ({
+  addressId,
+  data,
+}: {
+  addressId: string;
+  data: AddressFormData;
+}): Promise<ApiResponse<Address[]>> => {
+  return apiFetch(`/api/address?addressId=${addressId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 };
 

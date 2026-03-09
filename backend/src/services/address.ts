@@ -25,8 +25,10 @@ export class AddressService {
         )
       );
 
-    const phone1 = userAddress.phone1.replace(/[^\d+]/g, '');
-    const phone2 = userAddress.phone2?.replace(/[^\d+]/g, '');
+    const phone1 = `+234${userAddress.phone1.replace(/[^\d+]/g, '')}`;
+    const phone2 = userAddress.phone2
+      ? `+234${userAddress.phone2?.replace(/[^\d+]/g, '')}`
+      : '';
 
     const addressMetadata = {
       ...userAddress,
@@ -85,5 +87,43 @@ export class AddressService {
     });
 
     return { message: 'Default address updated' };
+  }
+
+  static async updateAddress(userId: string, addressId: string, data: Address) {
+    const [existing] = await db
+      .select()
+      .from(addressesTable)
+      .where(
+        and(eq(addressesTable.userId, userId), eq(addressesTable.id, addressId))
+      );
+
+    if (!existing) {
+      throw new ApiError(404, 'Address not found');
+    }
+
+    const phone1 = `+234${data.phone1.replace(/[^\d+]/g, '')}`;
+    const phone2 = data.phone2
+      ? `+234${data.phone2?.replace(/[^\d+]/g, '')}`
+      : '';
+
+    const metadata = {
+      ...data,
+      phone1,
+      phone2,
+    };
+
+    const [updatedAddress] = await db
+      .update(addressesTable)
+      .set(metadata)
+      .where(
+        and(eq(addressesTable.userId, userId), eq(addressesTable.id, addressId))
+      )
+      .returning();
+
+    if (!updatedAddress) {
+      throw new ApiError(500, 'Error updating address');
+    }
+
+    return;
   }
 }

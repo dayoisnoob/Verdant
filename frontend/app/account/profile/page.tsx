@@ -1,15 +1,24 @@
 "use client";
 
+import AddressesTab from "@/components/AdressesTab";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { OrderCard } from "@/components/OrderCard";
+import SettingsTab from "@/components/SettingsTab";
 
 import Wishlist from "@/components/Wishlist";
 import { useWishlist } from "@/hooks";
-import { getUserAddress, getuserOrders } from "@/lib/api";
+import { getUserAddresses, getuserOrders } from "@/lib/api";
 import { convertDate } from "@/lib/api/helpers";
 import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Heart,
+  NotebookTabs,
+  Package,
+  Settings,
+  SquareChartGantt,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -43,12 +52,14 @@ const STATUS_CONFIG: Record<
 export type StatusConfig = typeof STATUS_CONFIG;
 
 // ─────────────────────────────────────────────
-type Tab = "overview" | "orders" | "saved" | "settings";
+type Tab = "overview" | "orders" | "saved" | "addresses" | "settings";
 
 export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
   const user = useAuthStore((state) => state.user);
+
+  console.log(user);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["orders"],
@@ -58,12 +69,10 @@ export default function ProfilePage() {
     },
   });
 
-  console.log("tho", orders);
-
   const { data: addresses = [] } = useQuery({
     queryKey: ["addresses"],
     queryFn: async () => {
-      const res = await getUserAddress();
+      const res = await getUserAddresses();
       return res.data;
     },
   });
@@ -86,11 +95,12 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: "overview", label: "Overview", icon: "⊞" },
-    { id: "orders", label: "Orders", icon: "📦" },
-    { id: "saved", label: "Saved", icon: "♡" },
-    { id: "settings", label: "Settings", icon: "⚙" },
+  const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: "overview", label: "Overview", icon: <SquareChartGantt /> },
+    { id: "orders", label: "Orders", icon: <Package /> },
+    { id: "saved", label: "Saved", icon: <Heart /> },
+    { id: "addresses", label: "My Addresses", icon: <NotebookTabs /> },
+    { id: "settings", label: "Settings", icon: <Settings /> },
   ];
 
   return (
@@ -338,192 +348,10 @@ export default function ProfilePage() {
           {tab === "saved" && <Wishlist items={wishlist} />}
 
           {/* SETTINGS */}
-          {tab === "settings" && (
-            <div className="max-w-xl flex flex-col gap-6">
-              <h2 className="font-playfair font-bold text-verdant-dark text-2xl">
-                Account Settings
-              </h2>
+          {tab === "settings" && <SettingsTab user={user} />}
 
-              {/* Personal info */}
-              <div className="bg-white rounded-2xl border border-green/10 overflow-hidden">
-                <div className="px-6 py-5 border-b border-[#f0f0f0]">
-                  <h3 className="font-semibold text-verdant-dark">
-                    Personal Information
-                  </h3>
-                  <p className="text-xs text-verdant-muted mt-0.5">
-                    Updates sync to your delivery & order history
-                  </p>
-                </div>
-                <div className="px-6 py-6 flex flex-col gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    {(["firstName", "lastName"] as const).map((field) => (
-                      <div key={field} className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider">
-                          {field === "firstName" ? "First name" : "Last name"}
-                        </label>
-                        <input
-                          type="text"
-                          value={form[field]}
-                          onChange={(e) =>
-                            setForm({ ...form, [field]: e.target.value })
-                          }
-                          className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider">
-                      Email
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={form.email}
-                        onChange={(e) =>
-                          setForm({ ...form, email: e.target.value })
-                        }
-                        className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark pr-24"
-                      />
-                      {MOCK_USER.isVerified && (
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[0.6rem] bg-green-pale text-green font-bold uppercase tracking-wider px-2 py-1 rounded-full">
-                          Verified
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider">
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      value={form.phone}
-                      onChange={(e) =>
-                        setForm({ ...form, phone: e.target.value })
-                      }
-                      className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider">
-                      Delivery Postcode
-                    </label>
-                    <input
-                      type="text"
-                      value={form.postcode}
-                      onChange={(e) =>
-                        setForm({ ...form, postcode: e.target.value })
-                      }
-                      className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Password */}
-              <div className="bg-white rounded-2xl border border-green/10 overflow-hidden">
-                <div className="px-6 py-5 border-b border-[#f0f0f0]">
-                  <h3 className="font-semibold text-verdant-dark">Password</h3>
-                  <p className="text-xs text-verdant-muted mt-0.5">
-                    Leave blank to keep your current password
-                  </p>
-                </div>
-                <div className="px-6 py-6 flex flex-col gap-4">
-                  {[
-                    "Current password",
-                    "New password",
-                    "Confirm new password",
-                  ].map((label) => (
-                    <div key={label} className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider">
-                        {label}
-                      </label>
-                      {/* TODO: wire to PATCH /auth/me with password fields */}
-                      <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Notifications */}
-              <div className="bg-white rounded-2xl border border-green/10 overflow-hidden">
-                <div className="px-6 py-5 border-b border-[#f0f0f0]">
-                  <h3 className="font-semibold text-verdant-dark">
-                    Notifications
-                  </h3>
-                </div>
-                <div className="px-6 py-6 flex flex-col divide-y divide-[#f5f5f5]">
-                  {[
-                    {
-                      label: "Order updates",
-                      desc: "Dispatch, out for delivery, delivered",
-                      on: true,
-                    },
-                    {
-                      label: "Harvest alerts",
-                      desc: "When new seasonal produce arrives",
-                      on: true,
-                    },
-                    {
-                      label: "Loyalty points",
-                      desc: "When you earn or can redeem points",
-                      on: false,
-                    },
-                    {
-                      label: "Promotions & offers",
-                      desc: "Discounts and member-only deals",
-                      on: false,
-                    },
-                  ].map((n) => (
-                    <div
-                      key={n.label}
-                      className="flex items-center justify-between py-4"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-verdant-dark">
-                          {n.label}
-                        </div>
-                        <div className="text-xs text-verdant-muted mt-0.5">
-                          {n.desc}
-                        </div>
-                      </div>
-                      {/* TODO: wire toggle to PATCH /auth/me notification prefs */}
-                      <button
-                        className={`w-11 h-6 rounded-full transition-colors duration-200 relative flex-shrink-0 ${
-                          n.on ? "bg-green" : "bg-[#e5e5e5]"
-                        }`}
-                      >
-                        <span
-                          className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${
-                            n.on ? "translate-x-5" : "translate-x-0.5"
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Save button */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={handleSave}
-                  className="bg-green text-white px-10 py-3.5 rounded-full font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,106,79,0.28)]"
-                >
-                  {saved ? "✓ Saved" : "Save Changes"}
-                </button>
-                {/* TODO: wire to DELETE /auth/me with confirmation dialog */}
-                <button className="text-sm text-red-400 hover:text-red-600 hover:underline transition-colors">
-                  Delete account
-                </button>
-              </div>
-            </div>
-          )}
+          {/* ADDRESSES */}
+          {tab === "addresses" && <AddressesTab />}
         </div>
       </main>
 

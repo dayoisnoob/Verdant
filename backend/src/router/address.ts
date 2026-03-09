@@ -22,11 +22,10 @@ router.patch(
   asyncHandler(AddressController.setDefaultAddress)
 );
 
-// router.patch(
-//   '/',
-//   requireAdmin,
-//   validateInput(updateOrderSchema),
-//   OrderController.updateOrder
-// );
+router.patch(
+  '/',
+  validateInput(addressSchema),
+  asyncHandler(AddressController.updateAddress)
+);
 
 export default router;

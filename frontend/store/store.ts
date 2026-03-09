@@ -1,70 +1,14 @@
 import { addItemToCartApi, getCart, removeItemFromCartApi } from "@/lib/api";
-import { CartApi, CartItems, Product } from "@/types";
+import {
+  AddressStore,
+  AuthCartStore,
+  AuthStore,
+  CartItems,
+  GuestCartStore,
+  Product,
+} from "@/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface AuthCartStore {
-  items: CartItems[];
-  couponCode: string;
-  discount: number;
-
-  addItem: (product: Product, quantity?: number) => void;
-  setCart: (cartItems: CartApi) => void;
-  removeItem: (id: string) => void;
-  clearCart: () => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  applyCoupon: (code: string, discount: number) => void;
-  removeCoupon: () => void;
-  itemCount: () => number;
-}
-
-// Same flat shape as CartItems — no nested product object
-interface GuestCartStore {
-  items: CartItems[];
-  couponCode: string;
-  discount: number;
-
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
-  applyCoupon: (code: string, discount: number) => void;
-  removeCoupon: () => void;
-  itemCount: () => number;
-}
-
-interface AddressStore {
-  selectedAddressId: string | null;
-  setAddressId: (id: string) => void;
-}
-
-interface AuthStore {
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-    isVerified: boolean;
-    createdAt: Date;
-  } | null;
-  isLoggedIn: boolean;
-  accessToken: string | null;
-  signUpEmail: string;
-
-  setEmail: (email: string) => void;
-  login: (
-    user: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      role: string;
-      isVerified: boolean;
-      createdAt: Date;
-    },
-    accessToken: string,
-  ) => void;
-  logout: () => void;
-}
 
 export const useCartStore = create<AuthCartStore>((set, get) => ({
   items: [],

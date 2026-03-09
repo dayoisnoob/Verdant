@@ -27,4 +27,16 @@ export class AddressController {
     );
     res.json(new ApiResponse(200, result.message));
   }
+
+  static async updateAddress(req: Request, res: Response) {
+    const userId = req.user!.id;
+    const { addressId } = req.query;
+
+    const result = await AddressService.updateAddress(
+      userId,
+      addressId as string,
+      req.body
+    );
+    res.json(new ApiResponse(200, 'Address successfully updated'));
+  }
 }

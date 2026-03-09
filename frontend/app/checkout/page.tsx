@@ -7,7 +7,7 @@ import {
   addUserAddress,
   createCheckoutSession,
   getCartTotal,
-  getUserAddress,
+  getUserAddresses,
 } from "@/lib/api";
 import { useAuthStore } from "@/store/store";
 import { ApiError } from "@/util";
@@ -168,14 +168,16 @@ function PayButton({
 // ── Page ──────────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const router = useRouter();
+
   const user = useAuthStore((s) => s.user);
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const hydrated = useAuthStore.persist.hasHydrated();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+
   const { items: cartItems, couponCode } = useCart();
 
+  const [isPaying, setIsPaying] = useState(false);
   const [showNewForm, setShowNewForm] = useState(false);
   const [manualSelection, setManualSelection] = useState<string | null>(null);
-  const [isPaying, setIsPaying] = useState(false);
 
   const { data: cart } = useQuery({
     queryKey: ["cartTotal", couponCode],
@@ -184,15 +186,15 @@ export default function CheckoutPage() {
 
   const { data: addresses = [] } = useQuery({
     queryKey: ["addresses"],
-    queryFn: async () => (await getUserAddress()).data,
+    queryFn: async () => (await getUserAddresses()).data,
   });
 
   useEffect(() => {
     if (hydrated && !isLoggedIn) router.push("/login?redirect=/checkout");
   }, [hydrated, isLoggedIn, router]);
 
-  const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
   const shouldShowForm = showNewForm || addresses.length === 0;
+  const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
   const selectedAddressId = manualSelection ?? defaultAddress?.id ?? null;
 
   const {

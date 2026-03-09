@@ -241,3 +241,69 @@ export interface Address {
 export interface WishlistApi extends Product {
   wishlistId: string;
 }
+
+//////////////////////////////////////////
+////////// ZUSTAND STORE ///////////////
+//////////////////////////////////////////
+
+export interface AuthCartStore {
+  items: CartItems[];
+  couponCode: string;
+  discount: number;
+
+  addItem: (product: Product, quantity?: number) => void;
+  setCart: (cartItems: CartApi) => void;
+  removeItem: (id: string) => void;
+  clearCart: () => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  applyCoupon: (code: string, discount: number) => void;
+  removeCoupon: () => void;
+  itemCount: () => number;
+}
+
+// Same flat shape as CartItems — no nested product object
+export interface GuestCartStore {
+  items: CartItems[];
+  couponCode: string;
+  discount: number;
+
+  addItem: (product: Product, quantity?: number) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  applyCoupon: (code: string, discount: number) => void;
+  removeCoupon: () => void;
+  itemCount: () => number;
+}
+
+export interface AddressStore {
+  selectedAddressId: string | null;
+  setAddressId: (id: string) => void;
+}
+
+export interface AuthStore {
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    isVerified: boolean;
+    createdAt: Date;
+  } | null;
+  isLoggedIn: boolean;
+  accessToken: string | null;
+  signUpEmail: string;
+
+  setEmail: (email: string) => void;
+  login: (
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      role: string;
+      isVerified: boolean;
+      createdAt: Date;
+    },
+    accessToken: string,
+  ) => void;
+  logout: () => void;
+}
