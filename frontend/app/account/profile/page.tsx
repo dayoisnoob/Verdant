@@ -2,7 +2,8 @@
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import Orders from "@/components/Orders";
+import { OrderCard } from "@/components/OrderCard";
+
 import Wishlist from "@/components/Wishlist";
 import { useWishlist } from "@/hooks";
 import { getUserAddress, getuserOrders } from "@/lib/api";
@@ -56,6 +57,8 @@ export default function ProfilePage() {
       return res.data;
     },
   });
+
+  console.log("tho", orders);
 
   const { data: addresses = [] } = useQuery({
     queryKey: ["addresses"],
@@ -329,9 +332,8 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {tab === "orders" && (
-            <Orders orders={orders} statusConfig={STATUS_CONFIG} />
-          )}
+          {tab === "orders" &&
+            orders.map((order) => <OrderCard key={order.id} order={order} />)}
 
           {tab === "saved" && <Wishlist items={wishlist} />}
 

@@ -1,5 +1,23 @@
-import { number } from "zod";
+//////////////////////////////////////////
+///////////// API RESPONSE ///////////////
+//////////////////////////////////////////
+export interface ApiResponse<T> {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: T;
+}
 
+//////////////////////////////////////////
+//////////// PRODUCT TYPES ///////////////
+//////////////////////////////////////////
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+}
 export interface ProductImage {
   alt: string;
   url: string;
@@ -36,17 +54,6 @@ export interface CategoryMeta {
   img: string;
 }
 
-/////////////////////////////////////////////////////////// API RESPONSE ////////////////////////////////////////////////////////////////
-
-export interface ApiResponse<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: T;
-}
-
-/////////////////////////////////////////////////////////// PRODUCT TYPES  ////////////////////////////////////////////////////////////////
-
 export interface ProductsApiResponse {
   success: boolean;
   statusCode: number;
@@ -65,8 +72,9 @@ export interface ProductImage {
   alt: string;
 }
 
-/////////////////////////////////////////////////////////// USER TYPE ////////////////////////////////////////////////////////////////
-
+//////////////////////////////////////////
+/////////////// USER TYPES ///////////////
+//////////////////////////////////////////
 export interface UserApi {
   success: string;
   statusCode: number;
@@ -89,8 +97,9 @@ export interface User {
   avatar?: string;
 }
 
-/////////////////////////////////////////////////////////// CART TYPES ////////////////////////////////////////////////////////////////
-
+//////////////////////////////////////////
+/////////////// CART TYPES ///////////////
+//////////////////////////////////////////
 export interface GuestCart {
   product: Product;
   quantity: number;
@@ -108,14 +117,6 @@ export interface CartItems {
   pricePence: number;
   quantity: number;
 }
-
-// export interface Cart {
-//   items: CartItem[];
-//   subtotal: number;
-//   shipping: number;
-//   tax: number;
-//   total: number;
-// }
 
 export interface CartApi {
   id: string;
@@ -152,21 +153,17 @@ export interface Totals {
   };
 }
 
-/////////////////////////////////////////////////////////// ORDER TYPES ////////////////////////////////////////////////////////////////
+//////////////////////////////////////////
+////////////// ORDER TYPES ///////////////
+//////////////////////////////////////////
 
-// export interface Order {
-//   id: string;
-//   createdAt: Date;
-//   status: "processing" | "shipped" | "delivered" | "cancelled";
-//   items: CartItem[];
-//   address: Address;
-//   subtotal: number;
-//   shipping: number;
-//   tax: number;
-//   total: number;
-//   trackingNumber?: string;
-//   estimatedDelivery?: string;
-// }
+export type FilterStatus =
+  | "all"
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
 
 export interface OrderItems {
   id: string;
@@ -222,6 +219,10 @@ export interface OrderSession {
   orderNumber: string;
 }
 
+//////////////////////////////////////////
+//////////// ADDRESS TYPES ///////////////
+//////////////////////////////////////////
+
 export interface Address {
   id: string;
   firstName: string;
@@ -233,16 +234,10 @@ export interface Address {
   isDefault: boolean;
 }
 
-/////////////////////////////////////////////////////////// UWISHLISTSER TYPE ////////////////////////////////////////////////////////////////
+//////////////////////////////////////////
+////////// WISHLISTS TYPES ///////////////
+//////////////////////////////////////////
 
 export interface WishlistApi extends Product {
   wishlistId: string;
-}
-
-export interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  pageSize: number;
-  onPageChange: (page: number) => void;
 }
