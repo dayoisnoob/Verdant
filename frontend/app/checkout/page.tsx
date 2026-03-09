@@ -127,13 +127,11 @@ export default function CheckoutPage() {
   ) => {
     const items = cartItems.map((i) => ({
       name: i.name,
-      price: i.pricePence,
+      price: i.pricePence / 100,
       quantity: i.quantity,
       image: i.imageUrl,
       productId: i.productId,
     }));
-
-    console.log(items);
 
     const { data: checkoutData } = await createCheckoutSession({
       items,

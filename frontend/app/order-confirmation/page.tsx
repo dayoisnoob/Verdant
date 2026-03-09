@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useQuery } from "@tanstack/react-query";
-import { useCartStore } from "@/store/store";
+import Navbar from "@/components/Navbar";
+import { useCart } from "@/hooks";
 import { getOrderBySessionId } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const clearCart = useCartStore((state) => state.clearCart);
-  const removeCoupon = useCartStore((state) => state.removeCoupon);
+  const { clearCart, removeCoupon } = useCart();
 
   const [ready, setReady] = useState(false);
 

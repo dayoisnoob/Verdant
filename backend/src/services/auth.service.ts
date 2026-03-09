@@ -102,8 +102,6 @@ export class AuthService {
 
     const hashedToken = cryptoHash(verificationToken);
 
-    console.log(verificationToken);
-
     const [result] = await db
       .update(usersTable)
       .set({
@@ -484,8 +482,6 @@ export class AuthService {
     deviceInfo: DeviceInfo
   ) {
     const { newPassword } = passwords;
-
-    console.log(passwords);
 
     const hashedToken = cryptoHash(passwordResetToken);
 

@@ -29,8 +29,6 @@ export class OrderController {
     const userId = req.user!.id;
     const sessionId = req.params.sessionId as string;
 
-    console.log('sess', userId, sessionId);
-
     const result = await OrderService.getOrderBySessionId(userId, sessionId);
 
     res.json(new ApiResponse(200, result.message, result.order));
@@ -39,8 +37,6 @@ export class OrderController {
   static async getOrderById(req: Request, res: Response) {
     const userId = req.user!.id;
     const id = req.params.id as string;
-
-    console.log('id', userId, id);
 
     const result = await OrderService.getOrderById(userId, id);
 

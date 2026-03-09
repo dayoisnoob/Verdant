@@ -21,8 +21,6 @@ export class ProductController {
   static async getProductBySlug(req: Request, res: Response) {
     const { slug } = req.params;
 
-    console.log(slug);
-
     const result = await ProductService.getProductBySlug(slug as string);
 
     res.status(201).json(new ApiResponse(200, result.message, result.data));

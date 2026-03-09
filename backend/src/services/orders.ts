@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../config/db';
 import { addressesTable, orderItemsTable, ordersTable } from '../models';
 import { ApiError } from '../utils/apiResponse';
+import { CartService } from './cart';
 
 export interface CheckoutItem {
   productId: string;
@@ -38,6 +39,9 @@ export class OrderService {
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
     const totalCents = Math.round(data.amount * 100);
     const subtotalCents = Math.round(data.subtotal * 100);
+    const shippingFee = data.shippingFee
+      ? Math.round(data.shippingFee * 100)
+      : null;
 
     const order = await db.transaction(async (tx) => {
       const [newOrder] = await tx
@@ -54,7 +58,7 @@ export class OrderService {
           customerEmail: data.customerEmail ?? null,
           shippingAddressId: data.shippingAddressId ?? null,
           deliveryNotes: data.deliveryNotes ?? null,
-          shippingFee: data.shippingFee ?? null,
+          shippingFee,
         })
         .returning();
 
@@ -71,6 +75,9 @@ export class OrderService {
           totalPriceCents: String(Math.round(item.price * item.quantity * 100)),
         }))
       );
+
+      await CartService.clearCart(data.userId);
+      await CartService.removeCouponFromCart(data.userId);
 
       return newOrder;
     });
@@ -143,7 +150,6 @@ export class OrderService {
   }
 
   static async getOrderBySessionId(userId: string, sessionId: string) {
-    console.log(userId, sessionId);
     const [order] = await db
       .select({ orderNumber: ordersTable.orderNumber })
       .from(ordersTable)

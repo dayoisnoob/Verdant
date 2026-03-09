@@ -117,7 +117,6 @@ export class AuthController {
 
   static async resetPassword(req: Request, res: Response) {
     const passwordResetToken = req.query?.token;
-    console.log(req.query);
 
     if (typeof passwordResetToken !== 'string') {
       throw new ApiError(400, 'Invalid reset token');

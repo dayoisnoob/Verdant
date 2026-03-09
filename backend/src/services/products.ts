@@ -21,8 +21,6 @@ export class ProductService {
     if (category && category !== 'All')
       conditions.push(eq(productsTable.category, category));
 
-    console.log(conditions);
-
     const sortMap: Record<string, any> = {
       'price-asc': asc(productsTable.price),
       'price-desc': desc(productsTable.price),

@@ -15,7 +15,6 @@ interface Address {
 
 export class AddressService {
   static async addAddress(userId: string, userAddress: Address) {
-    console.log(userAddress);
     const [existing] = await db
       .select({ isDefault: addressesTable.isDefault })
       .from(addressesTable)

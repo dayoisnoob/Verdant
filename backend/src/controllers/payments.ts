@@ -14,8 +14,6 @@ export class PaymentController {
     } = req.body;
     const userId = req.user!.id;
 
-    console.log('This is body:', req.body);
-
     const result = await PaymentService.createCheckoutSession(
       userId,
       items,
@@ -36,7 +34,6 @@ export class PaymentController {
         req.body,
         signature
       );
-      console.log(`Webhook received: ${result.type}`);
 
       res.json({ received: true });
     } catch (err) {

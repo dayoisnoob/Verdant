@@ -6,6 +6,7 @@ import { stripe } from '../lib/stripe';
 import { couponRedemptionsTable } from '../models';
 import { couponsTable } from '../models/coupons';
 import { OrderService } from './orders';
+import { logger } from '../config/pino';
 
 export interface LineItems {
   name: string;
@@ -80,7 +81,7 @@ export class PaymentService {
         userId,
         addressId: addressId ?? '',
         discount: discount?.toString() ?? '0',
-        couponId: couponCode ?? '',
+        couponCode: couponCode ?? '',
         deliveryNotes: deliveryNotes ?? '',
         shippingFee: shippingFee,
       },
@@ -114,7 +115,7 @@ export class PaymentService {
         const discount = Number(session.metadata?.discount)
           ? Math.round(Number(session.metadata?.discount) * 100)
           : 0;
-        const couponId = session.metadata?.couponId || null;
+        const couponCode = session.metadata?.couponCode || null;
         const deliveryNotes = session.metadata?.deliveryNotes;
         const shippingFee = session.metadata?.shippingFee
           ? Number(session.metadata.shippingFee)
@@ -163,20 +164,21 @@ export class PaymentService {
             deliveryNotes: deliveryNotes,
             shippingFee: shippingFee,
           });
-          console.log('order created:', order);
+          logger.info(order, 'order created:' );
         } catch (err) {
-          console.error('createOrder failed:', err);
+          logger.error(err, 'createOrder failed:');
           throw err;
         }
 
-        if (couponId) {
-          await db
+        if (couponCode) {
+          const [coupon] = await db
             .update(couponsTable)
             .set({ usedCount: sql`${couponsTable.usedCount} + 1` })
-            .where(eq(couponsTable.id, couponId));
+            .where(eq(couponsTable.code, couponCode.toUpperCase()))
+            .returning();
 
           await db.insert(couponRedemptionsTable).values({
-            couponId,
+            couponId: coupon?.id as string,
             userId,
             orderId: order.id,
           });

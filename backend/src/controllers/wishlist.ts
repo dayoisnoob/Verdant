@@ -7,8 +7,6 @@ export class WishlistController {
     const userId = req.user!.id;
     const { productId } = req.query;
 
-    console.log(productId);
-
     const result = await WishlistService.addItem(userId, productId as string);
 
     res.json(new ApiResponse(201, result.message, result.newItem));
