@@ -5,10 +5,12 @@ import Navbar from "@/components/Navbar";
 import { OrderCard } from "@/components/OrderCard";
 import { getuserOrders } from "@/lib/api";
 import { ORDER_STATUS_CONFIG } from "@/lib/constants";
+import { useAuthStore } from "@/store/store";
 import { FilterStatus } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { Package } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 const FILTERS: { id: FilterStatus; label: string }[] = [
@@ -20,8 +22,12 @@ const FILTERS: { id: FilterStatus; label: string }[] = [
 ];
 
 export default function OrdersPage() {
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const [filter, setFilter] = useState<FilterStatus>("all");
 
+  if (!isLoggedIn) {
+    redirect("/login?redirect=/orders");
+  }
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => {

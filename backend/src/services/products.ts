@@ -11,7 +11,8 @@ export class ProductService {
     category: string,
     sort: string,
     page: number,
-    limit: number
+    limit: number,
+    filter?: string
   ) {
     const parsedLimit = Number(limit) || 8;
     const parsedPage = Number(page) || 1;
@@ -21,6 +22,13 @@ export class ProductService {
     if (category && category !== 'All')
       conditions.push(eq(productsTable.category, category));
 
+    if (filter === 'organic')
+      conditions.push(eq(productsTable.isOrganic, true));
+    if (filter === 'seasonal')
+      conditions.push(eq(productsTable.isSeasonal, true));
+    if (filter === 'on-sale') conditions.push(eq(productsTable.isOnSale, true));
+    if (filter === 'in-stock') conditions.push(eq(productsTable.inStock, true));
+
     const sortMap: Record<string, any> = {
       'price-asc': asc(productsTable.price),
       'price-desc': desc(productsTable.price),
@@ -28,18 +36,21 @@ export class ProductService {
       newest: desc(productsTable.createdAt),
     };
 
-    const products = await db
-      .select()
-      .from(productsTable)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(sortMap[sort] ?? sortMap['newest'])
-      .limit(limit)
-      .offset(offset);
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const countResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(productsTable)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
+    const [products, countResult] = await Promise.all([
+      db
+        .select()
+        .from(productsTable)
+        .where(where)
+        .orderBy(sortMap[sort] ?? sortMap['newest'])
+        .limit(parsedLimit)
+        .offset(offset),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(productsTable)
+        .where(where),
+    ]);
 
     const totalItems = Number(countResult[0]?.count ?? 0);
     const pagination = {
@@ -51,8 +62,7 @@ export class ProductService {
 
     return {
       message: 'Products fetched successfully',
-      data: products,
-      pagination,
+      data: { products, pagination },
     };
   }
 
@@ -182,5 +192,16 @@ export class ProductService {
     }
 
     return { message: 'Product deleted successfully', data: deletedProduct };
+  }
+
+  static async getCategories() {
+    const categories = await db
+      .selectDistinct({ category: productsTable.category })
+      .from(productsTable)
+      .orderBy(productsTable.category);
+
+    const uniqueCategories = categories.map((p) => p.category);
+
+    return uniqueCategories;
   }
 }

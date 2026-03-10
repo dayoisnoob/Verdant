@@ -4,36 +4,14 @@ import { registerApi } from "@/lib/api";
 import { handleFormError } from "@/lib/api/helpers";
 import { useAuthStore } from "@/store/store";
 import { ApiError } from "@/util";
-import PasswordStrengthBar from "react-password-strength-bar";
 import { RegistrationForm, registrationSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Leaf } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-
-function BackgroundDecor() {
-  return (
-    <>
-      <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-green-mid/20 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-24 w-96 h-96 rounded-full bg-orange/8 blur-3xl pointer-events-none" />
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: "128px",
-        }}
-      />
-      <div className="absolute top-8 left-8 text-green-mid/15 pointer-events-none select-none rotate-45">
-        <Leaf size={52} strokeWidth={0.8} />
-      </div>
-      <div className="absolute bottom-8 right-8 text-green-mid/10 pointer-events-none select-none rotate-[220deg]">
-        <Leaf size={36} strokeWidth={0.8} />
-      </div>
-    </>
-  );
-}
+import PasswordStrengthBar from "react-password-strength-bar";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -66,8 +44,6 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-[#0f1c13] flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      <BackgroundDecor />
-
       <div className="relative w-full max-w-[440px]">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -77,15 +53,13 @@ export default function SignupPage() {
           >
             Ver<em className="not-italic text-green-light">dant</em>
           </Link>
-          <p className="text-white/30 text-[0.65rem] mt-1.5 uppercase tracking-[0.2em]">
+          <p className="text-white/70 text-[0.65rem] mt-1.5 uppercase tracking-[0.2em]">
             Farm fresh · Delivered
           </p>
         </div>
 
         {/* Card */}
         <div className="bg-[#FAF7F0] rounded-[1.75rem] shadow-[0_40px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden">
-          <div className="h-[3px] bg-green" />
-
           <div className="px-8 pt-7 pb-9">
             {/* Heading */}
             <div className="mb-6">
@@ -241,44 +215,10 @@ export default function SignupPage() {
                 )}
               </button>
             </form>
-
-            {/* Member perks — below the fold, non-intrusive */}
-            <div className="mt-7 pt-6 border-t border-[#ebebeb]">
-              <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-verdant-muted mb-3">
-                What you get
-              </p>
-              <div className="grid grid-cols-2 gap-y-2.5 gap-x-3">
-                {[
-                  { icon: "🌅", text: "Early harvest access" },
-                  { icon: "🚚", text: "Free delivery over £40" },
-                  { icon: "⭐", text: "Loyalty rewards" },
-                  { icon: "📬", text: "Weekly harvest notes" },
-                ].map((perk) => (
-                  <div key={perk.text} className="flex items-center gap-2">
-                    <span className="text-sm">{perk.icon}</span>
-                    <span className="text-[0.68rem] text-verdant-muted leading-tight">
-                      {perk.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Trust strip */}
-        <div className="flex items-center justify-center gap-5 mt-6">
-          {["🔒 Secure", "🌱 120+ farms", "⚡ Same-day harvest"].map((item) => (
-            <span
-              key={item}
-              className="text-[0.6rem] text-white/25 tracking-wide"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-
-        <p className="text-center text-[0.6rem] text-white/20 mt-3">
+        <p className="text-center text-sm text-white/70 mt-3">
           By signing up you agree to our{" "}
           <Link
             href="/terms"

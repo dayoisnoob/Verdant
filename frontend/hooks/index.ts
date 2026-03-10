@@ -2,7 +2,6 @@ import { addToWishlist, getUserWishlist, removeFromWishlist } from "@/lib/api";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export const useAuthCart = () => {
   const items = useCartStore((state) => state.items);
@@ -68,20 +67,17 @@ export const useWishlist = () => {
   return { wishlist, isLoading };
 };
 
-export const useWishlistToggle = (productId: string, isWishlisted: boolean) => {
+export const useWishlistToggle = (productId: string) => {
+  const { wishlist } = useWishlist();
   const queryClient = useQueryClient();
-  const [optimistic, setOptimistic] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const wishlisted = optimistic !== null ? optimistic : isWishlisted;
+  const wishlisted = wishlist.some((l) => l.id === productId);
 
   const toggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     const prev = wishlisted;
-    setOptimistic(!wishlisted);
-    setLoading(true);
 
     try {
       if (prev) {
@@ -90,13 +86,8 @@ export const useWishlistToggle = (productId: string, isWishlisted: boolean) => {
         await addToWishlist(productId);
       }
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-      setOptimistic(null);
-    } catch {
-      setOptimistic(null);
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
-  return { wishlisted, toggle, loading };
+  return { wishlisted, toggle };
 };

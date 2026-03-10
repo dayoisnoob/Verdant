@@ -79,3 +79,11 @@ export const NIGERIAN_STATES = [
   "Yobe",
   "Zamfara",
 ];
+
+export const FILTERS = [
+  { label: "All", value: "all" },
+  { label: "Organic", value: "organic" },
+  { label: "Seasonal", value: "seasonal" },
+  { label: "On Sale", value: "on-sale" },
+  { label: "In Stock", value: "in-stock" },
+];

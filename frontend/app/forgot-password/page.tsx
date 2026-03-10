@@ -1,141 +1,193 @@
 "use client";
 
 import { forgotPassword } from "@/lib/api";
+import { Lock, Mail, MoveLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setError("Please enter your email address.");
+      return;
+    }
+    setError("");
+    setIsSubmitting(true);
     try {
-      if (!email) return;
       await forgotPassword(email);
-      toast.success(
-        "If this email exists, we'll send a link to retrieve your password",
-      );
+      setSent(true);
     } catch {
-      setError("Failed to send reset link");
+      setError("Failed to send reset link. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col">
-      {/* Minimal nav */}
-      <div className="px-10 py-6 border-b border-green/10">
-        <Link href="/" className="font-playfair text-2xl font-black text-green">
-          Ver<em className="not-italic text-green-light">dant</em>
-        </Link>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-16">
-        <div className="max-w-md w-full">
-          {/* Icon */}
-          <div className="w-20 h-20 bg-green-pale rounded-full flex items-center justify-center mb-8">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-9 h-9 text-green"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-
-          {/* Heading */}
-          <p className="text-xs tracking-[0.15em] uppercase text-green mb-2">
-            Account recovery
+    <div className="min-h-screen bg-[#0f1c13] flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      <div className="relative w-full max-w-[400px]">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link
+            href="/"
+            className="inline-block font-playfair text-3xl font-black text-white tracking-tight"
+          >
+            Ver<em className="not-italic text-green-light">dant</em>
+          </Link>
+          <p className="text-white/70 text-[0.65rem] mt-1.5 uppercase tracking-[0.2em]">
+            Farm fresh · Delivered
           </p>
-          <h1 className="font-playfair font-black text-verdant-dark text-4xl leading-tight mb-3">
-            Forgot your
-            <br />
-            password?
-          </h1>
-          <p className="text-verdant-muted text-sm leading-relaxed mb-10">
-            No worries. Enter the email address on your account and we&apos;ll
-            send you a link to reset it.
-          </p>
+        </div>
 
-          {/* Form — wire up onSubmit to POST /auth/forgot-password */}
-          <form className="flex flex-col gap-5">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider">
-                Email address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                name="email"
-                placeholder="jane@email.com"
-                className="border border-[#e5e5e5] rounded-xl px-4 py-3.5 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"
-              />
+        {/* Card */}
+        <div className="bg-[#FAF7F0] rounded-[1.75rem] shadow-[0_40px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden">
+          <div className="px-8 pt-7 pb-9">
+            {/* Icon */}
+            <div className="w-12 h-12 bg-green-pale rounded-2xl flex items-center justify-center mb-5">
+              <Lock color="green" />
             </div>
 
-            {/* Submit — wire up */}
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="w-full bg-green text-white py-4 rounded-full font-semibold text-base hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,106,79,0.28)]"
-            >
-              Send Reset Link
-            </button>
-          </form>
-
-          {/* Back to login */}
-          <div className="flex items-center justify-center gap-2 mt-8">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-4 h-4 text-[#bbb]"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <Link
-              href="/login"
-              className="text-sm text-verdant-muted hover:text-green transition-colors"
-            >
-              Back to sign in
-            </Link>
-          </div>
-
-          {/* Divider */}
-          <div className="h-px bg-[#e5e5e5] my-8" />
-
-          {/* Help note */}
-          <div className="bg-white border border-green/10 rounded-2xl p-5 flex gap-4 items-start">
-            <div className="text-xl flex-shrink-0 mt-0.5">💡</div>
-            <div>
-              <p className="text-sm font-medium text-verdant-dark mb-1">
-                Still can&apos;t get in?
+            {/* Heading — changes on success */}
+            <div className="mb-6">
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-green mb-1.5">
+                Account recovery
               </p>
-              <p className="text-xs text-verdant-muted leading-relaxed">
-                Check your spam folder for the reset email, or{" "}
+              <h1 className="font-playfair font-black text-verdant-dark text-[1.85rem] leading-tight">
+                {sent ? "Check your inbox" : "Forgot your password?"}
+              </h1>
+              <p className="text-verdant-muted text-sm mt-1.5 leading-relaxed">
+                {sent
+                  ? `We sent a reset link to ${email}. It expires in 15 minutes.`
+                  : "Enter your account email and we'll send you a link to reset it."}
+              </p>
+            </div>
+
+            {/* ── Sent state ── */}
+            {sent ? (
+              <div className="flex flex-col gap-3">
+                <div className="border border-green/20 rounded-2xl p-4 flex gap-3 items-start bg-green-pale/40">
+                  <div className="w-8 h-8 rounded-xl bg-green-pale flex items-center justify-center flex-shrink-0 text-base">
+                    <Mail size={20} color="blue" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-verdant-dark leading-snug">
+                      Email on its way
+                    </p>
+                    <p className="text-xs text-verdant-muted mt-0.5 leading-relaxed">
+                      Can&apos;t find it? Check your spam folder or{" "}
+                      <button
+                        onClick={() => setSent(false)}
+                        className="text-green font-semibold hover:underline"
+                      >
+                        try again
+                      </button>
+                      .
+                    </p>
+                  </div>
+                </div>
+
                 <Link
-                  href="/contact"
-                  className="text-green font-medium hover:underline underline-offset-2"
+                  href="/login"
+                  className="w-full flex items-center justify-center gap-2 bg-green text-white py-3.5 rounded-xl font-semibold text-sm tracking-wide hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,106,79,0.3)] mt-1"
                 >
-                  contact our support team
-                </Link>{" "}
-                and we&apos;ll get you back in within 24 hours.
-              </p>
-            </div>
+                  Back to sign in
+                </Link>
+              </div>
+            ) : (
+              /* ── Form ── */
+              <form onSubmit={handleSubmit} noValidate>
+                <div className="flex flex-col gap-4">
+                  {/* Error banner */}
+                  {error && (
+                    <div className="bg-red-50 border border-red-100 rounded-2xl px-4 py-3.5 flex gap-3 items-start">
+                      <span className="text-base flex-shrink-0 mt-0.5">⚠️</span>
+                      <p className="text-sm text-red-600 leading-snug">
+                        {error}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Email */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
+                      Email address
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (error) setError("");
+                      }}
+                      autoFocus
+                      autoComplete="email"
+                      placeholder="you@email.com"
+                      className={`border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] focus:ring-2 focus:ring-green/10 ${
+                        error
+                          ? "border-red-300 focus:border-red-400"
+                          : "border-[#e0ddd5] focus:border-green"
+                      }`}
+                    />
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-green text-white py-3.5 rounded-xl font-semibold text-sm tracking-wide hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,106,79,0.3)] disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none mt-1"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
+                        Sending…
+                      </span>
+                    ) : (
+                      "Send Reset Link"
+                    )}
+                  </button>
+
+                  {/* Back to login */}
+                  <Link
+                    href="/login"
+                    className="flex items-center justify-center gap-1.5 text-sm text-verdant-muted hover:text-green transition-colors"
+                  >
+                    <MoveLeft size={14} /> Back to sign in
+                  </Link>
+                </div>
+              </form>
+            )}
           </div>
         </div>
+
+        <div className="mt-4 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 flex gap-3 items-start">
+          <span className="text-base flex-shrink-0">💡</span>
+          <p className="text-xs text-white/50 leading-relaxed">
+            Still can&apos;t get in?{" "}
+            <Link
+              href="/contact"
+              className="text-white/70 font-medium hover:text-white transition-colors underline underline-offset-2"
+            >
+              Contact support
+            </Link>{" "}
+            and we&apos;ll get you back within 24 hours.
+          </p>
+        </div>
+
+        <p className="text-center text-sm text-white/70 mt-3">
+          Remember it?{" "}
+          <Link
+            href="/login"
+            className="text-white/90 font-medium hover:text-white underline underline-offset-2 transition-colors"
+          >
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -4,34 +4,11 @@ import { login, resendVerificationEmail } from "@/lib/api";
 import { ApiError } from "@/util";
 import { LoginForm, loginSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Leaf } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-// ── Decorative background ──────────────────────────────────────────────────
-function BackgroundDecor() {
-  return (
-    <>
-      <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-green-mid/20 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-24 w-96 h-96 rounded-full bg-orange/8 blur-3xl pointer-events-none" />
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: "128px",
-        }}
-      />
-      <div className="absolute top-8 right-8 text-green-mid/15 pointer-events-none select-none">
-        <Leaf size={52} strokeWidth={0.8} />
-      </div>
-      <div className="absolute bottom-8 left-8 text-green-mid/10 pointer-events-none select-none rotate-[200deg]">
-        <Leaf size={36} strokeWidth={0.8} />
-      </div>
-    </>
-  );
-}
 
 // ── Page ───────────────────────────────────────────────────────────────────
 export default function LoginPage() {
@@ -95,8 +72,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#0f1c13] flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      <BackgroundDecor />
-
       <div className="relative w-full max-w-[400px]">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -106,7 +81,7 @@ export default function LoginPage() {
           >
             Ver<em className="not-italic text-green-light">dant</em>
           </Link>
-          <p className="text-white/30 text-[0.65rem] mt-1.5 uppercase tracking-[0.2em]">
+          <p className="text-white/70 text-[0.65rem] mt-1.5 uppercase tracking-[0.2em]">
             Farm fresh · Delivered
           </p>
         </div>
@@ -114,7 +89,6 @@ export default function LoginPage() {
         {/* Card */}
         <div className="bg-[#FAF7F0] rounded-[1.75rem] shadow-[0_40px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden">
           {/* Top accent */}
-          <div className="h-[3px] bg-green" />
 
           <div className="px-8 pt-7 pb-9">
             {/* Heading */}
@@ -256,19 +230,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Trust strip */}
-        <div className="flex items-center justify-center gap-5 mt-6">
-          {["🔒 Secure", "🌱 120+ farms", "⚡ Same-day harvest"].map((item) => (
-            <span
-              key={item}
-              className="text-[0.6rem] text-white/25 tracking-wide"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-
-        <p className="text-center text-[0.6rem] text-white/20 mt-3">
+        <p className="text-center text-sm text-white/70 mt-3">
           By signing in you agree to our{" "}
           <Link
             href="/terms"

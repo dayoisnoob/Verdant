@@ -4,18 +4,17 @@ import { ApiError, ApiResponse } from '../utils/apiResponse';
 
 export class ProductController {
   static async getAllProducts(req: Request, res: Response) {
-    const { category, sort, page, limit } = req.query;
+    const { category, sort, page, limit, filter } = req.query;
 
     const result = await ProductService.getProducts(
       category as string,
       sort as string,
       Number(page),
-      Number(limit)
+      Number(limit),
+      filter as string
     );
-    res.json({
-      ...new ApiResponse(200, result.message, result.data),
-      pagination: result.pagination,
-    });
+
+    res.json(new ApiResponse(200, result.message, result.data));
   }
 
   static async getProductBySlug(req: Request, res: Response) {
@@ -46,5 +45,17 @@ export class ProductController {
     const result = await ProductService.deleteProduct(id);
 
     res.json(new ApiResponse(200, result.message, result.data));
+  }
+
+  static async getCategories(req: Request, res: Response) {
+    const uniqueCategories = await ProductService.getCategories();
+
+    res.json(
+      new ApiResponse(
+        200,
+        'All unique categories retrieved successfully',
+        uniqueCategories
+      )
+    );
   }
 }

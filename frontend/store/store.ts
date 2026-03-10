@@ -36,7 +36,8 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
 
     try {
       await addItemToCartApi({ productId: product.id, quantity });
-    } catch {
+    } catch (err) {
+      console.log(err);
       set((state) => ({
         items: state.items.filter((i) => i.productId !== product.id),
       }));

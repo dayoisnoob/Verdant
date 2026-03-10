@@ -15,13 +15,13 @@ import {
   Heart,
   LogOut,
   MapPin,
-  NotebookTabs,
   Package,
   Settings,
   SquareChartGantt,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -67,12 +67,15 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "settings", label: "Settings", icon: <Settings size={16} /> },
 ];
 
-// ── Page ───────────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const [tab, setTab] = useState<Tab>("overview");
-  const [mobileNav, setMobileNav] = useState(false);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+
+  if (!isLoggedIn) {
+    redirect("/login?redirect=/orders");
+  }
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["orders"],

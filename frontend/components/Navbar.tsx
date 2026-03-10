@@ -123,7 +123,7 @@ export default function Navbar() {
                 }`}
               >
                 {isLoggedIn ? (
-                  <span className="w-5 h-5 rounded-full bg-gradient-to-br from-green to-orange flex items-center justify-center text-white text-[0.6rem] font-black flex-shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-orange-400 flex items-center justify-center text-white text-[0.6rem] font-black flex-shrink-0">
                     {firstName.charAt(0).toUpperCase()}
                   </span>
                 ) : (

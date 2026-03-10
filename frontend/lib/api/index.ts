@@ -7,7 +7,7 @@ import {
   OrderSession,
   // OrderSession,
   Product,
-  ProductsApiResponse,
+  ProductsApi,
   SingleOrder,
   Totals,
   UserApi,
@@ -361,21 +361,28 @@ export const getuserOrders = (
 // ------------------------------------------PRODUCTS  API----------------------------------------
 // ----------------------------------------------------------------------------------------------
 
-export const getProducts = (
+export const getProducts = async (
   category?: string,
   sort?: string,
+  filter?: string,
   page = 1,
   limit = 8,
-): Promise<ProductsApiResponse> => {
+): Promise<ProductsApi> => {
   const params = new URLSearchParams();
   if (category && category !== "All") params.set("category", category);
   if (sort && sort !== "default") params.set("sort", sort);
+  if (filter && filter !== "default") params.set("filter", filter);
   params.set("page", String(page));
   params.set("limit", String(limit));
 
-  return apiFetch(`/api/products?${params.toString()}`, {
-    method: "GET",
-  });
+  const res = await apiFetch<{ data: ProductsApi }>(
+    `/api/products?${params.toString()}`,
+    {
+      method: "GET",
+    },
+  );
+
+  return res.data;
 };
 
 export const getProductBySlug = (
@@ -384,6 +391,14 @@ export const getProductBySlug = (
   return apiFetch(`/api/products/${slug}`, {
     method: "GET",
   });
+};
+
+export const getCategories = async (): Promise<string[]> => {
+  const res = await apiFetch<{ data: string[] }>("/api/products/categories", {
+    method: "GET",
+  });
+
+  return res.data;
 };
 
 // ----------------------------------------------------------------------------------------------

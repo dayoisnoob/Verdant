@@ -112,7 +112,7 @@ export default function ProductPage({
             {/* ── Left — Image gallery ── */}
             <div className="flex flex-col gap-4 lg:sticky lg:top-28">
               {/* Main image */}
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-[#f0ede6]">
+              <div className="relative rounded-2xl overflow-hidden aspect-square bg-[#f0ede6]">
                 <Image
                   src={product.images[activeImg]?.url}
                   alt={product.images[activeImg]?.alt}

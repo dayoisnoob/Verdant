@@ -30,7 +30,7 @@ export class CartService {
       .from(productsTable)
       .where(eq(productsTable.id, productId));
 
-    if (!product) throw new ApiError(404, 'ProductId not found');
+    if (!product) throw new ApiError(404, 'Product not found');
 
     if (!product.inStock) throw new ApiError(400, 'ProductId is out of stock');
 
@@ -50,7 +50,7 @@ export class CartService {
 
     if (existing) {
       const newQty = existing.quantity + (payload.quantity ?? 1);
-      return CartService.updateQuantity(userId, existing.id, newQty);
+      return CartService.updateQuantity(userId, existing.productId, newQty);
     }
 
     const [item] = await db
@@ -81,7 +81,7 @@ export class CartService {
       )
       .returning();
 
-    if (!updated) throw new ApiError(404, 'Item not found');
+    if (!updated) throw new ApiError(404, 'Cart Item not found');
 
     return { quantity: updated.quantity };
   }

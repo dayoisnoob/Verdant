@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useState } from "react";
 import { UserData } from "@/types";
 import { changePassword, deleteUserApi, updateProfile } from "@/lib/api";
@@ -12,8 +11,8 @@ import { useAuthStore } from "@/store/store";
 import { handleFormError } from "@/lib/api/helpers";
 import DeleteAccountModal from "./DeleteAccountModal";
 import {
+  ChangePasswordForm,
   changePasswordSchema,
-  PasswordForm,
   ProfileForm,
   updateProfileSchema,
 } from "@/validations";
@@ -88,9 +87,11 @@ export default function SettingsTab({ user }: { user: UserData }) {
     reset: resetPassword,
     setError: setPasswordError,
     formState: { errors: passwordErrors, isSubmitting: savingPassword },
-  } = useForm<PasswordForm>({ resolver: zodResolver(changePasswordSchema) });
+  } = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+  });
 
-  const onSavePassword = async (data: PasswordForm) => {
+  const onSavePassword = async (data: ChangePasswordForm) => {
     try {
       const res = await changePassword(data);
       resetPassword();

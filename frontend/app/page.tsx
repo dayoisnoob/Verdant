@@ -6,183 +6,309 @@ import { Product } from "@/types";
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import MarqueeStrip from "@/components/MarqueeStrip";
-import CategoryGrid from "@/components/CategoryGrid";
-import ProductCard from "@/components/ProductCard";
-import FreshnessBar from "@/components/FreshnessBar";
-import FarmStory from "@/components/FarmStory";
-import FarmsGrid from "@/components/FarmsGrid";
-import Newsletter from "@/components/Newsletter";
 import Footer from "@/components/Footer";
 import Toast from "@/components/Toast";
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "@/lib/api";
+import ProductCard from "@/components/ProductCard";
+import Container from "@/components/Container";
 
+// ── Skeleton primitives ────────────────────────────────────────────
+function Shimmer({ className }: { className?: string }) {
+  return (
+    <div
+      className={`relative overflow-hidden bg-[#e8e8e8] rounded-lg ${className}`}
+    >
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+    </div>
+  );
+}
+
+function HeroSkeleton() {
+  return (
+    <section className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-cream pt-20">
+      {/* Left copy */}
+      <div className="flex flex-col justify-center w-full lg:w-1/2 px-6 py-14 sm:px-12 lg:px-20 lg:py-0 gap-5">
+        <Shimmer className="h-6 w-44 rounded-full" />
+        <div className="flex flex-col gap-3">
+          <Shimmer className="h-14 w-4/5 rounded-xl" />
+          <Shimmer className="h-14 w-3/5 rounded-xl" />
+          <Shimmer className="h-14 w-2/3 rounded-xl" />
+        </div>
+        <div className="flex flex-col gap-2 mt-2">
+          <Shimmer className="h-4 w-full rounded-md" />
+          <Shimmer className="h-4 w-5/6 rounded-md" />
+          <Shimmer className="h-4 w-3/4 rounded-md" />
+        </div>
+        <div className="flex gap-3 mt-2">
+          <Shimmer className="h-12 w-32 rounded-full" />
+          <Shimmer className="h-12 w-28 rounded-full" />
+        </div>
+        <div className="flex gap-8 mt-6 pt-8 border-t border-black/8">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <Shimmer className="h-8 w-16 rounded-md" />
+              <Shimmer className="h-3 w-14 rounded-sm" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Right image panel */}
+      <div className="w-full lg:w-1/2 h-64 sm:h-96 lg:h-auto">
+        <Shimmer className="w-full h-full rounded-none" />
+      </div>
+    </section>
+  );
+}
+
+function ProductCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden">
+      <Shimmer className="h-48 w-full rounded-none" />
+      <div className="p-5 flex flex-col gap-3">
+        <Shimmer className="h-3 w-24 rounded-sm" />
+        <Shimmer className="h-5 w-4/5 rounded-md" />
+        <Shimmer className="h-3 w-1/3 rounded-sm" />
+        <div className="flex gap-1 mt-1">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Shimmer key={s} className="h-3 w-3 rounded-sm" />
+          ))}
+        </div>
+        <div className="flex gap-1.5 mt-1">
+          <Shimmer className="h-4 w-14 rounded-full" />
+          <Shimmer className="h-4 w-16 rounded-full" />
+        </div>
+        <div className="flex justify-between items-center pt-4 mt-1 border-t border-[#f0f0f0]">
+          <div className="flex flex-col gap-1.5">
+            <Shimmer className="h-5 w-12 rounded-md" />
+            <Shimmer className="h-3 w-16 rounded-sm" />
+          </div>
+          <Shimmer className="h-9 w-9 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeaturedSkeleton() {
+  return (
+    <section className="bg-white px-6 py-16 sm:px-10 sm:py-20 lg:px-20 lg:py-24">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
+        <div className="flex flex-col gap-3">
+          <Shimmer className="h-3 w-20 rounded-sm" />
+          <Shimmer className="h-9 w-52 rounded-lg" />
+        </div>
+        <Shimmer className="h-4 w-36 rounded-sm" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {[1, 2, 3, 4].map((i) => (
+          <ProductCardSkeleton key={i} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── Error state ────────────────────────────────────────────────────
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center gap-5">
+      <span className="text-5xl">🌧️</span>
+      <h2 className="font-playfair font-bold text-verdant-dark text-3xl">
+        Something went wrong
+      </h2>
+      <p className="text-verdant-muted text-sm max-w-sm leading-relaxed">
+        {message || "We couldn't load the produce. Try refreshing the page."}
+      </p>
+      <button
+        onClick={() => window.location.reload()}
+        className="bg-green text-white px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-green-mid transition-all"
+      >
+        Refresh
+      </button>
+    </div>
+  );
+}
+
+// ── Page ───────────────────────────────────────────────────────────
 export default function HomePage() {
   const [cartCount, setCartCount] = useState(0);
   const [toast, setToast] = useState({ visible: false, message: "" });
 
-  const handleAddToCart = useCallback((product: Product) => {
-    setCartCount((c) => c + 1);
-    setToast({
-      visible: true,
-      message: `🛒 Added "${product.name}" to basket`,
-    });
-  }, []);
-
-  const hideToast = useCallback(() => {
-    setToast((t) => ({ ...t, visible: false }));
-  }, []);
-
-  const {
-    data: PRODUCTS,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["products"],
-    queryFn: async () => {
-      const res = await getProducts(undefined, undefined, 1, 999);
-      return res.data;
-    },
+    queryFn: () => getProducts(undefined, undefined, undefined, 1, 999),
   });
 
-  if (!PRODUCTS) return null;
+  const PRODUCTS = data?.products;
 
-  console.log(PRODUCTS);
+  // ── Loading ──
+  if (isLoading) {
+    return (
+      <>
+        <style>{`
+          @keyframes shimmer { to { transform: translateX(200%); } }
+        `}</style>
+        <Navbar />
+        <main>
+          <HeroSkeleton />
+          <FeaturedSkeleton />
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // ── Error ──
+  if (isError) {
+    return (
+      <>
+        <Navbar />
+        <ErrorState
+          message={error instanceof Error ? error.message : "Unexpected error."}
+        />
+        <Footer />
+      </>
+    );
+  }
+
+  // ── Empty (API returned nothing) ──
+  if (!PRODUCTS || PRODUCTS.length === 0) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center gap-5">
+          <span className="text-5xl">🌱</span>
+          <h2 className="font-playfair font-bold text-verdant-dark text-3xl">
+            No produce yet
+          </h2>
+          <p className="text-verdant-muted text-sm max-w-sm">
+            Looks like the fields are being prepared. Check back soon.
+          </p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   const featuredProducts = PRODUCTS.filter((p) => p.isFeatured);
-  const onSaleProducts = PRODUCTS.filter((p) => p.isOnSale && p.originalPrice);
 
-  const categoryMap: Record<string, { count: number; organicCount: number }> =
-    {};
-  PRODUCTS.forEach((p) => {
-    if (!categoryMap[p.category])
-      categoryMap[p.category] = { count: 0, organicCount: 0 };
-    categoryMap[p.category].count++;
-    if (p.isOrganic) categoryMap[p.category].organicCount++;
-  });
-  const categories = Object.entries(categoryMap)
-    .map(([name, data]) => ({ name, ...data }))
-    .sort((a, b) => b.count - a.count);
-
-  const uniqueFarms = (() => {
-    const map: Record<
-      string,
-      { origin: string; productCount: number; isOrganic: boolean }
-    > = {};
-    PRODUCTS.forEach((p) => {
-      if (!map[p.farm])
-        map[p.farm] = { origin: p.origin, productCount: 0, isOrganic: false };
-      map[p.farm].productCount++;
-      if (p.isOrganic) map[p.farm].isOrganic = true;
-    });
-    return Object.entries(map).map(([name, info]) => ({ name, ...info }));
-  })();
-
-  const uniqueFarmNames = [...new Set(PRODUCTS.map((p) => p.farm))];
-
-  const sameDayCount = PRODUCTS.filter((p) => p.harvestDaysAgo === 0).length;
-  const organicCount = PRODUCTS.filter((p) => p.isOrganic).length;
-  const categoryCount = new Set(PRODUCTS.map((p) => p.category)).size;
+  // console.log(featuredProducts);
 
   return (
-    <>
+    <Container>
+      <style>{`
+        @keyframes shimmer { to { transform: translateX(200%); } }
+      `}</style>
       <Navbar />
 
       <main>
-        {/* ── Hero ── */}
-        <Hero featuredProducts={featuredProducts} />
+        <Hero hero={featuredProducts[0]} />
 
-        {/* ── Marquee ── */}
-        <MarqueeStrip farms={uniqueFarmNames} />
-
-        {/* ── Categories ── */}
-        <CategoryGrid categories={categories} />
-
-        {/* ── Featured Products ── */}
-        <section className="bg-[#F0F7F2] px-20 pb-22 pt-22">
-          <div className="flex justify-between items-end mb-10">
+        <section className="bg-white px-6 py-16 sm:px-10 sm:py-20 lg:px-20 lg:py-24">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
             <div>
-              <p className="text-xs tracking-[0.15em] uppercase text-green mb-2">
+              <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
                 Staff Picks
               </p>
-              <h2 className="font-playfair font-black text-verdant-dark text-4xl leading-[1.15]">
-                Featured This Week
+              <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl">
+                This Week&apos;s Best
               </h2>
             </div>
             <Link
               href="/shop"
-              className="text-green text-sm font-medium border-b border-green pb-px hover:opacity-65 transition-opacity whitespace-nowrap"
+              className="text-green text-sm font-medium hover:opacity-65 transition-opacity self-start sm:self-auto"
             >
-              See all products →
+              Browse all produce →
             </Link>
           </div>
-          <div className="grid grid-cols-4 gap-6">
-            {featuredProducts.slice(0, 4).map((p) => (
-              <ProductCard
-                key={p.slug}
-                product={p}
-                onAddToCart={handleAddToCart}
-              />
-            ))}
-          </div>
-        </section>
 
-        {/* ── Freshness Bar ── */}
-        <FreshnessBar
-          sameDayCount={sameDayCount}
-          organicCount={organicCount}
-          categoryCount={categoryCount}
-        />
-
-        {/* ── On Sale ── */}
-        <section className="px-20 py-22">
-          <div className="flex justify-between items-end mb-10">
-            <div>
-              <p className="text-xs tracking-[0.15em] uppercase text-green mb-2">
-                Limited Time
-              </p>
-              <h2 className="font-playfair font-black text-verdant-dark text-4xl leading-[1.15]">
-                On Sale Now
-              </h2>
+          {featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {featuredProducts.slice(0, 4).map((p) => (
+                <ProductCard key={p.slug} product={p} />
+              ))}
             </div>
-            <Link
-              href="/shop?filter=on-sale"
-              className="text-green text-sm font-medium border-b border-green pb-px hover:opacity-65 transition-opacity whitespace-nowrap"
-            >
-              View all offers →
-            </Link>
-          </div>
-          <div className="grid grid-cols-4 gap-6">
-            {onSaleProducts.map((p) => (
-              <ProductCard
-                key={p.slug}
-                product={p}
-                onAddToCart={handleAddToCart}
-              />
+          ) : (
+            <div className="text-center py-16 text-verdant-muted text-sm">
+              No featured products right now.{" "}
+              <Link
+                href="/shop"
+                className="text-green font-medium hover:underline"
+              >
+                Browse everything →
+              </Link>
+            </div>
+          )}
+        </section>
+
+        {/* ── 3. Trust strip ── */}
+        <section className="bg-green px-6 py-10 sm:px-10 lg:px-20">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
+            {[
+              {
+                icon: "🌱",
+                title: "Same-day harvest",
+                desc: "Produce is picked the morning it ships. No warehouses, no cold storage.",
+              },
+              {
+                icon: "🚜",
+                title: "Traced to the field",
+                desc: "Every item links back to the specific farm and harvest date.",
+              },
+              {
+                icon: "♻️",
+                title: "Zero-waste packaging",
+                desc: "Compostable boxes, no plastic. Good for you, better for the soil.",
+              },
+            ].map((v) => (
+              <div key={v.title} className="flex items-start gap-4">
+                <span className="text-2xl mt-0.5">{v.icon}</span>
+                <div>
+                  <div className="font-semibold text-white text-sm mb-1">
+                    {v.title}
+                  </div>
+                  <p className="text-white/65 text-xs leading-relaxed">
+                    {v.desc}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* ── Farm Story ── */}
-        <FarmStory />
-
-        {/* ── Farms Grid ── */}
-        <FarmsGrid farms={uniqueFarms} />
-
-        {/* ── Newsletter ── */}
-        <Newsletter />
+        {/* ── 4. Newsletter ── */}
+        <section className="bg-cream px-6 py-16 sm:px-10 sm:py-20 lg:px-20 lg:py-24">
+          <div className="max-w-xl mx-auto text-center">
+            <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-3">
+              Harvest Notes
+            </p>
+            <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl mb-4">
+              What&apos;s growing this week
+            </h2>
+            <p className="text-verdant-muted text-sm leading-relaxed mb-8">
+              Weekly updates on what&apos;s in season, which farms are
+              harvesting, and early access to limited produce — straight to your
+              inbox.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="flex-1 border border-[#e0e0e0] bg-white rounded-full px-5 py-3.5 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all text-verdant-dark placeholder:text-[#ccc]"
+              />
+              <button className="bg-green text-white px-7 py-3.5 rounded-full text-sm font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,106,79,0.28)] whitespace-nowrap">
+                Subscribe
+              </button>
+            </div>
+            <p className="text-[0.65rem] text-[#bbb] mt-4">
+              No spam. Unsubscribe anytime.
+            </p>
+          </div>
+        </section>
       </main>
 
       <Footer />
-
-      {/* ── Toast ── */}
-      <Toast
-        message={toast.message}
-        visible={toast.visible}
-        onHide={hideToast}
-      />
-    </>
+    </Container>
   );
 }

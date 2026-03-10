@@ -18,7 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Loader2, MapPin, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -131,6 +131,8 @@ export default function CheckoutPage() {
 
   const { items: cartItems, couponCode } = useCart();
 
+  if (cartItems.length === 0) redirect("/basket");
+
   const [isPaying, setIsPaying] = useState(false);
   const [showNewForm, setShowNewForm] = useState(false);
   const [manualSelection, setManualSelection] = useState<string | null>(null);
@@ -146,7 +148,7 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    if (hydrated && !isLoggedIn) router.push("/login?redirect=/checkout");
+    if (hydrated && !isLoggedIn) redirect("/login?redirect=/checkout");
   }, [hydrated, isLoggedIn, router]);
 
   const shouldShowForm = showNewForm || addresses.length === 0;

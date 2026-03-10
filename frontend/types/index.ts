@@ -11,13 +11,7 @@ export interface ApiResponse<T> {
 //////////////////////////////////////////
 //////////// PRODUCT TYPES ///////////////
 //////////////////////////////////////////
-export interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  pageSize: number;
-  onPageChange: (page: number) => void;
-}
+
 export interface ProductImage {
   alt: string;
   url: string;
@@ -54,11 +48,8 @@ export interface CategoryMeta {
   img: string;
 }
 
-export interface ProductsApiResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: Product[];
+export interface ProductsApi {
+  products: Product[];
   pagination: {
     totalItems: number;
     currentPage: number;

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const nigerianPhoneRegex = /^[789]\d{9}$/;
+
 export const registrationSchema = z
   .object({
     firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -25,8 +27,6 @@ export const checkoutSchema = z.object({
   state: z.string().min(1, "Select a state"),
   deliveryNotes: z.string().optional(),
 });
-
-const nigerianPhoneRegex = /^[789]\d{9}$/;
 
 export const addressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -60,9 +60,15 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const resetPasswordSchema = z.object({
+  newPassword: z.string().min(1, "Password is required"),
+  confirmNewPassword: z.string(),
+});
+
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegistrationForm = z.infer<typeof registrationSchema>;
 export type CheckoutForm = z.infer<typeof checkoutSchema>;
 export type AddressFormData = z.infer<typeof addressSchema>;
 export type ProfileForm = z.infer<typeof updateProfileSchema>;
-export type PasswordForm = z.infer<typeof changePasswordSchema>;
+export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
+export type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
