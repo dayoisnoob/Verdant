@@ -25,7 +25,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
-export type OrderStatus = "delivered" | "on-the-way" | "paid";
+export type OrderStatus = "delivered" | "shipped" | "paid" | "processing";
 
 export const STATUS_CONFIG: Record<
   OrderStatus,
@@ -37,7 +37,7 @@ export const STATUS_CONFIG: Record<
     bg: "bg-green-pale",
     text: "text-green",
   },
-  "on-the-way": {
+  shipped: {
     label: "On the way",
     dot: "bg-orange",
     bg: "bg-orange-pale",
@@ -48,6 +48,12 @@ export const STATUS_CONFIG: Record<
     dot: "bg-blue-400",
     bg: "bg-blue-50",
     text: "text-blue-600",
+  },
+  processing: {
+    label: "processing",
+    dot: "bg-yellow-400",
+    bg: "bg-yellow-50",
+    text: "text-yellow-600",
   },
 };
 

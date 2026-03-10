@@ -18,5 +18,6 @@ export const jwtVerify = (token: string) => {
     id: string;
     role: 'customer' | 'admin';
     email: string;
+    isActive: boolean;
   };
 };

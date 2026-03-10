@@ -38,6 +38,7 @@ export const usersTable = pgTable(
       .$onUpdate(() => new Date())
       .defaultNow()
       .notNull(),
+    deletedAt: timestamp(),
   },
   (table) => ({
     emailidx: index('user_email_idx').on(table.email),

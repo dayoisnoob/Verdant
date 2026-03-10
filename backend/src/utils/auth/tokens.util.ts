@@ -47,6 +47,7 @@ export class AuthTokens {
       id: user.id,
       role: user.role,
       email: user.email,
+      isActive: user.isActive,
     };
 
     const accessToken = jwtToken(jwtPayload);

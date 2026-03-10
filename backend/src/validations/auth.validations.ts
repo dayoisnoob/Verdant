@@ -62,6 +62,10 @@ export const updateUserSchema = z.object({
   email: z.string().email('please enter a valid email').trim().toLowerCase(),
 });
 
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'password is required'),
+});
+
 export type SignupInput = z.infer<typeof signupSchemaValidation>;
 export type LoginInput = z.infer<typeof loginSchemaValidation>;
 export type updateInput = z.infer<typeof updateUserSchema>;

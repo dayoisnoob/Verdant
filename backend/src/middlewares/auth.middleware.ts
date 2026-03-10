@@ -26,6 +26,13 @@ export const authenticate = (
 
     const decoded = jwtVerify(accessToken);
 
+    if (!decoded.isActive) {
+      throw new ApiError(
+        403,
+        'Your account has been suspended. Please contact support.'
+      );
+    }
+
     req.user = decoded;
 
     next();

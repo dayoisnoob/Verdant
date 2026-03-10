@@ -14,6 +14,7 @@ import { validateInput } from '../middlewares/validation.ts';
 import { asyncHandler } from '../utils/asyncHandler.ts';
 import {
   changePasswordSchema,
+  deleteAccountSchema,
   forgotPasswordSchemaValidation,
   loginSchemaValidation,
   resendEmailSchemaValidation,
@@ -81,6 +82,12 @@ router.patch(
   '/profile',
   validateInput(updateUserSchema),
   asyncHandler(AuthController.updateUser)
+);
+
+router.delete(
+  '/delete',
+  validateInput(deleteAccountSchema),
+  asyncHandler(AuthController.deleteUser)
 );
 
 export default router;

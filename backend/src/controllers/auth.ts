@@ -153,4 +153,21 @@ export class AuthController {
       new ApiResponse(200, 'User successfully updated', result.updatedUser)
     );
   }
+
+  static async deleteUser(req: Request, res: Response) {
+    const userId = req.user!.id;
+    const { password } = req.body;
+
+    await AuthService.deleteUser(userId, password);
+    res.clearCookie('refreshToken', { path: '/api/auth' });
+    res.json(new ApiResponse(200, 'User successfully deleted'));
+  }
+
+  static async veryfyPassword(req: Request, res: Response) {
+    const userId = req.user!.id;
+    const { password } = req.body;
+
+    await AuthService.verifyPassword(userId, password);
+    res.json(new ApiResponse(200, 'Password successfully verified'));
+  }
 }

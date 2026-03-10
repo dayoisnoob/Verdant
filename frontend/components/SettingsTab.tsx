@@ -1,44 +1,22 @@
 "use client";
 
-// ── Drop this in place of the {tab === "settings" && (...)} block ──────────
-// Make sure these imports are at the top of your profile page file:
-//
-// import { useForm } from "react-hook-form"
-// import { zodResolver } from "@hookform/resolvers/zod"
-// import { z } from "zod"
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { UserData } from "@/types";
-import { changePassword, updateProfile } from "@/lib/api";
+import { changePassword, deleteUserApi, updateProfile } from "@/lib/api";
 import { ApiError } from "@/util";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/store";
 import { handleFormError } from "@/lib/api/helpers";
-
-// ── Validation schemas ─────────────────────────────────────────────────────
-
-const profileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Enter a valid email"),
-});
-
-const passwordSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "Must be at least 8 characters"),
-    confirmNewPassword: z.string(),
-  })
-  .refine((d) => d.newPassword === d.confirmNewPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type ProfileForm = z.infer<typeof profileSchema>;
-type PasswordForm = z.infer<typeof passwordSchema>;
+import DeleteAccountModal from "./DeleteAccountModal";
+import {
+  changePasswordSchema,
+  PasswordForm,
+  ProfileForm,
+  updateProfileSchema,
+} from "@/validations";
 
 // ── Field wrapper ──────────────────────────────────────────────────────────
 function Field({
@@ -61,44 +39,12 @@ function Field({
   );
 }
 
-// ── Notification toggle (local state) ─────────────────────────────────────
-function NotificationRow({
-  label,
-  desc,
-  defaultOn,
-}: {
-  label: string;
-  desc: string;
-  defaultOn: boolean;
-}) {
-  const [on, setOn] = useState(defaultOn);
-  return (
-    <div className="flex items-center justify-between py-4">
-      <div>
-        <p className="text-sm font-medium text-verdant-dark">{label}</p>
-        <p className="text-xs text-verdant-muted mt-0.5">{desc}</p>
-      </div>
-      {/* TODO: wire onChange to PATCH /auth/me notification prefs */}
-      <button
-        type="button"
-        onClick={() => setOn((v) => !v)}
-        className={`w-11 h-6 rounded-full transition-colors duration-200 relative flex-shrink-0 ${
-          on ? "bg-green" : "bg-[#e5e5e5]"
-        }`}
-        aria-label={`Toggle ${label}`}
-      >
-        <span
-          className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${
-            on ? "translate-x-5" : "translate-x-0.5"
-          }`}
-        />
-      </button>
-    </div>
-  );
-}
-
 export default function SettingsTab({ user }: { user: UserData }) {
   const setUser = useAuthStore((s) => s.setUser);
+
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const {
     register: rProfile,
@@ -110,15 +56,13 @@ export default function SettingsTab({ user }: { user: UserData }) {
       isDirty: profileDirty,
     },
   } = useForm<ProfileForm>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
     },
   });
-
-  const [profileSaved, setProfileSaved] = useState(false);
 
   const onSaveProfile = async (data: ProfileForm) => {
     try {
@@ -144,13 +88,9 @@ export default function SettingsTab({ user }: { user: UserData }) {
     reset: resetPassword,
     setError: setPasswordError,
     formState: { errors: passwordErrors, isSubmitting: savingPassword },
-  } = useForm<PasswordForm>({ resolver: zodResolver(passwordSchema) });
-
-  const [passwordSaved, setPasswordSaved] = useState(false);
+  } = useForm<PasswordForm>({ resolver: zodResolver(changePasswordSchema) });
 
   const onSavePassword = async (data: PasswordForm) => {
-    console.log(data);
-
     try {
       const res = await changePassword(data);
       resetPassword();
@@ -169,6 +109,10 @@ export default function SettingsTab({ user }: { user: UserData }) {
         },
       });
     }
+  };
+
+  const handleDeleteAccount = async (password: string) => {
+    await deleteUserApi(password);
   };
 
   return (
@@ -306,39 +250,6 @@ export default function SettingsTab({ user }: { user: UserData }) {
         </div>
       </form>
 
-      {/* ── Notifications ── */}
-      <div className="bg-white rounded-2xl border border-green/10 overflow-hidden">
-        <div className="px-6 py-5 border-b border-[#f0f0f0]">
-          <h3 className="font-semibold text-verdant-dark">Notifications</h3>
-        </div>
-        <div className="px-6 flex flex-col divide-y divide-[#f5f5f5]">
-          {[
-            {
-              label: "Order updates",
-              desc: "Dispatch, out for delivery, delivered",
-              defaultOn: true,
-            },
-            {
-              label: "Harvest alerts",
-              desc: "When new seasonal produce arrives",
-              defaultOn: true,
-            },
-            {
-              label: "Loyalty points",
-              desc: "When you earn or can redeem points",
-              defaultOn: false,
-            },
-            {
-              label: "Promotions & offers",
-              desc: "Discounts and member-only deals",
-              defaultOn: false,
-            },
-          ].map((n) => (
-            <NotificationRow key={n.label} {...n} />
-          ))}
-        </div>
-      </div>
-
       {/* ── Danger zone ── */}
       <div className="bg-white rounded-2xl border border-red-100 overflow-hidden">
         <div className="px-6 py-5 border-b border-red-50">
@@ -348,12 +259,20 @@ export default function SettingsTab({ user }: { user: UserData }) {
           </p>
         </div>
         <div className="px-6 py-5">
-          {/* TODO: wire to DELETE /auth/me with confirmation dialog */}
-          <button className="text-sm text-red-400 border border-red-200 px-5 py-2.5 rounded-full hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition-all">
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="text-sm text-red-400 border border-red-200 px-5 py-2.5 rounded-full hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition-all"
+          >
             Delete my account
           </button>
         </div>
       </div>
+
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteAccount}
+      />
     </div>
   );
 }

@@ -43,7 +43,26 @@ export const addressSchema = z.object({
   state: z.string().min(1, "State is required"),
 });
 
+export const updateProfileSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Enter a valid email"),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "Must be at least 8 characters"),
+    confirmNewPassword: z.string(),
+  })
+  .refine((d) => d.newPassword === d.confirmNewPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegistrationForm = z.infer<typeof registrationSchema>;
 export type CheckoutForm = z.infer<typeof checkoutSchema>;
 export type AddressFormData = z.infer<typeof addressSchema>;
+export type ProfileForm = z.infer<typeof updateProfileSchema>;
+export type PasswordForm = z.infer<typeof changePasswordSchema>;

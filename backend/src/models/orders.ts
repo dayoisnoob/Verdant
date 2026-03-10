@@ -26,7 +26,7 @@ export const ordersTable = pgTable(
     stripeSessionId: text('stripe_session_id').notNull().unique(),
     stripePaymentIntent: text('stripe_payment_int'),
 
-    status: orderStatusEnum('status').default('pending').notNull(),
+    status: orderStatusEnum('status').default('paid').notNull(),
 
     subtotalCents: integer('subtotal_cents').notNull(),
     totalCents: integer('total_cents').notNull(),

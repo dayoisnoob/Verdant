@@ -21,6 +21,9 @@ import type {
   updateInput,
 } from '../validations/auth.validations.ts';
 import { sendMail } from './email.service.ts';
+import { ordersTable } from '../models/orders.ts';
+import { cartsTable } from '../models/cart.ts';
+import { wishlistsTable } from '../models/wishlist.ts';
 
 export class AuthService {
   static async register(
@@ -597,7 +600,7 @@ export class AuthService {
     },
     deviceInfo: DeviceInfo
   ) {
-    const { currentPassword, newPassword, confirmNewPassword } = passwords;
+    const { currentPassword, newPassword } = passwords;
 
     const [user] = await db
       .select({
@@ -687,5 +690,78 @@ export class AuthService {
     }
 
     return { updatedUser };
+  }
+
+  static async verifyPassword(userId: string, password: string) {
+    const [existing] = await db
+      .select({
+        password: usersTable.passwordHash,
+        id: usersTable.id,
+        firstName: usersTable.firstName,
+        email: usersTable.email,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId));
+
+    if (!existing) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    const isPasswordValid = await bcryptCompare(password, existing.password);
+
+    if (!isPasswordValid) {
+      throw new ApiError(401, 'You have entered an incorrect password');
+    }
+
+    return existing;
+  }
+
+  static async deleteUser(userId: string, password: string) {
+    const existing = await AuthService.verifyPassword(userId, password);
+
+    const orders = await db
+      .select({ status: ordersTable.status })
+      .from(ordersTable)
+      .where(
+        and(
+          eq(ordersTable.userId, userId),
+          eq(ordersTable.status, 'processing')
+        )
+      );
+
+    if (orders.length > 0) {
+      throw new ApiError(
+        409,
+        'You have orders currently being processed. Please wait until they are fulfilled before deleting your account.'
+      );
+    }
+
+    const deletedUser = await db.transaction(async (tx) => {
+      const [deletedUser] = await tx
+        .update(usersTable)
+        .set({
+          isActive: false,
+          deletedAt: new Date(),
+          email: `deleted_${existing.id}@deleted.com`,
+        })
+        .where(eq(usersTable.id, userId))
+        .returning();
+
+      await tx
+        .delete(refreshTokensTable)
+        .where(eq(refreshTokensTable.userId, userId));
+      await tx.delete(cartsTable).where(eq(cartsTable.userId, userId));
+      await tx.delete(wishlistsTable).where(eq(wishlistsTable.userId, userId));
+
+      return deletedUser;
+    });
+
+    if (!deletedUser) {
+      throw new ApiError(500, 'Error deleting user');
+    }
+    const link = `${process.env.FRONTEND_URL}/`;
+    await sendMail(existing, link);
+
+    return;
   }
 }

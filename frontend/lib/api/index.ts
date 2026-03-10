@@ -121,6 +121,15 @@ export const changePassword = async (data: {
   });
 };
 
+export const deleteUserApi = async (
+  password: string,
+): Promise<ApiResponse<null>> => {
+  return apiFetch("/api/auth/delete", {
+    method: "DELETE",
+    body: JSON.stringify({ password }),
+  });
+};
+
 // ----------------------------------------------------------------------------------------------
 // ------------------------------------------CART  API----------------------------------------
 // ----------------------------------------------------------------------------------------------
