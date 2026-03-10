@@ -29,14 +29,11 @@ export default function AddressesTab() {
   const canAdd = addresses.length < MAX_ADDRESSES;
 
   return (
-    <div className="max-w-xl flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="font-playfair font-bold text-verdant-dark text-2xl">
-            My Addresses
-          </h2>
-          <p className="text-xs text-verdant-muted mt-1">
+          <p className="text-sm text-verdant-muted mt-1">
             {addresses.length} of {MAX_ADDRESSES} saved
           </p>
         </div>
@@ -53,8 +50,8 @@ export default function AddressesTab() {
 
       {/* Inline add panel */}
       {adding && (
-        <div className="bg-white rounded-2xl border border-green shadow-[0_0_0_1px_rgba(45,106,79,0.1),0_4px_24px_rgba(45,106,79,0.1)] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0f0f0]">
+        <div className="bg-[#faf8f4] rounded-2xl border border-green/30 shadow-[0_0_0_1px_rgba(45,106,79,0.06),0_4px_20px_rgba(45,106,79,0.07)] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#ede9e1]">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 bg-green-pale rounded-lg flex items-center justify-center">
                 <MapPin size={14} className="text-green" />
@@ -82,7 +79,7 @@ export default function AddressesTab() {
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="h-36 bg-white rounded-2xl border border-[#ebebeb] animate-pulse"
+              className="h-36 bg-[#faf8f4] rounded-2xl border border-[#e8e4dc] animate-pulse"
             />
           ))}
         </div>
@@ -90,15 +87,15 @@ export default function AddressesTab() {
 
       {/* Empty state */}
       {!isLoading && addresses.length === 0 && !adding && (
-        <div className="bg-white rounded-2xl border border-[#ebebeb] px-8 py-14 flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 bg-green-pale rounded-2xl flex items-center justify-center text-3xl">
-            📍
+        <div className="bg-[#faf8f4] rounded-2xl border border-[#e8e4dc] px-8 py-14 flex flex-col items-center text-center gap-4">
+          <div className="w-14 h-14 bg-green-pale rounded-2xl flex items-center justify-center">
+            <MapPin size={24} className="text-green" strokeWidth={1.5} />
           </div>
           <div>
             <p className="font-playfair font-bold text-verdant-dark text-lg">
               No saved addresses
             </p>
-            <p className="text-sm text-verdant-muted mt-1 max-w-[240px] mx-auto leading-relaxed">
+            <p className="text-sm text-verdant-muted mt-1 max-w-[230px] mx-auto leading-relaxed">
               Add a delivery address and checkout will be faster next time
             </p>
           </div>
@@ -112,7 +109,7 @@ export default function AddressesTab() {
         </div>
       )}
 
-      {/* List — default pinned first */}
+      {/* Address list */}
       {!isLoading && addresses.length > 0 && (
         <div className="flex flex-col gap-3">
           {[...addresses]
@@ -125,10 +122,16 @@ export default function AddressesTab() {
 
       {/* Cap notice */}
       {!canAdd && !adding && (
-        <p className="text-xs text-verdant-muted text-center">
-          You&apos;ve reached the maximum of {MAX_ADDRESSES} saved addresses.
-          Remove one to add another.
-        </p>
+        <div className="bg-[#faf8f4] border border-[#e8e4dc] rounded-xl px-4 py-3 flex items-center gap-2.5">
+          <span className="text-base flex-shrink-0">📍</span>
+          <p className="text-xs text-verdant-muted leading-relaxed">
+            You&apos;ve reached the maximum of{" "}
+            <span className="font-semibold text-verdant-dark">
+              {MAX_ADDRESSES}
+            </span>{" "}
+            saved addresses. Remove one to add another.
+          </p>
+        </div>
       )}
     </div>
   );

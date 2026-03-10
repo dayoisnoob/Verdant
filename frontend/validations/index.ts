@@ -13,6 +13,11 @@ export const registrationSchema = z
     path: ["confirmPassword"],
   });
 
+export const loginSchema = z.object({
+  email: z.string().email("please enter a valid email").trim().toLowerCase(),
+  password: z.string().min(1, "password is required"),
+});
+
 export const checkoutSchema = z.object({
   streetAddress: z.string().min(1, "Address is required"),
   phone1: z.string().min(10, "Enter a valid phone number"),
@@ -38,6 +43,7 @@ export const addressSchema = z.object({
   state: z.string().min(1, "State is required"),
 });
 
+export type LoginForm = z.infer<typeof loginSchema>;
 export type RegistrationForm = z.infer<typeof registrationSchema>;
 export type CheckoutForm = z.infer<typeof checkoutSchema>;
 export type AddressFormData = z.infer<typeof addressSchema>;

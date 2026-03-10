@@ -35,7 +35,7 @@ export function OrderCard({ order }: { order: AllOrders }) {
   const overflow = order.items.length - ORDER_PREVIEW_LIMIT;
 
   return (
-    <div className="bg-white rounded-2xl border border-green/10 overflow-hidden hover:border-green/20 hover:shadow-sm transition-all duration-200">
+    <div className="bg-[#faf8f4] rounded-2xl border border-green/10 overflow-hidden hover:border-green/20 hover:shadow-sm transition-all duration-200">
       {/* ── Always-visible header ── */}
       <div className="px-5 py-4 sm:px-6 sm:py-5">
         <div className="flex items-start gap-4">

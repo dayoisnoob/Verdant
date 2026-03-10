@@ -12,10 +12,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { UserData } from "@/types";
-import { updateProfile } from "@/lib/api";
+import { changePassword, updateProfile } from "@/lib/api";
 import { ApiError } from "@/util";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/store";
+import { handleFormError } from "@/lib/api/helpers";
 
 // ── Validation schemas ─────────────────────────────────────────────────────
 
@@ -29,9 +30,9 @@ const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
     newPassword: z.string().min(8, "Must be at least 8 characters"),
-    confirmPassword: z.string(),
+    confirmNewPassword: z.string(),
   })
-  .refine((d) => d.newPassword === d.confirmPassword, {
+  .refine((d) => d.newPassword === d.confirmNewPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
@@ -102,7 +103,7 @@ export default function SettingsTab({ user }: { user: UserData }) {
   const {
     register: rProfile,
     handleSubmit: handleProfile,
-    setError,
+    setError: setProfileError,
     formState: {
       errors: profileErrors,
       isSubmitting: savingProfile,
@@ -120,7 +121,6 @@ export default function SettingsTab({ user }: { user: UserData }) {
   const [profileSaved, setProfileSaved] = useState(false);
 
   const onSaveProfile = async (data: ProfileForm) => {
-    console.log("Saving...");
     try {
       const res = await updateProfile(data);
       setUser(res.data);
@@ -130,7 +130,7 @@ export default function SettingsTab({ user }: { user: UserData }) {
     } catch (err) {
       if (err instanceof ApiError && err.errors) {
         for (const { field, message } of err.errors) {
-          setError(field as keyof ProfileForm, { message });
+          setProfileError(field as keyof ProfileForm, { message });
         }
       } else {
         toast.error("Something went wrong, please try again");
@@ -142,17 +142,33 @@ export default function SettingsTab({ user }: { user: UserData }) {
     register: rPassword,
     handleSubmit: handlePassword,
     reset: resetPassword,
+    setError: setPasswordError,
     formState: { errors: passwordErrors, isSubmitting: savingPassword },
   } = useForm<PasswordForm>({ resolver: zodResolver(passwordSchema) });
 
   const [passwordSaved, setPasswordSaved] = useState(false);
 
   const onSavePassword = async (data: PasswordForm) => {
-    // TODO: await changePassword(data)
-    console.log("change password", data);
-    resetPassword();
-    setPasswordSaved(true);
-    setTimeout(() => setPasswordSaved(false), 2500);
+    console.log(data);
+
+    try {
+      const res = await changePassword(data);
+      resetPassword();
+      setPasswordSaved(true);
+      setTimeout(() => setPasswordSaved(false), 2500);
+      toast.success(res.message);
+    } catch (err) {
+      handleFormError(err, setPasswordError, {
+        401: {
+          field: "currentPassword",
+          message: (err as ApiError).message,
+        },
+        422: {
+          field: "newPassword",
+          message: (err as ApiError).message,
+        },
+      });
+    }
   };
 
   return (
@@ -264,10 +280,10 @@ export default function SettingsTab({ user }: { user: UserData }) {
           </Field>
           <Field
             label="Confirm new password"
-            error={passwordErrors.confirmPassword?.message}
+            error={passwordErrors.confirmNewPassword?.message}
           >
             <input
-              {...rPassword("confirmPassword")}
+              {...rPassword("confirmNewPassword")}
               type="password"
               placeholder="••••••••"
               className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"

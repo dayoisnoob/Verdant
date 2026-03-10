@@ -657,9 +657,7 @@ export class AuthService {
       'Password change audit:'
     );
 
-    return {
-      message: `Password was successfully changed`,
-    };
+    return;
   }
 
   static async updateUser(userId: string, data: updateInput) {

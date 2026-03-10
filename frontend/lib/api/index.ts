@@ -38,7 +38,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 // ------------------------------------------AUTH  API----------------------------------------
 // ----------------------------------------------------------------------------------------------
 
-export const login = async (data: Login) => {
+export const login = async (data: { email: string; password: string }) => {
   const user = await apiFetch<UserApi>(`/api/auth/login`, {
     method: "POST",
     body: JSON.stringify(data),
@@ -114,19 +114,12 @@ export const changePassword = async (data: {
   currentPassword: string;
   newPassword: string;
   confirmNewPassword: string;
-}) => {
+}): Promise<ApiResponse<null>> => {
   return apiFetch("/api/auth/change-password", {
     method: "POST",
     body: JSON.stringify(data),
   });
 };
-
-export interface Login {
-  email: string;
-  password: string;
-  isVerified: boolean;
-  createdAt: Date;
-}
 
 // ----------------------------------------------------------------------------------------------
 // ------------------------------------------CART  API----------------------------------------

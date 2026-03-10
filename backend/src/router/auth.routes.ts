@@ -13,7 +13,7 @@ import {
 import { validateInput } from '../middlewares/validation.ts';
 import { asyncHandler } from '../utils/asyncHandler.ts';
 import {
-  changePasswordSchemaValidation,
+  changePasswordSchema,
   forgotPasswordSchemaValidation,
   loginSchemaValidation,
   resendEmailSchemaValidation,
@@ -72,8 +72,8 @@ router.post('/logout-all', asyncHandler(AuthController.logoutAll));
 
 router.post(
   '/change-password',
-  changePasswordLimiter,
-  validateInput(changePasswordSchemaValidation),
+  // changePasswordLimiter,
+  validateInput(changePasswordSchema),
   AuthController.changePassword
 );
 

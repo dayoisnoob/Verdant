@@ -1,3 +1,7 @@
+import { ApiError } from "@/util";
+import { FieldValues, Path, UseFormSetError } from "react-hook-form";
+import { toast } from "sonner";
+
 // lib/shipping.ts
 export function calculateOrderTotal(subtotalPence: number): {
   shippingFee: number;
@@ -21,3 +25,26 @@ export const convertDate = (date: Date) => {
     year: "numeric",
   });
 };
+
+export function handleFormError<T extends FieldValues>(
+  err: unknown,
+  setError: UseFormSetError<T>,
+  fieldOverrides?: Partial<Record<number, { field: Path<T>; message: string }>>,
+) {
+  if (!(err instanceof ApiError)) {
+    toast.error("Something went wrong, please try again");
+    return;
+  }
+  if (err.errors?.length) {
+    for (const { field, message } of err.errors) {
+      setError(field as Path<T>, { message });
+    }
+    return;
+  }
+  const override = fieldOverrides?.[err.statusCode];
+  if (override) {
+    setError(override.field, { message: override.message ?? err.message });
+    return;
+  }
+  toast.error(err.message ?? "Something went wrong");
+}

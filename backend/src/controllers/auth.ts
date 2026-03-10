@@ -134,13 +134,15 @@ export class AuthController {
   static async changePassword(req: Request, res: Response) {
     const userId = req.user!.id;
 
-    const result = await AuthService.changePassword(
+    console.log(req.body);
+
+    await AuthService.changePassword(
       userId,
       req.body,
       AuthController.deviceInfo(req)
     );
 
-    res.json(new ApiResponse(200, result.message));
+    res.json(new ApiResponse(200, 'Password was successfully changed'));
   }
 
   static async updateUser(req: Request, res: Response) {
