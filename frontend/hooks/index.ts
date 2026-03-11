@@ -1,17 +1,24 @@
-import { addToWishlist, getUserWishlist, removeFromWishlist } from "@/lib/api";
+import {
+  addToWishlist,
+  getUserWishlist,
+  logoutApi,
+  removeFromWishlist,
+} from "@/lib/api";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 export const useAuthCart = () => {
   const items = useCartStore((state) => state.items);
+  const isLoading = useCartStore((state) => state.isLoading);
+
   const itemCount = items.length;
   const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = Number(
     items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0).toFixed(2),
   );
 
-  return { itemCount, totalQuantity, subtotal };
+  return { itemCount, totalQuantity, subtotal, isLoading };
 };
 
 export const useGuestCart = () => {
@@ -23,7 +30,7 @@ export const useGuestCart = () => {
     items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0).toFixed(2),
   );
 
-  return { itemCount, totalQuantity, subtotal };
+  return { itemCount, totalQuantity, subtotal, isLoading: false };
 };
 
 export const useCart = () => {
@@ -46,7 +53,8 @@ export const useLogout = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  return () => {
+  return async () => {
+    await logoutApi();
     logout();
     router.push("/login");
     queryClient.clear();
@@ -55,7 +63,12 @@ export const useLogout = () => {
 };
 
 export const useWishlist = () => {
-  const { data: wishlist = [], isLoading } = useQuery({
+  const {
+    data: wishlist = [],
+    isLoading,
+    isError: wishlistError,
+    refetch: refetchWishlist,
+  } = useQuery({
     queryKey: ["wishlist"],
     queryFn: async () => {
       const res = await getUserWishlist();
@@ -64,7 +77,7 @@ export const useWishlist = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  return { wishlist, isLoading };
+  return { wishlist, isLoading, wishlistError, refetchWishlist };
 };
 
 export const useWishlistToggle = (productId: string) => {

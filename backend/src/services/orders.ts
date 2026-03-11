@@ -3,6 +3,7 @@ import { db } from '../config/db';
 import { addressesTable, orderItemsTable, ordersTable } from '../models';
 import { ApiError } from '../utils/apiResponse';
 import { CartService } from './cart';
+import { CouponService } from './coupon';
 
 export interface CheckoutItem {
   productId: string;
@@ -77,7 +78,7 @@ export class OrderService {
       );
 
       await CartService.clearCart(data.userId);
-      await CartService.removeCouponFromCart(data.userId);
+      await CouponService.removeCouponFromCart(data.userId);
 
       return newOrder;
     });

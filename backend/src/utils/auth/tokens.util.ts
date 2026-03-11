@@ -56,6 +56,8 @@ export class AuthTokens {
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
+    console.log('login', refreshToken);
+
     await transaction.insert(refreshTokensTable).values({
       userId: user.id,
       tokenHash: hashedRefreshToken,

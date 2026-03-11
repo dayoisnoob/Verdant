@@ -3,7 +3,8 @@ import { db } from '../config/db';
 import { addressesTable } from '../models/addresses';
 import { ApiError } from '../utils/apiResponse';
 import { couponsTable } from '../models/coupons';
-import { couponRedemptionsTable } from '../models';
+import { cartsTable, couponRedemptionsTable } from '../models';
+import { CartService } from './cart';
 
 interface CouponType {
   code: string;
@@ -123,14 +124,38 @@ export class CouponService {
       throw new ApiError(403, `Spend ${amountToSpend} more to use this coupon`);
     }
 
-    let discount =
+    const discount =
       existing.discountType === 'percentage'
         ? (subtotal * existing.discountValue) / 100
         : existing.discountValue * 100;
 
-    return {
-      message: 'Coupon successfully applied',
-      discount,
-    };
+    if (discount) {
+      const cart = await CartService.getOrCreateCart(userId);
+
+      const [updated] = await db
+        .update(cartsTable)
+        .set({ couponCode: code, discount, updatedAt: new Date() })
+        .where(eq(cartsTable.id, cart.id as string))
+        .returning();
+
+      if (!updated) {
+        throw new ApiError(500, 'Error applying coupon code');
+      }
+    }
+
+    return discount;
+  }
+  static async removeCouponFromCart(userId: string) {
+    const cart = await CartService.getOrCreateCart(userId);
+
+    const [updated] = await db
+      .update(cartsTable)
+      .set({ couponCode: null, discount: null, updatedAt: new Date() })
+      .where(eq(cartsTable.id, cart.id as string))
+      .returning();
+
+    if (!updated) {
+      throw new ApiError(500, 'Error removing coupon code');
+    }
   }
 }

@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import Link from "next/link";
-import { Product } from "@/types";
 
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Footer from "@/components/Footer";
-import Toast from "@/components/Toast";
-import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "@/lib/api";
-import ProductCard from "@/components/ProductCard";
 import Container from "@/components/Container";
+import Footer from "@/components/Footer";
+import Hero from "@/components/Hero";
+import Navbar from "@/components/Navbar";
+import ProductCard from "@/components/ProductCard";
+import { getProducts } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
-// ── Skeleton primitives ────────────────────────────────────────────
 function Shimmer({ className }: { className?: string }) {
   return (
     <div
@@ -109,8 +105,13 @@ function FeaturedSkeleton() {
   );
 }
 
-// ── Error state ────────────────────────────────────────────────────
-function ErrorState({ message }: { message: string }) {
+export function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center gap-5">
       <span className="text-5xl">🌧️</span>
@@ -121,7 +122,7 @@ function ErrorState({ message }: { message: string }) {
         {message || "We couldn't load the produce. Try refreshing the page."}
       </p>
       <button
-        onClick={() => window.location.reload()}
+        onClick={onRetry}
         className="bg-green text-white px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-green-mid transition-all"
       >
         Refresh
@@ -132,9 +133,6 @@ function ErrorState({ message }: { message: string }) {
 
 // ── Page ───────────────────────────────────────────────────────────
 export default function HomePage() {
-  const [cartCount, setCartCount] = useState(0);
-  const [toast, setToast] = useState({ visible: false, message: "" });
-
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts(undefined, undefined, undefined, 1, 999),
@@ -142,7 +140,6 @@ export default function HomePage() {
 
   const PRODUCTS = data?.products;
 
-  // ── Loading ──
   if (isLoading) {
     return (
       <>
@@ -159,20 +156,22 @@ export default function HomePage() {
     );
   }
 
-  // ── Error ──
   if (isError) {
     return (
       <>
         <Navbar />
         <ErrorState
-          message={error instanceof Error ? error.message : "Unexpected error."}
+          message={
+            error instanceof Error
+              ? error.message
+              : "Check your connection and try again."
+          }
         />
         <Footer />
       </>
     );
   }
 
-  // ── Empty (API returned nothing) ──
   if (!PRODUCTS || PRODUCTS.length === 0) {
     return (
       <>
@@ -192,8 +191,6 @@ export default function HomePage() {
   }
 
   const featuredProducts = PRODUCTS.filter((p) => p.isFeatured);
-
-  // console.log(featuredProducts);
 
   return (
     <Container>
@@ -242,7 +239,90 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* ── 3. Trust strip ── */}
+        {/* {Best Selling} */}
+        <section className="bg-white px-6 py-16 sm:px-10 sm:py-20 lg:px-20 lg:py-24">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
+            <div>
+              <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
+                Customer Favourites
+              </p>
+              <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl">
+                Best Selling Produce
+              </h2>
+              <p className="text-verdant-muted text-sm mt-2 max-w-sm">
+                What our customers keep coming back for — picked fresh,
+                delivered to your door.
+              </p>
+            </div>
+            <Link
+              href="/shop"
+              className="text-green text-sm font-medium hover:opacity-65 transition-opacity self-start sm:self-auto"
+            >
+              Browse all produce →
+            </Link>
+          </div>
+
+          {PRODUCTS.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {PRODUCTS.slice(4, 12).map((p) => (
+                <ProductCard key={p.slug} product={p} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 text-verdant-muted text-sm">
+              No featured products right now.{" "}
+              <Link
+                href="/shop"
+                className="text-green font-medium hover:underline"
+              >
+                Browse everything →
+              </Link>
+            </div>
+          )}
+        </section>
+
+        {/* {Trending} */}
+        <section className="bg-white px-6 py-16 sm:px-10 sm:py-20 lg:px-20 lg:py-24">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
+            <div>
+              <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
+                Right Now
+              </p>
+              <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl">
+                Trending Produce
+              </h2>
+              <p className="text-verdant-muted text-sm mt-2 max-w-sm">
+                What everyone&apos;s adding to their basket this week — before
+                it sells out.
+              </p>
+            </div>
+            <Link
+              href="/shop"
+              className="text-green text-sm font-medium hover:opacity-65 transition-opacity self-start sm:self-auto"
+            >
+              Browse all produce →
+            </Link>
+          </div>
+
+          {PRODUCTS.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {PRODUCTS.slice(12, 20).map((p) => (
+                <ProductCard key={p.slug} product={p} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 text-verdant-muted text-sm">
+              No trending products right now.{" "}
+              <Link
+                href="/shop"
+                className="text-green font-medium hover:underline"
+              >
+                Browse everything →
+              </Link>
+            </div>
+          )}
+        </section>
+
         <section className="bg-green px-6 py-10 sm:px-10 lg:px-20">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
             {[
@@ -277,7 +357,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 4. Newsletter ── */}
         <section className="bg-cream px-6 py-16 sm:px-10 sm:py-20 lg:px-20 lg:py-24">
           <div className="max-w-xl mx-auto text-center">
             <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-3">

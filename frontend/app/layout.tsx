@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import QueryProvider from "@/components/QueryProvider";
 import { CartProvider } from "@/components/CartProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -34,9 +35,11 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${dmSans.variable} font-sans bg-cream`}
       >
-        <CartProvider>
-          <QueryProvider>{children}</QueryProvider>
-        </CartProvider>
+        <ErrorBoundary>
+          <CartProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </CartProvider>
+        </ErrorBoundary>
         <Toaster richColors />
       </body>
     </html>

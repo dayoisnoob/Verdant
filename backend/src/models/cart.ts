@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, text } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, text, integer } from 'drizzle-orm/pg-core';
 import { usersTable } from '../models';
 
 export const cartsTable = pgTable('carts', {
@@ -8,6 +8,7 @@ export const cartsTable = pgTable('carts', {
     .references(() => usersTable.id, { onDelete: 'cascade' })
     .unique(),
   couponCode: text('coupon_code'),
+  discount: integer('discount'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

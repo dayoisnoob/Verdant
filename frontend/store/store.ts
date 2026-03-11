@@ -1,4 +1,9 @@
-import { addItemToCartApi, getCart, removeItemFromCartApi } from "@/lib/api";
+import {
+  addItemToCartApi,
+  getCart,
+  removeCouponApi,
+  removeItemFromCartApi,
+} from "@/lib/api";
 import {
   AddressStore,
   AuthCartStore,
@@ -14,25 +19,32 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
   items: [],
   couponCode: "",
   discount: 0,
+  isLoading: true,
 
   addItem: async (product, quantity = 1) => {
-    set((state) => ({
-      items: [
-        ...state.items,
-        {
-          id: crypto.randomUUID(),
-          productId: product.id,
-          name: product.name,
-          slug: product.slug,
-          imageUrl: product.images[0].url,
-          unit: product.unit,
-          farm: product.farm,
-          isOrganic: product.isOrganic,
-          pricePence: Math.round(parseFloat(product.price) * 100),
-          quantity,
-        },
-      ],
-    }));
+    const existing = get().items.find((i) => i.productId === product.id);
+
+    if (existing) {
+      get().updateQuantity(product.id, quantity);
+    } else {
+      set((state) => ({
+        items: [
+          ...state.items,
+          {
+            id: crypto.randomUUID(),
+            productId: product.id,
+            name: product.name,
+            slug: product.slug,
+            imageUrl: product.images[0].url,
+            unit: product.unit,
+            farm: product.farm,
+            isOrganic: product.isOrganic,
+            pricePence: Math.round(parseFloat(product.price) * 100),
+            quantity,
+          },
+        ],
+      }));
+    }
 
     try {
       await addItemToCartApi({ productId: product.id, quantity });
@@ -45,7 +57,11 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
   },
 
   setCart: (cart) =>
-    set({ items: cart.items, couponCode: cart.couponCode ?? "" }),
+    set({
+      items: cart.items,
+      couponCode: cart.couponCode ?? "",
+      discount: cart.discount,
+    }),
 
   removeItem: async (id: string) => {
     set((state) => ({
@@ -56,7 +72,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
       await removeItemFromCartApi(id);
     } catch {
       const cart = await getCart();
-      useCartStore.getState().setCart(cart.data);
+      useCartStore.getState().setCart(cart);
     }
   },
 
@@ -65,13 +81,11 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
   updateQuantity: (id: string, quantity: number) => {
     set((state) => {
       const item = state.items.find((i) => i.productId === id);
-      if (!item) return state;
+      if (!item) return {};
 
       const newQuantity = item.quantity + quantity;
 
-      if (newQuantity < 1) {
-        return { items: state.items.filter((i) => i.productId !== id) };
-      }
+      if (newQuantity < 1) return {};
 
       return {
         items: state.items.map((i) =>
@@ -83,9 +97,20 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
 
   applyCoupon: (code: string, discount: number) =>
     set({ couponCode: code, discount }),
-  removeCoupon: () => set({ couponCode: "", discount: 0 }),
+
+  removeCoupon: async () => {
+    set({ couponCode: "", discount: 0 });
+
+    try {
+      await removeCouponApi();
+    } catch (err) {
+      console.log(err);
+    }
+  },
 
   itemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
+
+  setLoading: (val: boolean) => set({ isLoading: val }),
 }));
 
 export const useGuestCartStore = create(
@@ -142,9 +167,7 @@ export const useGuestCartStore = create(
 
           const newQuantity = item.quantity + quantity;
 
-          if (newQuantity < 1) {
-            return { items: state.items.filter((i) => i.productId !== id) };
-          }
+          if (newQuantity < 1) return state;
 
           return {
             items: state.items.map((i) =>
@@ -179,6 +202,8 @@ export const useAuthStore = create<AuthStore>()(
         set({ user, accessToken, isLoggedIn: true }),
 
       setUser: (data) => set({ user: data }),
+
+      setAccessToken: (token) => set({ accessToken: token }),
 
       logout: () => set({ user: null, isLoggedIn: false, accessToken: null }),
     }),

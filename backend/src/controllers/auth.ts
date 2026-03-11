@@ -69,13 +69,13 @@ export class AuthController {
   static async refreshAccessToken(req: Request, res: Response) {
     const refreshToken = req.cookies?.refreshToken;
 
-    const { message, result } = await AuthService.refreshAccessToken(
+    const result = await AuthService.refreshAccessToken(
       refreshToken,
       AuthController.deviceInfo(req)
     );
 
     res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS).json(
-      new ApiResponse(200, message, {
+      new ApiResponse(200, 'Access token successfully refreshed', {
         accessToken: result.accessToken,
       })
     );
@@ -88,7 +88,7 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+    res.clearCookie('refreshToken', { path: '/' });
     res.json(new ApiResponse(200, result.message));
   }
 
@@ -100,7 +100,7 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+    res.clearCookie('refreshToken', { path: '/' });
     res.json(new ApiResponse(200, result.message));
   }
 

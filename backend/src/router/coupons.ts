@@ -18,4 +18,6 @@ router.post(
 
 router.get('/', asyncHandler(CouponController.applyCoupon));
 
+router.delete('/', asyncHandler(CouponController.removeCouponFromCart));
+
 export default router;

@@ -17,12 +17,18 @@ export class CouponController {
       throw new ApiError(400, 'Please enter a coupon code');
     }
 
-    const result = await CouponService.applyCoupon(
+    const discount = await CouponService.applyCoupon(
       id,
       code as string,
       parseFloat(subtotal as string)
     );
 
-    res.json(new ApiResponse(200, result.message, result.data));
+    res.json(new ApiResponse(200, 'Coupon successfully applied', discount));
+  }
+
+  static async removeCouponFromCart(req: Request, res: Response) {
+    await CouponService.removeCouponFromCart(req.user!.id);
+
+    res.json(new ApiResponse(200, 'Coupon successfully removed'));
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart, useWishlist, useWishlistToggle } from "@/hooks";
+import { useCart, useWishlistToggle } from "@/hooks";
 import { Product } from "@/types";
 import { Heart, ShoppingBasket } from "lucide-react";
 import Image from "next/image";
@@ -78,7 +78,7 @@ export default function ProductCard({ product: p }: ProductCardProps) {
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
           className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm ${
             wishlisted
-              ? " text-orange  bg-orange/70 "
+              ? "text-orange  bg-orange/70"
               : " text-[#c0c0c0] bg-white/50 hover:text-orange hover:bg-white"
           }`}
         >

@@ -1,10 +1,11 @@
 "use client";
 
+import { ErrorState } from "@/app/page";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
-import { useWishlist, useWishlistToggle } from "@/hooks";
+import { useWishlistToggle } from "@/hooks";
 import { getProductBySlug, getProducts } from "@/lib/api";
 import { useCartStore } from "@/store/store";
 import { Product } from "@/types";
@@ -26,22 +27,26 @@ export default function ProductPage({
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
 
-  const { wishlist } = useWishlist();
   const addItem = useCartStore((s) => s.addItem);
 
-  const isWishlisted = wishlist.some((i) => i.slug === slug);
-
-  const { data: product, isLoading } = useQuery({
+  const {
+    data: product,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["product", slug],
     queryFn: async () => (await getProductBySlug(slug)).data,
   });
 
-  const { data: PRODUCTS } = useQuery({
+  const { data } = useQuery({
     queryKey: ["products"],
-    queryFn: async () => (await getProducts(undefined, undefined, 1, 20)).data,
+    queryFn: async () =>
+      await getProducts(undefined, undefined, undefined, 1, 20),
   });
 
-  const { toggle } = useWishlistToggle(product?.id ?? "", isWishlisted);
+  const { toggle, wishlisted } = useWishlistToggle(product?.id as string);
 
   if (isLoading)
     return (
@@ -59,9 +64,9 @@ export default function ProductPage({
 
   if (!product) notFound();
 
-  const related = PRODUCTS?.filter(
-    (p) => p.category === product.category && p.slug !== product.slug,
-  ).slice(0, 4);
+  const related = data?.products
+    ?.filter((p) => p.category === product.category && p.slug !== product.slug)
+    .slice(0, 4);
 
   const discountPct = product.originalPrice
     ? Math.round(
@@ -74,6 +79,23 @@ export default function ProductPage({
     addItem(p, qty);
     toast.success(`${p.name} added to basket`);
   };
+
+  if (isError) {
+    return (
+      <>
+        <Navbar />
+        <ErrorState
+          message={
+            error instanceof Error
+              ? error.message
+              : "Check your connection and try again."
+          }
+          onRetry={refetch}
+        />
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -298,15 +320,15 @@ export default function ProductPage({
                 {/* Wishlist */}
                 <button
                   onClick={toggle}
-                  className={`w-12 h-12 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
-                    isWishlisted
-                      ? "border-orange text-orange"
-                      : "border-[#e5e5e5] text-[#ccc] hover:border-orange hover:text-orange"
+                  className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                    wishlisted
+                      ? "  text-orange "
+                      : " text-[#c0c0c0] hover:text-orange"
                   }`}
                 >
                   <Heart
-                    size={18}
-                    fill={isWishlisted ? "currentColor" : "none"}
+                    size={32}
+                    fill={wishlisted ? "currentColor" : "none"}
                   />
                 </button>
               </div>
@@ -401,7 +423,7 @@ export default function ProductPage({
             <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 md:grid-cols-4 sm:overflow-visible sm:pb-0">
               {related?.map((p) => (
                 <div key={p.slug} className="min-w-[220px] sm:min-w-0">
-                  <ProductCard product={p} isWishlisted={isWishlisted} />
+                  <ProductCard product={p} />
                 </div>
               ))}
             </div>

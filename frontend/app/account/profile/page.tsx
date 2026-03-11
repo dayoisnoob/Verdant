@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/app/page";
 import AddressesTab from "@/components/AdressesTab";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -21,7 +22,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { useState } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -71,25 +71,64 @@ export default function ProfilePage() {
   const [tab, setTab] = useState<Tab>("overview");
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
-  if (!isLoggedIn) {
-    redirect("/login?redirect=/orders");
-  }
-
-  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+  const {
+    data: orders = [],
+    isLoading: ordersLoading,
+    isError: ordersError,
+    refetch: refetchOrders,
+  } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => (await getuserOrders()).data,
   });
 
-  const { data: addresses = [] } = useQuery({
+  const {
+    data: addresses = [],
+    isError: addressesError,
+    isLoading: addressesLoading,
+    refetch: refetchAddresses,
+  } = useQuery({
     queryKey: ["addresses"],
     queryFn: async () => (await getUserAddresses()).data,
   });
 
-  const { wishlist } = useWishlist();
+  const { wishlist, wishlistError, refetchWishlist } = useWishlist();
 
   if (!user) return null;
+
+  if (ordersLoading || addressesLoading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-[#f2efe8] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-green border-t-transparent animate-spin" />
+            <p className="text-xs text-verdant-muted">
+              Loading your profile...
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (ordersError || addressesError || wishlistError) {
+    return (
+      <>
+        <Navbar />
+        <ErrorState
+          message="Check your connection and try again."
+          onRetry={() => {
+            refetchOrders();
+            refetchAddresses();
+            refetchWishlist();
+          }}
+        />
+        <Footer />
+      </>
+    );
+  }
 
   const initials = user.firstName[0] + (user.lastName?.[0] ?? "");
   const defaultAddress = addresses.find((a) => a.isDefault);
@@ -270,6 +309,7 @@ export default function ProfilePage() {
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white rounded-2xl border border-[#e8e4dc] p-5 flex items-center gap-4">
+                      ordersLoading{" "}
                       <div className="w-10 h-10 bg-green-pale rounded-xl flex items-center justify-center text-lg flex-shrink-0">
                         📦
                       </div>
@@ -461,7 +501,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Getting started — new users only */}
-                  {orders.length === 0 && (
+                  {orders.length === 0 && !ordersError && (
                     <div className="bg-white rounded-2xl border border-[#e8e4dc] overflow-hidden">
                       <div className="px-5 py-4 border-b border-[#f0ede6]">
                         <h3 className="font-semibold text-verdant-dark text-sm">

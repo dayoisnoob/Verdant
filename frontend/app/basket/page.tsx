@@ -1,5 +1,6 @@
 "use client";
 
+import Container from "@/components/Container";
 import Footer from "@/components/Footer";
 import MightLike from "@/components/MightLike";
 import Navbar from "@/components/Navbar";
@@ -8,6 +9,7 @@ import {
   applyCouponApi,
   getCartTotal,
   getProducts,
+  refreshAccessToken,
   updateItem,
 } from "@/lib/api";
 import { calculateOrderTotal } from "@/lib/api/helpers";
@@ -16,43 +18,85 @@ import { ApiError } from "@/util";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
+import { ErrorState } from "../page";
 
 export default function CartPage() {
   const {
     items: cartItems,
     subtotal,
     removeItem,
+    couponCode: appliedCoupon,
+    discount: appliedDiscount,
     updateQuantity,
+    removeCoupon,
+    isLoading,
     applyCoupon: applyCouponToStore,
   } = useCart();
+
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
-  const { data: PRODUCTS } = useQuery({
+  const {
+    data,
+    isLoading: productsLoading,
+    isError: productsError,
+    refetch: refetchProducts,
+  } = useQuery({
     queryKey: ["products"],
-    queryFn: async () => {
-      const res = await getProducts(undefined, undefined, 1, 999);
-      return res.data;
-    },
+    queryFn: async () => getProducts(undefined, undefined, undefined, 1, 999),
   });
 
+  const PRODUCTS = data?.products;
+
   const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
   const [couponError, setCouponError] = useState("");
-  const [couponSuccess, setCouponSuccess] = useState("");
+
   const [total, setTotal] = useState<number | null>(null);
   const [delivery, setDelivery] = useState<number | null>(null);
 
-  const discountedSubtotal = Number(subtotal) - discount;
+  if (isLoading || productsLoading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-[#f2efe8] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-green border-t-transparent animate-spin" />
+            <p className="text-xs text-verdant-muted">Loading your Basket...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (productsError) {
+    return (
+      <>
+        <Navbar />
+        <ErrorState
+          message="Check your connection and try again."
+          onRetry={() => {
+            refetchProducts();
+          }}
+        />
+        <Footer />
+      </>
+    );
+  }
+
+  const discountedSubtotal = Number(subtotal) - appliedDiscount;
   const { shippingFee, totalAmount } = calculateOrderTotal(discountedSubtotal);
 
   if (!PRODUCTS) return null;
   const SUGGESTED = PRODUCTS.filter((p) => p.isFeatured).slice(0, 3);
 
-  const FREE_DELIVERY_THRESHOLD = 10000; // pence
+  const FREE_DELIVERY_THRESHOLD = 10000;
   const progressPct = Math.min((subtotal / FREE_DELIVERY_THRESHOLD) * 100, 100);
-  const amountLeft = ((FREE_DELIVERY_THRESHOLD - subtotal) / 100).toFixed(2);
-  const hasFreeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD;
+  const amountLeft = (
+    (FREE_DELIVERY_THRESHOLD - discountedSubtotal) /
+    100
+  ).toFixed(2);
+  const hasFreeDelivery = discountedSubtotal >= FREE_DELIVERY_THRESHOLD;
 
   const handleUpdateQuantity = async (
     itemId: string,
@@ -60,12 +104,36 @@ export default function CartPage() {
     currentQuantity: number,
   ) => {
     const newQuantity = currentQuantity + delta;
-    updateQuantity(itemId, delta);
-    await updateItem({ itemId, newQuantity });
+
+    if (subtotal) updateQuantity(itemId, delta);
+
+    try {
+      await updateItem({ itemId, newQuantity });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        handleRemoveCoupon(err.message);
+        setCouponError(err.message);
+      } else {
+        setCouponError("Discount value needs to be higher than your subtotal");
+      }
+    }
   };
 
   const handleRemoveItem = async (id: string) => {
     removeItem(id);
+  };
+
+  const handleCouponInput = (e: ChangeEvent<HTMLInputElement>) => {
+    setCouponError("");
+    setCoupon(e.target.value.toUpperCase());
+  };
+
+  const handleRemoveCoupon = (errMsg?: string) => {
+    removeCoupon();
+    setCoupon("");
+    setCouponError(errMsg || "");
+    setTotal(null);
+    setDelivery(null);
   };
 
   const handleCoupon = async () => {
@@ -80,19 +148,19 @@ export default function CartPage() {
     }
 
     try {
-      const res = await getCartTotal(coupon);
-      const discountApi = parseFloat((res.data.discountPence / 100).toFixed(2));
-      const totalApi = parseFloat((res.data.totalPence / 100).toFixed(2));
-      const deliveryApi = parseFloat((res.data.deliveryPence / 100).toFixed(2));
+      await applyCouponApi(coupon, subtotal);
 
-      setDiscount(discountApi);
+      const data = await getCartTotal();
+      const discountApi = parseFloat((data.discountPence / 100).toFixed(2));
+      const totalApi = parseFloat((data.totalPence / 100).toFixed(2));
+      const deliveryApi = parseFloat((data.deliveryPence / 100).toFixed(2));
+
+      // setDiscount(discountApi);
       setTotal(totalApi);
       setDelivery(deliveryApi);
 
       if (discountApi > 0) {
-        await applyCouponApi(coupon);
-        setCouponSuccess("Coupon applied!");
-        applyCouponToStore(coupon, res.data.discountPence);
+        applyCouponToStore(coupon, data.discountPence);
       } else {
         setCouponError("This coupon has no discount value");
       }
@@ -106,7 +174,7 @@ export default function CartPage() {
   };
 
   return (
-    <>
+    <Container>
       <Navbar />
 
       <main className="pt-20 md:pt-24 bg-cream min-h-screen">
@@ -185,7 +253,7 @@ export default function CartPage() {
                   >
                     {hasFreeDelivery
                       ? "You qualify!"
-                      : `£${(subtotal / 100).toFixed(2)} / £${(FREE_DELIVERY_THRESHOLD / 100).toFixed(2)}`}
+                      : `£${(discountedSubtotal / 100).toFixed(2)} / £${(FREE_DELIVERY_THRESHOLD / 100).toFixed(2)}`}
                   </span>
                 </div>
                 <div className="h-2.5 bg-green-pale rounded-full overflow-hidden">
@@ -356,23 +424,26 @@ export default function CartPage() {
                     className={`flex rounded-xl overflow-hidden border transition-colors ${
                       couponError
                         ? "border-rose-300"
-                        : couponSuccess
+                        : appliedCoupon
                           ? "border-green/30"
                           : "border-[#e5e5e5]"
                     }`}
                   >
                     <input
                       type="text"
-                      value={coupon}
-                      onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-                      disabled={!!couponSuccess}
+                      value={appliedCoupon || coupon}
+                      onChange={handleCouponInput}
+                      disabled={!!appliedCoupon}
                       placeholder="Promo code"
                       className="flex-1 bg-transparent outline-none px-4 py-3 text-sm text-verdant-dark placeholder:text-[#ccc] disabled:opacity-50 font-mono tracking-wider"
                     />
-                    {couponSuccess ? (
-                      <span className="flex items-center px-4 text-xs text-green font-bold">
-                        ✓ Applied
-                      </span>
+                    {appliedCoupon ? (
+                      <button
+                        onClick={() => handleRemoveCoupon()}
+                        className="px-4 text-xs font-bold text-rose-400 hover:text-white hover:bg-rose-400 border-l border-[#e5e5e5] transition-colors"
+                      >
+                        Remove
+                      </button>
                     ) : (
                       <button
                         onClick={handleCoupon}
@@ -386,8 +457,8 @@ export default function CartPage() {
                     {couponError && (
                       <p className="text-xs text-rose-500">{couponError}</p>
                     )}
-                    {couponSuccess && (
-                      <p className="text-xs text-green">{couponSuccess}</p>
+                    {appliedCoupon && (
+                      <p className="text-xs text-green">Coupon Applied</p>
                     )}
                   </div>
                 </div>
@@ -400,13 +471,13 @@ export default function CartPage() {
                       £{(subtotal / 100).toFixed(2)}
                     </span>
                   </div>
-                  {discount > 0 && (
+                  {appliedDiscount > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-green">
                         Discount ({coupon.toUpperCase()})
                       </span>
                       <span className="text-green font-medium">
-                        −£{Number(discount).toFixed(2)}
+                        −£{Number(appliedDiscount / 100).toFixed(2)}
                       </span>
                     </div>
                   )}
@@ -477,6 +548,6 @@ export default function CartPage() {
       </main>
 
       <Footer />
-    </>
+    </Container>
   );
 }

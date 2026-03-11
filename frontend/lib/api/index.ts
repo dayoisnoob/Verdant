@@ -8,6 +8,7 @@ import {
   // OrderSession,
   Product,
   ProductsApi,
+  RefreshTokenApi,
   SingleOrder,
   Totals,
   UserApi,
@@ -19,16 +20,35 @@ import { AddressFormData, RegistrationForm } from "@/validations";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "${BASE_URL}";
 
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+async function attemptFetch(path: string, options?: RequestInit) {
   const accessToken = useAuthStore.getState().accessToken;
 
-  const res = await fetch(`${BASE_URL}${path}`, {
+  return fetch(`${BASE_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      ...options?.headers,
     },
   });
+}
+
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await attemptFetch(path, options);
+
+  if (res.status === 401) {
+    if (path.includes("refresh-token")) {
+      useAuthStore.getState().logout();
+      window.location.href = "/login";
+      throw new Error("Session expired");
+    }
+
+    await refreshAccessToken();
+    const retried = await attemptFetch(path, options);
+    if (!retried.ok) await handleApiError(retried);
+    return retried.json();
+  }
 
   if (!res.ok) await handleApiError(res);
   return res.json();
@@ -52,7 +72,7 @@ export const login = async (data: { email: string; password: string }) => {
   useGuestCartStore.getState().clearCart();
 
   const cart = await getCart();
-  useCartStore.getState().setCart(cart.data);
+  useCartStore.getState().setCart(cart);
 };
 
 export const registerApi = async (data: RegistrationForm) => {
@@ -68,8 +88,6 @@ export const verifyEmail = async (token: string) => {
 
 export const logoutApi = async () => {
   await apiFetch("/api/auth/logout", { method: "POST" });
-
-  useAuthStore.getState().logout();
 };
 
 export const forgotPassword = async (email: string) => {
@@ -130,22 +148,36 @@ export const deleteUserApi = async (
   });
 };
 
+export const refreshAccessToken = async () => {
+  const data = await apiFetch<ApiResponse<{ accessToken: string }>>(
+    "/api/auth/refresh-token",
+    {
+      method: "POST",
+      credentials: "include",
+    },
+  );
+
+  useAuthStore.getState().setAccessToken(data.data.accessToken);
+};
+
 // ----------------------------------------------------------------------------------------------
 // ------------------------------------------CART  API----------------------------------------
 // ----------------------------------------------------------------------------------------------
 
-export const getCart = async (): Promise<ApiResponse<CartApi>> => {
-  return apiFetch<ApiResponse<CartApi>>("/api/cart", {
+export const getCart = async (): Promise<CartApi> => {
+  const res = await apiFetch<{ data: CartApi }>("/api/cart", {
     method: "GET",
   });
+
+  return res.data;
 };
 
-export const getCartTotal = async (
-  couponCode: string,
-): Promise<ApiResponse<Totals>> => {
-  return apiFetch(`/api/cart/total?coupon=${couponCode}`, {
+export const getCartTotal = async (): Promise<Totals> => {
+  const res = await apiFetch<{ data: Totals }>("/api/cart/total", {
     method: "GET",
   });
+
+  return res.data;
 };
 
 export const updateItem = async ({
@@ -191,14 +223,6 @@ export const mergeGuestCart = async (
   return apiFetch("/api/cart/merge", {
     method: "POST",
     body: JSON.stringify(data),
-  });
-};
-
-export const applyCouponApi = async (
-  couponCode: string,
-): Promise<ApiResponse<CartApi>> => {
-  return apiFetch(`/api/cart/coupon?coupon=${couponCode}`, {
-    method: "PATCH",
   });
 };
 
@@ -405,12 +429,18 @@ export const getCategories = async (): Promise<string[]> => {
 // ------------------------------------------COUPONS  API----------------------------------------
 // ----------------------------------------------------------------------------------------------
 
-export const applyCoupon = (
+export const applyCouponApi = (
   code: string,
   subtotal: number,
 ): Promise<ApiResponse<Coupon>> => {
   return apiFetch(`/api/coupons?code=${code}&subtotal=${subtotal}`, {
     method: "GET",
+  });
+};
+
+export const removeCouponApi = (): Promise<ApiResponse<Coupon>> => {
+  return apiFetch("/api/coupons", {
+    method: "DELETE",
   });
 };
 

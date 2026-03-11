@@ -162,13 +162,13 @@ export class AuthService {
       .where(eq(usersTable.email, normalisedEmail));
 
     if (!user) {
-      throw new ApiError(401, 'Invalid credentials');
+      throw new ApiError(403, 'Invalid credentials');
     }
 
     const isPasswordValid = await bcryptCompare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      throw new ApiError(401, 'Invalid credentials');
+      throw new ApiError(403, 'Invalid credentials');
     }
 
     if (!user.emailVerified) {
@@ -242,17 +242,17 @@ export class AuthService {
       .where(eq(usersTable.email, email.toLowerCase()));
 
     if (!user) {
-      throw new ApiError(
-        200,
-        'If this email is registered and unverified, a new verification email has been sent.'
-      );
+      return {
+        message:
+          'If this email is registered and unverified, a new verification email has been sent.',
+      };
     }
 
     if (user.emailVerified) {
-      throw new ApiError(
-        200,
-        'If this email is registered and unverified, a new verification email has been sent.'
-      );
+      return {
+        message:
+          'If this email is registered and unverified, a new verification email has been sent.',
+      };
     }
 
     const { token, hashedToken, tokenExpiry } = await TempToken.generate();
@@ -290,6 +290,9 @@ export class AuthService {
     }
 
     const hashedToken = cryptoHash(refreshToken);
+
+    console.log('onRefresh', refreshToken);
+    console.log('hashed', hashedToken);
 
     const [storedToken] = await db
       .select()
@@ -370,12 +373,12 @@ export class AuthService {
 
     logger.info({ userId: user.id, ip: deviceInfo.ip }, 'Token refreshed');
 
-    return { message: 'Access token successfully refreshed', result };
+    return result;
   }
 
   static async logout(refreshToken: string, deviceInfo: DeviceInfo) {
     if (!refreshToken) {
-      throw new ApiError(401, 'You have been signed out successfully.');
+      return { message: 'You have been signed out successfully.' };
     }
     const hashedToken = cryptoHash(refreshToken);
 
@@ -496,7 +499,7 @@ export class AuthService {
 
     if (!resetToken) {
       throw new ApiError(
-        401,
+        403,
         'This password reset link is invalid or has expired. Please request a new one.'
       );
     }
@@ -507,14 +510,14 @@ export class AuthService {
         .where(eq(passwordResetTokensTable.id, resetToken.id));
 
       throw new ApiError(
-        401,
+        403,
         'This password reset link has expired. Please request a new one.'
       );
     }
 
     if (resetToken.used) {
       throw new ApiError(
-        401,
+        403,
         'This password reset link has already been used. Please request a new one if needed.'
       );
     }
@@ -536,7 +539,7 @@ export class AuthService {
 
     if (!user) {
       throw new ApiError(
-        401,
+        403,
         'This password reset link is no longer valid. Please request a new one.'
       );
     }
@@ -613,7 +616,7 @@ export class AuthService {
       .where(eq(usersTable.id, userId));
 
     if (!user) {
-      throw new ApiError(401, 'User not found');
+      throw new ApiError(404, 'User not found');
     }
 
     const iscurrentPasswordCorrect = await bcryptCompare(
@@ -622,7 +625,7 @@ export class AuthService {
     );
 
     if (!iscurrentPasswordCorrect) {
-      throw new ApiError(401, 'Your current password is incorrect');
+      throw new ApiError(403, 'Your current password is incorrect');
     }
 
     if (newPassword === currentPassword) {
@@ -710,7 +713,7 @@ export class AuthService {
     const isPasswordValid = await bcryptCompare(password, existing.password);
 
     if (!isPasswordValid) {
-      throw new ApiError(401, 'You have entered an incorrect password');
+      throw new ApiError(403, 'You have entered an incorrect password');
     }
 
     return existing;

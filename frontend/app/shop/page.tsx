@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { ErrorState } from "../page";
 
 function ProductCardSkeleton() {
   return (
@@ -60,7 +61,7 @@ function ShopContent() {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["products", activeCategory, activeFilter, sortBy, currentPage],
     queryFn: async () =>
       await getProducts(activeCategory, sortBy, activeFilter, currentPage),
@@ -104,6 +105,23 @@ function ShopContent() {
     setActiveCategory("All");
     setCurrentPage(1);
   };
+
+  if (isError) {
+    return (
+      <>
+        <Navbar />
+        <ErrorState
+          message={
+            error instanceof Error
+              ? error.message
+              : "Check your connection and try again."
+          }
+          onRetry={refetch}
+        />
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>

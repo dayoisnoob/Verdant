@@ -63,10 +63,10 @@ export class CartService {
 
   static async updateQuantity(
     userId: string,
-    itemId: string,
+    productId: string,
     quantity: number
   ) {
-    if (quantity <= 0) return CartService.removeItem(userId, itemId);
+    if (quantity < 1) return;
 
     const cart = await CartService.getOrCreateCart(userId);
 
@@ -75,13 +75,24 @@ export class CartService {
       .set({ quantity, updatedAt: new Date() })
       .where(
         and(
-          eq(cartItemsTable.productId, itemId),
+          eq(cartItemsTable.productId, productId),
           eq(cartItemsTable.cartId, cart.id as string)
         )
       )
       .returning();
 
     if (!updated) throw new ApiError(404, 'Cart Item not found');
+
+    const { subtotal, discount } = await CartService.getCartTotal(userId);
+
+    if (Number(discount) > 0 && subtotal <= discount) {
+      await CouponService.removeCouponFromCart(userId);
+
+      throw new ApiError(
+        409,
+        'Discount value needs to be higher than your subtotal'
+      );
+    }
 
     return { quantity: updated.quantity };
   }
@@ -121,7 +132,7 @@ export class CartService {
     return CartService.getCart(userId);
   }
 
-  static async getCartTotal(userId: string, couponCode?: string) {
+  static async getCartTotal(userId: string) {
     const cart = await CartService.getOrCreateCart(userId);
 
     const subtotalPence = cart.items.reduce(
@@ -129,16 +140,14 @@ export class CartService {
       0
     );
 
-    const result = couponCode
-      ? await CouponService.applyCoupon(userId, couponCode, subtotalPence)
-      : null;
+    const couponDiscount = cart.discount;
 
-    const discountPence = Math.min(result?.discount ?? 0, subtotalPence);
+    const discountPence = Math.min(couponDiscount ?? 0, subtotalPence);
     const discountedSubtotal = subtotalPence - discountPence;
     const deliveryPence = discountedSubtotal >= 10000 ? 0 : 499;
     const totalPence = discountedSubtotal + deliveryPence;
 
-    console.log(subtotalPence, discountPence, deliveryPence, totalPence);
+    console.log(discountedSubtotal, totalPence, deliveryPence);
 
     return {
       subtotalPence,
@@ -150,7 +159,6 @@ export class CartService {
       delivery: (deliveryPence / 100).toFixed(2),
       total: (totalPence / 100).toFixed(2),
       itemCount: cart.items.reduce((n, i) => n + i.quantity, 0),
-      appliedCoupon: result ? { code: couponCode } : null,
     };
   }
 
@@ -186,28 +194,5 @@ export class CartService {
       .returning();
 
     return { ...created, items: [] };
-  }
-
-  static async applyCouponToCart(userId: string, couponCode: string) {
-    const cart = await CartService.getOrCreateCart(userId);
-
-    const [updated] = await db
-      .update(cartsTable)
-      .set({ couponCode, updatedAt: new Date() })
-      .where(eq(cartsTable.id, cart.id as string))
-      .returning();
-
-    if (!updated) {
-      throw new ApiError(500, 'Error applying coupon code');
-    }
-  }
-
-  static async removeCouponFromCart(userId: string) {
-    const cart = await CartService.getOrCreateCart(userId);
-
-    await db
-      .update(cartsTable)
-      .set({ couponCode: null, updatedAt: new Date() })
-      .where(eq(cartsTable.id, cart.id as string));
   }
 }

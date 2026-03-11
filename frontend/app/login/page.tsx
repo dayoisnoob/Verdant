@@ -14,7 +14,6 @@ import { useForm } from "react-hook-form";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/";
 
   const [bannerError, setBannerError] = useState("");
   const [notVerified, setNotVerified] = useState(false);
@@ -36,7 +35,9 @@ export default function LoginPage() {
     setNotVerified(false);
     try {
       await login(data);
-      router.push(redirect);
+
+      const redirect = searchParams.get("redirect") || "/";
+      router.replace(redirect);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.statusCode === 401) {

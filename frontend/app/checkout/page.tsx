@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckoutSteps } from "@/components/CheckoutSteps";
+import Container from "@/components/Container";
 import Navbar from "@/components/Navbar";
 import { useCart } from "@/hooks";
 import {
@@ -129,9 +130,9 @@ export default function CheckoutPage() {
   const hydrated = useAuthStore.persist.hasHydrated();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
-  const { items: cartItems, couponCode } = useCart();
+  const { items: cartItems, couponCode, isLoading } = useCart();
 
-  if (cartItems.length === 0) redirect("/basket");
+  if (!isLoading && cartItems.length === 0) redirect("/basket");
 
   const [isPaying, setIsPaying] = useState(false);
   const [showNewForm, setShowNewForm] = useState(false);
@@ -139,7 +140,7 @@ export default function CheckoutPage() {
 
   const { data: cart } = useQuery({
     queryKey: ["cartTotal", couponCode],
-    queryFn: async () => (await getCartTotal(couponCode)).data,
+    queryFn: getCartTotal,
   });
 
   const { data: addresses = [] } = useQuery({
@@ -224,7 +225,7 @@ export default function CheckoutPage() {
   const isProcessing = isSubmitting || isPaying;
 
   return (
-    <>
+    <Container>
       <Navbar />
 
       <main className="pt-16 md:pt-24 bg-cream min-h-screen pb-16">
@@ -542,6 +543,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </main>
-    </>
+    </Container>
   );
 }

@@ -22,9 +22,8 @@ export class CartController {
 
   static async getTotal(req: Request, res: Response) {
     const userId = req.user!.id;
-    const couponCode = req.query.coupon;
 
-    const total = await CartService.getCartTotal(userId, couponCode as string);
+    const total = await CartService.getCartTotal(userId);
     res.json(new ApiResponse(200, 'Totals retrieved successfully', total));
   }
 
@@ -75,22 +74,5 @@ export class CartController {
 
     const cart = await CartService.mergeGuestCart(userId, items);
     res.json({ success: true, data: cart });
-  }
-
-  static async applyCouponToCart(req: Request, res: Response) {
-    const userId = req.user!.id;
-    const { coupon } = req.query;
-
-    await CartService.applyCouponToCart(userId, coupon as string);
-
-    res.json(new ApiResponse(200, 'Coupon successfully applied to cart'));
-  }
-
-  static async removeCouponFromCart(req: Request, res: Response) {
-    const userId = req.user!.id;
-
-    await CartService.removeCouponFromCart(userId);
-
-    res.json(new ApiResponse(200, 'Coupon successfully removed from cart'));
   }
 }

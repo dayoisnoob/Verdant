@@ -115,6 +115,7 @@ export interface CartApi {
   id: string;
   userId: string;
   couponCode: string;
+  discount: number;
   createdAt: Date;
   updatedAt: Date;
   items: {
@@ -141,9 +142,6 @@ export interface Totals {
   delivery: string;
   total: string;
   itemCount: number;
-  appliedCoupon: {
-    code: string;
-  };
 }
 
 //////////////////////////////////////////
@@ -243,6 +241,7 @@ export interface AuthCartStore {
   items: CartItems[];
   couponCode: string;
   discount: number;
+  isLoading: boolean;
 
   addItem: (product: Product, quantity?: number) => void;
   setCart: (cartItems: CartApi) => void;
@@ -252,6 +251,7 @@ export interface AuthCartStore {
   applyCoupon: (code: string, discount: number) => void;
   removeCoupon: () => void;
   itemCount: () => number;
+  setLoading: (val: boolean) => void;
 }
 
 // Same flat shape as CartItems — no nested product object
@@ -274,6 +274,10 @@ export interface AddressStore {
   setAddressId: (id: string) => void;
 }
 
+export interface RefreshTokenApi {
+  accessToken: string;
+}
+
 export interface AuthStore {
   user: {
     firstName: string;
@@ -289,6 +293,7 @@ export interface AuthStore {
 
   setEmail: (email: string) => void;
   setUser: (data: UserData) => void;
+  setAccessToken: (token: string) => void;
   login: (
     user: {
       firstName: string;

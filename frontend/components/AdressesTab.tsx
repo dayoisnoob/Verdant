@@ -10,12 +10,19 @@ import { useState } from "react";
 import { toast } from "sonner";
 import AddressCard from "./AddressCard";
 import { AddAddressForm } from "./AddressFields";
+import { ErrorState } from "@/app/page";
 
 export default function AddressesTab() {
   const qc = useQueryClient();
   const [adding, setAdding] = useState(false);
 
-  const { data: addresses = [], isLoading } = useQuery<Address[]>({
+  const {
+    data: addresses = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery<Address[]>({
     queryKey: ["addresses"],
     queryFn: async () => (await getUserAddresses()).data,
   });
@@ -27,6 +34,21 @@ export default function AddressesTab() {
   };
 
   const canAdd = addresses.length < MAX_ADDRESSES;
+
+  if (isError) {
+    return (
+      <>
+        <ErrorState
+          message={
+            error instanceof Error
+              ? error.message
+              : "Check your connection and try again."
+          }
+          onRetry={refetch}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5">

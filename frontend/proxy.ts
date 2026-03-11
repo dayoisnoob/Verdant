@@ -2,13 +2,18 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED_ROUTES = ["/orders", "/checkout", "/profile", "/basket"];
+const PROTECTED_ROUTES = [
+  "/account/orders",
+  "/checkout",
+  "/account/profile",
+  "/basket",
+];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("refreshToken")?.value;
 
-  console.log(pathname);
+  console.log(token);
 
   const isProtected = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route),
