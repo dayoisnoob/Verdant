@@ -9,7 +9,6 @@ import {
   applyCouponApi,
   getCartTotal,
   getProducts,
-  refreshAccessToken,
   updateItem,
 } from "@/lib/api";
 import { calculateOrderTotal } from "@/lib/api/helpers";
@@ -31,6 +30,7 @@ export default function CartPage() {
     updateQuantity,
     removeCoupon,
     isLoading,
+    cartError,
     applyCoupon: applyCouponToStore,
   } = useCart();
 
@@ -69,7 +69,7 @@ export default function CartPage() {
     );
   }
 
-  if (productsError) {
+  if (cartError || productsError) {
     return (
       <>
         <Navbar />

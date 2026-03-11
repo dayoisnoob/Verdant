@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 export const useAuthCart = () => {
   const items = useCartStore((state) => state.items);
   const isLoading = useCartStore((state) => state.isLoading);
+  const cartError = useCartStore((state) => state.isError);
 
   const itemCount = items.length;
   const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
@@ -18,7 +19,7 @@ export const useAuthCart = () => {
     items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0).toFixed(2),
   );
 
-  return { itemCount, totalQuantity, subtotal, isLoading };
+  return { itemCount, totalQuantity, subtotal, isLoading, cartError };
 };
 
 export const useGuestCart = () => {
@@ -30,7 +31,13 @@ export const useGuestCart = () => {
     items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0).toFixed(2),
   );
 
-  return { itemCount, totalQuantity, subtotal, isLoading: false };
+  return {
+    itemCount,
+    totalQuantity,
+    subtotal,
+    isLoading: false,
+    cartError: false,
+  };
 };
 
 export const useCart = () => {

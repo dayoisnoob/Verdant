@@ -20,6 +20,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
   couponCode: "",
   discount: 0,
   isLoading: true,
+  isError: false,
 
   addItem: async (product, quantity = 1) => {
     const existing = get().items.find((i) => i.productId === product.id);
@@ -111,6 +112,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
   itemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
 
   setLoading: (val: boolean) => set({ isLoading: val }),
+  setError: (val: boolean) => set({ isError: val }),
 }));
 
 export const useGuestCartStore = create(

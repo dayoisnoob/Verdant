@@ -2,13 +2,14 @@
 
 import { getCart } from "@/lib/api";
 import { useAuthStore, useCartStore } from "@/store/store";
+import { ApiError } from "@/util";
 import { useEffect } from "react";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   useEffect(() => {
-    const { setCart, setLoading } = useCartStore.getState();
+    const { setCart, setLoading, setError } = useCartStore.getState();
 
     if (!isLoggedIn) {
       setLoading(false);
@@ -20,7 +21,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         const cart = await getCart();
         setCart(cart);
       } catch (err) {
-        console.error(err);
+        if (err instanceof ApiError) {
+          setError(true);
+        }
       } finally {
         setLoading(false);
       }

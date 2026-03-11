@@ -242,6 +242,7 @@ export interface AuthCartStore {
   couponCode: string;
   discount: number;
   isLoading: boolean;
+  isError: boolean;
 
   addItem: (product: Product, quantity?: number) => void;
   setCart: (cartItems: CartApi) => void;
@@ -252,6 +253,7 @@ export interface AuthCartStore {
   removeCoupon: () => void;
   itemCount: () => number;
   setLoading: (val: boolean) => void;
+  setError: (val: boolean) => void;
 }
 
 // Same flat shape as CartItems — no nested product object
