@@ -270,7 +270,7 @@ export const updateUserAddresses = async ({
   addressId: string;
   data: AddressFormData;
 }): Promise<ApiResponse<null>> => {
-  return apiFetch(`/api/address?addressId=${addressId}`, {
+  return apiFetch(`/api/address/${addressId}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
@@ -279,7 +279,7 @@ export const updateUserAddresses = async ({
 export const removeAddress = async (
   addressId: string,
 ): Promise<ApiResponse<null>> => {
-  return apiFetch(`/api/address?addressId=${addressId}`, {
+  return apiFetch(`/api/address/${addressId}`, {
     method: "DELETE",
   });
 };

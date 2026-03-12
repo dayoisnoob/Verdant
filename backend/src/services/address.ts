@@ -2,6 +2,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../config/db';
 import { addressesTable } from '../models/addresses';
 import { ApiError } from '../utils/apiResponse';
+import type { AddressForm } from '../validations/address';
 
 interface Address {
   firstName: string;
@@ -13,8 +14,13 @@ interface Address {
   city: string;
 }
 
+const formatNigerianPhoneNumber = (phoneNumber: string | undefined): string => {
+  if (!phoneNumber) return '';
+
+  return `+234${phoneNumber?.replace(/[^\d+]/g, '')}`;
+};
 export class AddressService {
-  static async addAddress(userId: string, userAddress: Address) {
+  static async addAddress(userId: string, userAddress: AddressForm) {
     const [existing] = await db
       .select({ isDefault: addressesTable.isDefault })
       .from(addressesTable)
@@ -25,28 +31,26 @@ export class AddressService {
         )
       );
 
-    const phone1 = `+234${userAddress.phone1.replace(/[^\d+]/g, '')}`;
-    const phone2 = userAddress.phone2
-      ? `+234${userAddress.phone2?.replace(/[^\d+]/g, '')}`
-      : '';
+    const phone1 = formatNigerianPhoneNumber(userAddress.phone1);
+    const phone2 = formatNigerianPhoneNumber(userAddress.phone2);
 
     const addressMetadata = {
       ...userAddress,
       phone1,
       phone2,
       userId,
-      isDefault: !existing ? true : false,
+      isDefault: !existing,
     };
 
-    const [newAddress] = await db
+    const [address] = await db
       .insert(addressesTable)
       .values(addressMetadata)
       .returning();
 
-    return { message: 'Address successfully created', newAddress };
+    return address;
   }
 
-  static async getAddress(userId: string) {
+  static async getAddresses(userId: string) {
     const addresses = await db
       .select({
         id: addressesTable.id,
@@ -62,13 +66,19 @@ export class AddressService {
       .where(eq(addressesTable.userId, userId))
       .orderBy(desc(addressesTable.isDefault));
 
-    // if (addresses.length < 1)
-    //   throw new ApiError(404, 'User has no saved address');
-
-    return { message: 'Address successfully retrieved', addresses };
+    return addresses;
   }
 
   static async setDefaultAddress(userId: string, addressId: string) {
+    const [address] = await db
+      .select()
+      .from(addressesTable)
+      .where(
+        and(eq(addressesTable.id, addressId), eq(addressesTable.userId, userId))
+      );
+
+    if (!address) throw new ApiError(404, 'Address not found');
+
     await db.transaction(async (tx) => {
       await tx
         .update(addressesTable)
@@ -85,11 +95,13 @@ export class AddressService {
           )
         );
     });
-
-    return;
   }
 
-  static async updateAddress(userId: string, addressId: string, data: Address) {
+  static async updateAddress(
+    userId: string,
+    addressId: string,
+    data: AddressForm
+  ) {
     const [existing] = await db
       .select()
       .from(addressesTable)
@@ -101,10 +113,8 @@ export class AddressService {
       throw new ApiError(404, 'Address not found');
     }
 
-    const phone1 = `+234${data.phone1.replace(/[^\d+]/g, '')}`;
-    const phone2 = data.phone2
-      ? `+234${data.phone2?.replace(/[^\d+]/g, '')}`
-      : '';
+    const phone1 = formatNigerianPhoneNumber(data.phone1);
+    const phone2 = formatNigerianPhoneNumber(data.phone2);
 
     const metadata = {
       ...data,
@@ -115,15 +125,16 @@ export class AddressService {
     const [updatedAddress] = await db
       .update(addressesTable)
       .set(metadata)
-      .where(eq(addressesTable.id, addressId))
+      .where(
+        and(eq(addressesTable.userId, userId), eq(addressesTable.id, addressId))
+      )
       .returning();
 
     if (!updatedAddress) {
       throw new ApiError(500, 'Error updating address');
     }
-
-    return;
   }
+
   static async removeAddress(userId: string, addressId: string) {
     const [existing] = await db
       .select()
@@ -134,6 +145,18 @@ export class AddressService {
 
     if (!existing) {
       throw new ApiError(404, 'Address not found');
+    }
+
+    if (existing.isDefault) {
+      const addresses = await AddressService.getAddresses(userId);
+      const newDefault =
+        addresses && addresses.filter((a) => a.isDefault === false)[0];
+
+      await db
+        .update(addressesTable)
+        .set({ isDefault: true })
+        .where(eq(addressesTable.id, newDefault?.id as string))
+        .returning();
     }
 
     const [removedAddress] = await db

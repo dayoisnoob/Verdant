@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import { ApiError, ApiResponse } from '../utils/apiResponse';
 import { CouponService } from '../services/coupon';
+import { ApiResponse } from '../utils/apiResponse';
 
 export class CouponController {
   static async addCoupon(req: Request, res: Response) {

@@ -44,7 +44,7 @@ const nigerianPhoneRegex = /^[789]\d{9}$/;
 
 export const addressSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().optional(),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   streetAddress: z.string().min(5, 'Enter a full street address'),
   state: z.enum(NIGERIAN_STATES, {
     error: 'Select a valid Nigerian state',

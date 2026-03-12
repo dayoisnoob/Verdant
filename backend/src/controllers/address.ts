@@ -6,15 +6,17 @@ export class AddressController {
   static async addAddress(req: Request, res: Response) {
     const userId = req.user!.id;
 
-    const result = await AddressService.addAddress(userId, req.body);
-    res.json(new ApiResponse(200, result.message, result.newAddress));
+    const address = await AddressService.addAddress(userId, req.body);
+    res.json(new ApiResponse(200, 'Address added successfully', { address }));
   }
 
   static async getAddress(req: Request, res: Response) {
     const userId = req.user!.id;
 
-    const result = await AddressService.getAddress(userId);
-    res.json(new ApiResponse(200, result.message, result.addresses));
+    const addresses = await AddressService.getAddresses(userId);
+    res.json(
+      new ApiResponse(200, 'Addresses retrieved successfully', { addresses })
+    );
   }
 
   static async setDefaultAddress(req: Request, res: Response) {
@@ -27,17 +29,17 @@ export class AddressController {
 
   static async updateAddress(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { addressId } = req.query;
+    const { addressId } = req.params;
 
     await AddressService.updateAddress(userId, addressId as string, req.body);
-    res.json(new ApiResponse(200, 'Address successfully updated'));
+    res.json(new ApiResponse(200, 'Address updated successfully'));
   }
 
   static async removeAddress(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { addressId } = req.query;
+    const { addressId } = req.params;
 
     await AddressService.removeAddress(userId, addressId as string);
-    res.json(new ApiResponse(200, 'Address successfully removed'));
+    res.json(new ApiResponse(200, 'Address removed successfully'));
   }
 }

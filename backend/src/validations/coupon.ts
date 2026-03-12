@@ -22,8 +22,11 @@ export const addCouponSchema = z.object({
 });
 
 export const applyCouponSchema = z.object({
-  code: z.string().toUpperCase(),
-  subtotal: z.string(),
+  code: z.string().min(1, 'Coupon code is required').toUpperCase(),
+  subtotal: z
+    .number()
+    .positive('Subtotal must be a positive number')
+    .int('Subtotal must be in pence'),
 });
 
 export const createCouponSchema = z.union([
