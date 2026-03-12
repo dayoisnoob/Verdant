@@ -309,3 +309,17 @@ export interface AuthStore {
   ) => void;
   logout: () => void;
 }
+
+export interface AdminUser {
+  email: string;
+  role: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface AdminStore {
+  admin: AdminUser | null;
+  accessToken: string | null;
+  login: (admin: AdminUser, accessToken: string) => void;
+  logout: () => void;
+}

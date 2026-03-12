@@ -1,6 +1,6 @@
 "use client";
 
-import { ErrorState } from "@/app/page";
+import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";

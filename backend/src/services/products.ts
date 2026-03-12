@@ -14,7 +14,7 @@ export class ProductService {
     limit: number,
     filter?: string
   ) {
-    const parsedLimit = Number(limit) || 8;
+    const parsedLimit = Number(limit) || 12;
     const parsedPage = Number(page) || 1;
     const offset = (parsedPage - 1) * parsedLimit;
 

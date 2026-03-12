@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const couponSchema = z.object({
+export const addCouponSchema = z.object({
   code: z
     .string()
     .min(3, 'Code must be at least 3 characters')
@@ -10,23 +10,25 @@ export const couponSchema = z.object({
   discountValue: z
     .number()
     .positive('Value must be greater than 0')
-    .refine((val) => val <= 100, {
-      message: 'Percentage value cannot exceed 100',
-    }),
-  minOrderAmount: z.number().min(0).default(0),
-  usageLimit: z.number().int().positive('Usage limit must be at least 1'),
-  perUserLimit: z.number().int().positive('Per user limit must be at least 1'),
+    .refine((val) => true),
+  minOrderAmount: z.number().min(0).nullable().default(null),
+  usageLimit: z.number().int().positive().nullable().default(null),
+  perUserLimit: z.number().int().positive().nullable().default(null),
   expiresAt: z.coerce.date().refine((date) => date > new Date(), {
     message: 'Expiry date must be in the future',
   }),
   isActive: z.boolean().default(true),
   usedCount: z.number().default(0).optional(),
-  description: z.string().optional(),
 });
 
-export const createCouponValidation = z.union([
-  couponSchema,
-  z.array(couponSchema).min(1),
+export const applyCouponSchema = z.object({
+  code: z.string().toUpperCase(),
+  subtotal: z.string(),
+});
+
+export const createCouponSchema = z.union([
+  addCouponSchema,
+  z.array(addCouponSchema).min(1),
 ]);
 
-export type CouponInput = z.infer<typeof couponSchema>;
+export type CouponInput = z.infer<typeof addCouponSchema>;

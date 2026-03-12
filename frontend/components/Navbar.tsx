@@ -64,8 +64,8 @@ export default function Navbar() {
     };
   }, [mobileOpen]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setAccountOpen(false);
     setMobileOpen(false);
   };

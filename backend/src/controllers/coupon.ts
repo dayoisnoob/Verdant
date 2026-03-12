@@ -9,26 +9,36 @@ export class CouponController {
     res.json(new ApiResponse(200, result.message, result.newCoupon));
   }
 
+  static async getCoupons(req: Request, res: Response) {
+    const coupons = await CouponService.getCoupons();
+
+    res.json(
+      new ApiResponse(200, 'Coupons Retrieved successfully', { coupons })
+    );
+  }
+  static async getCouponByCode(req: Request, res: Response) {
+    const { code } = req.params;
+    const coupon = await CouponService.getCouponByCode(code as string);
+
+    res.json(new ApiResponse(200, 'Coupon retrieved successfully', { coupon }));
+  }
+
   static async applyCoupon(req: Request, res: Response) {
     const id = req.user!.id as string;
-    const { code, subtotal } = req.query;
-
-    if (!code) {
-      throw new ApiError(400, 'Please enter a coupon code');
-    }
+    const { code, subtotal } = req.body;
 
     const discount = await CouponService.applyCoupon(
       id,
-      code as string,
-      parseFloat(subtotal as string)
+      code,
+      parseFloat(subtotal)
     );
 
-    res.json(new ApiResponse(200, 'Coupon successfully applied', discount));
+    res.json(new ApiResponse(200, 'Coupon applied successfully', { discount }));
   }
 
   static async removeCouponFromCart(req: Request, res: Response) {
     await CouponService.removeCouponFromCart(req.user!.id);
 
-    res.json(new ApiResponse(200, 'Coupon successfully removed'));
+    res.json(new ApiResponse(200, 'Coupon removed successfully'));
   }
 }

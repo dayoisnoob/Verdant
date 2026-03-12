@@ -10,7 +10,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import AddressCard from "./AddressCard";
 import { AddAddressForm } from "./AddressFields";
-import { ErrorState } from "@/app/page";
+import { ErrorState } from "./ErrorState";
 
 export default function AddressesTab() {
   const qc = useQueryClient();

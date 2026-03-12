@@ -4,9 +4,15 @@ import {
   logoutApi,
   removeFromWishlist,
 } from "@/lib/api";
-import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
+import {
+  useAdminStore,
+  useAuthStore,
+  useCartStore,
+  useGuestCartStore,
+} from "@/store/store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export const useAuthCart = () => {
   const items = useCartStore((state) => state.items);
@@ -69,6 +75,17 @@ export const useLogout = () => {
   };
 };
 
+export const useAdminLogout = () => {
+  const router = useRouter();
+  const logout = useAdminStore((state) => state.logout);
+
+  return async () => {
+    await logoutApi();
+    logout();
+    router.push("/admin/login");
+  };
+};
+
 export const useWishlist = () => {
   const {
     data: wishlist = [],
@@ -102,8 +119,10 @@ export const useWishlistToggle = (productId: string) => {
     try {
       if (prev) {
         await removeFromWishlist(productId);
+        toast.success("Item removed");
       } else {
         await addToWishlist(productId);
+        toast.success("Item added");
       }
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
     } catch {}

@@ -1,7 +1,7 @@
 "use client";
 
-import { ErrorState } from "@/app/page";
 import AddressesTab from "@/components/AdressesTab";
+import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { OrderCard } from "@/components/OrderCard";
@@ -9,7 +9,7 @@ import SettingsTab from "@/components/SettingsTab";
 import Wishlist from "@/components/Wishlist";
 import { useWishlist } from "@/hooks";
 import { getUserAddresses, getuserOrders } from "@/lib/api";
-import { convertDate } from "@/lib/api/helpers";
+import { convertDate } from "@/lib/helpers";
 import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
 import {

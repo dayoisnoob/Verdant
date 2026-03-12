@@ -1,6 +1,7 @@
 "use client";
 
 import Container from "@/components/Container";
+import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Pagination } from "@/components/Pagination";
@@ -11,7 +12,6 @@ import { useQuery } from "@tanstack/react-query";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { ErrorState } from "../page";
 
 function ProductCardSkeleton() {
   return (

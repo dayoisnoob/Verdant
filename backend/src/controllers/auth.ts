@@ -55,6 +55,19 @@ export class AuthController {
       );
   }
 
+  static async loginAsAdmin(req: Request, res: Response) {
+    const result = await AuthService.loginAsAdmin(
+      req.body,
+      AuthController.deviceInfo(req)
+    );
+
+    res
+      .cookie('adminRefreshToken', result.refreshToken, COOKIE_OPTIONS)
+      .json(
+        new ApiResponse(200, result.message, result.user, result.accessToken)
+      );
+  }
+
   static async resendVerificationMail(req: Request, res: Response) {
     const { email } = req.body;
 

@@ -2,15 +2,14 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type Request, type Response } from 'express';
 import { globalErrorHandler, notFoundError } from './middlewares/error';
-import authRouter from './router/auth.routes.ts';
-// import inventoryRouter from './router/inventory.ts';
-import productRouter from './router/products.ts';
-import paymentRouter from './router/payments.ts';
-import orderRouter from './router/orders.ts';
 import addressRouter from './router/address.ts';
-import wishlistRouter from './router/wishlist.ts';
-import couponsRouter from './router/coupons.ts';
+import authRouter from './router/auth.routes.ts';
 import cartRouter from './router/cart.ts';
+import couponsRouter from './router/coupons.ts';
+import orderRouter from './router/orders.ts';
+import paymentRouter from './router/payments.ts';
+import productRouter from './router/products.ts';
+import wishlistRouter from './router/wishlist.ts';
 
 export const app = express();
 
@@ -43,7 +42,6 @@ app.use('/api/address', addressRouter);
 app.use('/api/wishlist', wishlistRouter);
 app.use('/api/coupons', couponsRouter);
 app.use('/api/cart', cartRouter);
-// app.use('/api/inventory', inventoryRouter);
 
 app.use(notFoundError);
 app.use(globalErrorHandler);

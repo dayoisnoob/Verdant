@@ -1,7 +1,7 @@
 "use client";
 
 import { registerApi } from "@/lib/api";
-import { handleFormError } from "@/lib/api/helpers";
+import { handleFormError } from "@/lib/helpers";
 import { useAuthStore } from "@/store/store";
 import { ApiError } from "@/util";
 import { RegistrationForm, registrationSchema } from "@/validations";

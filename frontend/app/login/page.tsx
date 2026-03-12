@@ -109,7 +109,7 @@ export default function LoginPage() {
             </div>
 
             {/* ── Banner — reserved height prevents layout shift ── */}
-            <div className="mb-5 overflow-hidden">
+            <div className="mb-5 min-h-[44px]">
               {notVerified ? (
                 <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 flex gap-3 items-start">
                   <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 text-base">
@@ -138,11 +138,27 @@ export default function LoginPage() {
                   </div>
                 </div>
               ) : bannerError ? (
-                <div className="bg-red-50 border border-red-100 rounded-2xl px-4 py-3.5 flex gap-3 items-start">
-                  <span className="text-base flex-shrink-0 mt-0.5">⚠️</span>
-                  <p className="text-sm text-red-600 leading-snug">
-                    {bannerError}
-                  </p>
+                <div className="rounded-2xl overflow-hidden border border-red-200/60">
+                  <div className="bg-red-500 px-4 py-2 flex items-center gap-2">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-3.5 h-3.5 text-white flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
+                    </svg>
+                    <p className="text-white text-[0.7rem] font-bold uppercase tracking-wider">
+                      Sign in failed
+                    </p>
+                  </div>
+                  <div className="bg-red-50 px-4 py-3">
+                    <p className="text-red-700 text-sm leading-snug">
+                      {bannerError}
+                    </p>
+                  </div>
                 </div>
               ) : null}
             </div>

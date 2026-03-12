@@ -8,7 +8,7 @@ import { changePassword, deleteUserApi, updateProfile } from "@/lib/api";
 import { ApiError } from "@/util";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/store";
-import { handleFormError } from "@/lib/api/helpers";
+import { handleFormError } from "@/lib/helpers";
 import DeleteAccountModal from "./DeleteAccountModal";
 import {
   ChangePasswordForm,

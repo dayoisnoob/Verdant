@@ -390,7 +390,7 @@ export const getProducts = async (
   sort?: string,
   filter?: string,
   page = 1,
-  limit = 8,
+  limit = 12,
 ): Promise<ProductsApi> => {
   const params = new URLSearchParams();
   if (category && category !== "All") params.set("category", category);
@@ -433,8 +433,9 @@ export const applyCouponApi = (
   code: string,
   subtotal: number,
 ): Promise<ApiResponse<Coupon>> => {
-  return apiFetch(`/api/coupons?code=${code}&subtotal=${subtotal}`, {
-    method: "GET",
+  return apiFetch("/api/coupons/apply", {
+    method: "POST",
+    body: JSON.stringify({ code, subtotal }),
   });
 };
 

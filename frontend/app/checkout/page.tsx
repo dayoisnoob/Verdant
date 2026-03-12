@@ -2,6 +2,8 @@
 
 import { CheckoutSteps } from "@/components/CheckoutSteps";
 import Container from "@/components/Container";
+import { ErrorState } from "@/components/ErrorState";
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useCart } from "@/hooks";
 import {
@@ -130,7 +132,7 @@ export default function CheckoutPage() {
   const hydrated = useAuthStore.persist.hasHydrated();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
-  const { items: cartItems, couponCode, isLoading } = useCart();
+  const { items: cartItems, couponCode, isLoading, cartError } = useCart();
 
   if (!isLoading && cartItems.length === 0) redirect("/basket");
 
@@ -138,12 +140,21 @@ export default function CheckoutPage() {
   const [showNewForm, setShowNewForm] = useState(false);
   const [manualSelection, setManualSelection] = useState<string | null>(null);
 
-  const { data: cart } = useQuery({
+  const {
+    data: cart,
+    isLoading: totalsLoading,
+    refetch: refetchTotals,
+  } = useQuery({
     queryKey: ["cartTotal", couponCode],
     queryFn: getCartTotal,
   });
 
-  const { data: addresses = [] } = useQuery({
+  const {
+    data: addresses = [],
+    isLoading: addressesLoading,
+    refetch: refetchAddresses,
+    isError: addressesError,
+  } = useQuery({
     queryKey: ["addresses"],
     queryFn: async () => (await getUserAddresses()).data,
   });
@@ -165,6 +176,37 @@ export default function CheckoutPage() {
   } = useForm<CheckoutForm>({ resolver: zodResolver(checkoutSchema) });
 
   if (!hydrated || !isLoggedIn || !cart) return null;
+
+  if (isLoading || totalsLoading || addressesLoading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-[#f2efe8] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-green border-t-transparent animate-spin" />
+            <p className="text-xs text-verdant-muted">Loading your Basket...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (cartError || addressesError) {
+    return (
+      <>
+        <Navbar />
+        <ErrorState
+          message="Check your connection and try again."
+          onRetry={() => {
+            refetchTotals();
+            refetchAddresses();
+          }}
+        />
+        <Footer />
+      </>
+    );
+  }
 
   const subtotal = Number((cart.subtotalPence / 100).toFixed(2));
   const discount = Number((cart.discountPence / 100).toFixed(2));

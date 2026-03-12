@@ -7,7 +7,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AllOrders } from "@/types";
 import { ORDER_PREVIEW_LIMIT, ORDER_STATUS_CONFIG } from "@/lib/constants";
-import { convertDate } from "@/lib/api/helpers";
+import { convertDate } from "@/lib/helpers";
 
 export function OrderCard({ order }: { order: AllOrders }) {
   const [expanded, setExpanded] = useState(false);

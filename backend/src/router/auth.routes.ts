@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.ts';
-import { authenticate } from '../middlewares/auth.middleware.ts';
+import { authenticate, requireAdmin } from '../middlewares/auth.middleware.ts';
 import {
   changePasswordLimiter,
   forgotPasswordHourlyLimiter,
@@ -40,6 +40,14 @@ router.post(
   loginIpLimiter,
   validateInput(loginSchemaValidation),
   asyncHandler(AuthController.login)
+);
+
+router.post(
+  '/admin/login',
+  // loginEmailLimiter,
+  // loginIpLimiter,
+  validateInput(loginSchemaValidation),
+  asyncHandler(AuthController.loginAsAdmin)
 );
 
 router.post(
@@ -89,5 +97,7 @@ router.delete(
   validateInput(deleteAccountSchema),
   asyncHandler(AuthController.deleteUser)
 );
+
+// router.use(requireAdmin);
 
 export default router;

@@ -216,6 +216,7 @@ export class AuthService {
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       email: updatedUser.email,
+      role: updatedUser.role,
       isVerified: updatedUser.isVerified,
       createdAt: updatedUser.createdAt,
     };
@@ -226,6 +227,23 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  static async loginAsAdmin(credentials: LoginInput, deviceInfo: DeviceInfo) {
+    const [user] = await db
+      .select({ role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.email, credentials.email.toLowerCase()));
+
+    if (!user || user.role !== 'admin') {
+      throw new ApiError(403, 'Invalid credentials');
+    }
+
+    if (user.role !== 'admin') {
+      throw new ApiError(403, 'Invalid credentials');
+    }
+
+    return AuthService.login(credentials, deviceInfo);
   }
 
   static async resendVerificationMail(email: string, deviceInfo: DeviceInfo) {

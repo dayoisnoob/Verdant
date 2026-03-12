@@ -6,6 +6,7 @@ import {
 } from "@/lib/api";
 import {
   AddressStore,
+  AdminUser,
   AuthCartStore,
   AuthStore,
   CartItems,
@@ -209,9 +210,23 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: () => set({ user: null, isLoggedIn: false, accessToken: null }),
     }),
-    { name: "be-bold" },
+    { name: "verdant" },
   ),
 );
+
+interface AdminStore {
+  admin: AdminUser | null;
+  accessToken: string | null;
+  login: (admin: AdminUser, accessToken: string) => void;
+  logout: () => void;
+}
+
+export const useAdminStore = create<AdminStore>((set) => ({
+  admin: null,
+  accessToken: null,
+  login: (admin, accessToken) => set({ admin, accessToken }),
+  logout: () => set({ admin: null, accessToken: null }),
+}));
 
 export const useAddressStore = create<AddressStore>()(
   persist(

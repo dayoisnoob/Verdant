@@ -9,7 +9,6 @@ export { couponRedemptionsTable } from './couponRedemptions.ts';
 export { couponsTable } from './coupons.ts';
 export { cartsTable } from './cart.ts';
 export { cartItemsTable } from './cartItems.ts';
-// export { inventoryTable } from './inventory.ts';
 
 export { refreshTokensTable } from './refreshToken.ts';
 export { passwordResetTokensTable } from './passwordResetToken.ts';
