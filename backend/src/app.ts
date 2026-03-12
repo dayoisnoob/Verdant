@@ -3,7 +3,7 @@ import cors from 'cors';
 import express, { type Request, type Response } from 'express';
 import { globalErrorHandler, notFoundError } from './middlewares/error';
 import addressRouter from './router/address.ts';
-import authRouter from './router/auth.routes.ts';
+import authRouter from './router/auth.ts';
 import cartRouter from './router/cart.ts';
 import couponsRouter from './router/coupons.ts';
 import orderRouter from './router/orders.ts';

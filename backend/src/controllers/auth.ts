@@ -2,8 +2,6 @@ import type { Request, Response } from 'express';
 import { COOKIE_OPTIONS } from '../constants/constants.js';
 import { AuthService } from '../services/auth.service.js';
 import { ApiError, ApiResponse } from '../utils/apiResponse.js';
-import type { SignupInput } from '../validations/auth.validations.js';
-import { logger } from '../config/pino.js';
 
 export class AuthController {
   static deviceInfo(req: Request) {
@@ -15,31 +13,34 @@ export class AuthController {
   }
 
   static async register(req: Request, res: Response): Promise<void> {
-    const body = req.body as SignupInput;
-
-    logger.info(body);
-
-    const result = await AuthService.register(
-      body,
+    const user = await AuthService.register(
+      req.body,
       AuthController.deviceInfo(req)
     );
 
-    res.json(new ApiResponse(201, result.message, result.data));
+    res
+      .status(201)
+      .json(new ApiResponse(201, 'Registration successful', { user }));
   }
 
   static async verifyEmail(req: Request, res: Response) {
-    const { token: verificationToken } = req.query;
+    const { token } = req.query;
 
-    if (typeof verificationToken !== 'string') {
-      throw new ApiError(400, 'Invalid verification link');
+    if (!token || typeof token !== 'string') {
+      throw new ApiError(400, 'Verification token is missing.');
     }
 
     const result = await AuthService.verifyEmail(
-      verificationToken,
+      token,
       AuthController.deviceInfo(req)
     );
 
-    res.json(new ApiResponse(200, result.message));
+    res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS).json(
+      new ApiResponse(200, 'Email verified successfully', {
+        user: result.user,
+        accessToken: result.accessToken,
+      })
+    );
   }
 
   static async login(req: Request, res: Response) {
@@ -48,24 +49,12 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res
-      .cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS)
-      .json(
-        new ApiResponse(200, result.message, result.user, result.accessToken)
-      );
-  }
-
-  static async loginAsAdmin(req: Request, res: Response) {
-    const result = await AuthService.loginAsAdmin(
-      req.body,
-      AuthController.deviceInfo(req)
+    res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS).json(
+      new ApiResponse(200, 'Login successful', {
+        user: result.user,
+        accessToken: result.accessToken,
+      })
     );
-
-    res
-      .cookie('adminRefreshToken', result.refreshToken, COOKIE_OPTIONS)
-      .json(
-        new ApiResponse(200, result.message, result.user, result.accessToken)
-      );
   }
 
   static async resendVerificationMail(req: Request, res: Response) {
@@ -82,6 +71,10 @@ export class AuthController {
   static async refreshAccessToken(req: Request, res: Response) {
     const refreshToken = req.cookies?.refreshToken;
 
+    if (!refreshToken) {
+      throw new ApiError(401, 'Authentication required. Please sign in.');
+    }
+
     const result = await AuthService.refreshAccessToken(
       refreshToken,
       AuthController.deviceInfo(req)
@@ -96,12 +89,17 @@ export class AuthController {
 
   static async logout(req: Request, res: Response) {
     const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      throw new ApiError(401, 'Authentication required. Please sign in.');
+    }
+
     const result = await AuthService.logout(
       refreshToken,
       AuthController.deviceInfo(req)
     );
 
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('refreshToken', COOKIE_OPTIONS);
     res.json(new ApiResponse(200, result.message));
   }
 
@@ -113,7 +111,7 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('refreshToken', COOKIE_OPTIONS);
     res.json(new ApiResponse(200, result.message));
   }
 
@@ -129,42 +127,49 @@ export class AuthController {
   }
 
   static async resetPassword(req: Request, res: Response) {
-    const passwordResetToken = req.query?.token;
+    const token = req.query?.token;
 
-    if (typeof passwordResetToken !== 'string') {
-      throw new ApiError(400, 'Invalid reset token');
+    if (!token || typeof token !== 'string') {
+      throw new ApiError(400, 'Verification token is missing.');
     }
 
     const result = await AuthService.resetPassword(
-      passwordResetToken,
-      req.body,
+      token,
+      req.body.newPassword,
       AuthController.deviceInfo(req)
     );
 
-    res.json(new ApiResponse(200, result.message));
+    res.json(new ApiResponse(200, 'Password reset was successfully'));
   }
 
   static async changePassword(req: Request, res: Response) {
     const userId = req.user!.id;
 
-    console.log(req.body);
-
+    const { currentPassword, newPassword } = req.body;
     await AuthService.changePassword(
       userId,
-      req.body,
+      { currentPassword, newPassword },
       AuthController.deviceInfo(req)
     );
 
-    res.json(new ApiResponse(200, 'Password was successfully changed'));
+    res.json(new ApiResponse(200, 'Password successfully changed'));
   }
 
   static async updateUser(req: Request, res: Response) {
     const userId = req.user!.id;
 
-    const result = await AuthService.updateUser(userId, req.body);
+    const updatedUser = await AuthService.updateUser(userId, req.body);
     res.json(
-      new ApiResponse(200, 'User successfully updated', result.updatedUser)
+      new ApiResponse(200, 'User successfully updated', { updatedUser })
     );
+  }
+
+  static async verifyPassword(req: Request, res: Response) {
+    const userId = req.user!.id;
+    const { password } = req.body;
+
+    await AuthService.verifyPassword(userId, password);
+    res.json(new ApiResponse(200, 'Password successfully verified'));
   }
 
   static async deleteUser(req: Request, res: Response) {
@@ -172,15 +177,8 @@ export class AuthController {
     const { password } = req.body;
 
     await AuthService.deleteUser(userId, password);
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+
+    res.clearCookie('refreshToken', COOKIE_OPTIONS);
     res.json(new ApiResponse(200, 'User successfully deleted'));
-  }
-
-  static async veryfyPassword(req: Request, res: Response) {
-    const userId = req.user!.id;
-    const { password } = req.body;
-
-    await AuthService.verifyPassword(userId, password);
-    res.json(new ApiResponse(200, 'Password successfully verified'));
   }
 }

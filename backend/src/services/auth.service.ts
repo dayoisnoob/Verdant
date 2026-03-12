@@ -1,4 +1,4 @@
-import { and, eq, gt } from 'drizzle-orm';
+import { and, eq, gt, sql } from 'drizzle-orm';
 import { db } from '../config/db.ts';
 
 import { usersTable } from '../models/users.ts';
@@ -11,33 +11,29 @@ import {
 
 import { env } from '../config/env.ts';
 import { logger } from '../config/pino.ts';
+import { cartsTable } from '../models/cart.ts';
+import { ordersTable } from '../models/orders.ts';
 import { passwordResetTokensTable } from '../models/passwordResetToken.ts';
 import { refreshTokensTable } from '../models/refreshToken.ts';
-import type { DeviceInfo, RegisterResult } from '../types/types.ts';
-import { AuthTokens, TempToken } from '../utils/auth/tokens.util.ts';
+import { wishlistsTable } from '../models/wishlist.ts';
+import type { DeviceInfo } from '../types/types.ts';
+import { Tokens } from '../utils/auth/tokens.util.ts';
+import { RESEND_COOLDOWN_SECONDS } from '../utils/helpers.ts';
 import type {
   LoginInput,
   SignupInput,
   updateInput,
 } from '../validations/auth.validations.ts';
 import { sendMail } from './email.service.ts';
-import { ordersTable } from '../models/orders.ts';
-import { cartsTable } from '../models/cart.ts';
-import { wishlistsTable } from '../models/wishlist.ts';
 
 export class AuthService {
-  static async register(
-    userData: SignupInput,
-    deviceInfo: DeviceInfo
-  ): Promise<RegisterResult> {
+  static async register(userData: SignupInput, deviceInfo: DeviceInfo) {
     const { firstName, lastName, email, password } = userData;
-
-    const normalisedEmail = email?.toLowerCase();
 
     const [existingUser] = await db
       .select()
       .from(usersTable)
-      .where(eq(usersTable.email, normalisedEmail as string))
+      .where(eq(usersTable.email, email))
       .limit(1);
 
     if (existingUser) {
@@ -46,15 +42,15 @@ export class AuthService {
 
     const hashedPassword = await bcryptHash(password);
 
-    const { token, hashedToken, tokenExpiry } = await TempToken.generate();
+    const { token, hashedToken, expiry } = await Tokens.generateTempTokens();
 
     const userObject = {
       firstName,
       lastName,
-      email: normalisedEmail,
+      email,
       passwordHash: hashedPassword,
       emailVerifyToken: hashedToken,
-      emailVerifyTokenExpiry: tokenExpiry,
+      emailVerifyTokenExpiry: expiry,
       emailVerifyTokenSentAt: new Date(),
     };
 
@@ -76,42 +72,43 @@ export class AuthService {
         email: newUser.email,
         ip: deviceInfo.ip,
       },
-      'User rigistered'
+      'User registered'
     );
 
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
-    sendMail(newUser, verificationLink, 'verification');
 
-    return {
-      message:
-        'Registration successful. Please check your email to verify your account.',
-      data: {
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-      },
-    };
-  }
+    try {
+      await sendMail(newUser, verificationLink, 'verification');
+    } catch (err) {
+      logger.error({ userId: newUser.id }, 'Verification email failed to send');
 
-  static async verifyEmail(
-    verificationToken: string | undefined,
-    deviceInfo: DeviceInfo
-  ) {
-    if (!verificationToken) {
+      await db.delete(usersTable).where(eq(usersTable.id, newUser.id));
       throw new ApiError(
-        400,
-        'This verification link is invalid or has expired. Please request a new one.'
+        500,
+        'Failed to send verification email. Please try again.'
       );
     }
 
-    const hashedToken = cryptoHash(verificationToken);
+    const user = {
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email,
+    };
 
-    const [result] = await db
+    return user;
+  }
+
+  static async verifyEmail(token: string, deviceInfo: DeviceInfo) {
+    const hashedToken = cryptoHash(token);
+
+    const [updated] = await db
       .update(usersTable)
       .set({
         emailVerified: true,
         emailVerifyToken: null,
         emailVerifyTokenExpiry: null,
+        emailVerifyTokenSentAt: null,
+        lastLogin: new Date(),
       })
       .where(
         and(
@@ -120,31 +117,43 @@ export class AuthService {
           gt(usersTable.emailVerifyTokenExpiry, new Date())
         )
       )
-      .returning();
+      .returning({
+        id: usersTable.id,
+        firstName: usersTable.firstName,
+        lastName: usersTable.lastName,
+        role: usersTable.role,
+        email: usersTable.email,
+        isActive: usersTable.isActive,
+        emailVerified: usersTable.emailVerified,
+        createdAt: usersTable.createdAt,
+      });
 
-    if (!result) {
-      throw new ApiError(400, 'Invalid or expired token');
+    if (!updated) {
+      throw new ApiError(
+        400,
+        'This verification link is invalid or has expired. Please request a new one'
+      );
     }
+
+    const { accessToken, refreshToken, user } = await Tokens.generateAuthTokens(
+      updated,
+      deviceInfo
+    );
 
     logger.info(
       {
-        userId: result.id,
-        email: result.email,
+        userId: updated.id,
+        email: updated.email,
         ip: deviceInfo.ip,
       },
-      'Email successfully verified'
+      'Email successfully verified, user logged in'
     );
 
-    return {
-      message:
-        'Email verification successful. Please proceed to login to your account.',
-    };
+    return { accessToken, refreshToken, user };
   }
 
   static async login(credentials: LoginInput, deviceInfo: DeviceInfo) {
     const { email, password } = credentials;
-
-    const normalisedEmail = email.toLowerCase();
 
     const [user] = await db
       .select({
@@ -159,15 +168,9 @@ export class AuthService {
         createdAt: usersTable.createdAt,
       })
       .from(usersTable)
-      .where(eq(usersTable.email, normalisedEmail));
+      .where(eq(usersTable.email, email));
 
     if (!user) {
-      throw new ApiError(403, 'Invalid credentials');
-    }
-
-    const isPasswordValid = await bcryptCompare(password, user.passwordHash);
-
-    if (!isPasswordValid) {
       throw new ApiError(403, 'Invalid credentials');
     }
 
@@ -177,7 +180,6 @@ export class AuthService {
         'Please verify your email address before signing in. Check your inbox or request a new verification email'
       );
     }
-
     if (!user.isActive) {
       throw new ApiError(
         403,
@@ -185,23 +187,23 @@ export class AuthService {
       );
     }
 
-    const { accessToken, refreshToken, updatedUser } = await db.transaction(
-      async (tx) => {
-        await tx
-          .update(usersTable)
-          .set({ lastLogin: new Date() })
-          .where(eq(usersTable.id, user.id));
+    const isPasswordValid = await bcryptCompare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new ApiError(403, 'Invalid credentials');
+    }
 
-        const tokenFamilyId = crypto.randomUUID();
+    db.update(usersTable)
+      .set({ lastLogin: new Date() })
+      .where(eq(usersTable.id, user.id))
+      .catch((err) =>
+        logger.warn({ userId: user.id, err }, 'Failed to update lastLogin')
+      );
 
-        return await AuthTokens.generateAndUpdate(
-          user,
-          tokenFamilyId,
-          deviceInfo,
-          tx
-        );
-      }
-    );
+    const {
+      accessToken,
+      refreshToken,
+      user: loggedInUser,
+    } = await Tokens.generateAuthTokens(user, deviceInfo);
 
     logger.info(
       {
@@ -212,38 +214,11 @@ export class AuthService {
       'User logged in'
     );
 
-    const cleanUser = {
-      firstName: updatedUser.firstName,
-      lastName: updatedUser.lastName,
-      email: updatedUser.email,
-      role: updatedUser.role,
-      isVerified: updatedUser.isVerified,
-      createdAt: updatedUser.createdAt,
-    };
-
     return {
-      message: 'Login successful',
-      user: cleanUser,
       accessToken,
       refreshToken,
+      user: loggedInUser,
     };
-  }
-
-  static async loginAsAdmin(credentials: LoginInput, deviceInfo: DeviceInfo) {
-    const [user] = await db
-      .select({ role: usersTable.role })
-      .from(usersTable)
-      .where(eq(usersTable.email, credentials.email.toLowerCase()));
-
-    if (!user || user.role !== 'admin') {
-      throw new ApiError(403, 'Invalid credentials');
-    }
-
-    if (user.role !== 'admin') {
-      throw new ApiError(403, 'Invalid credentials');
-    }
-
-    return AuthService.login(credentials, deviceInfo);
   }
 
   static async resendVerificationMail(email: string, deviceInfo: DeviceInfo) {
@@ -257,7 +232,7 @@ export class AuthService {
         emailVerifyTokenSentAt: usersTable.emailVerifyTokenSentAt,
       })
       .from(usersTable)
-      .where(eq(usersTable.email, email.toLowerCase()));
+      .where(eq(usersTable.email, email));
 
     if (!user) {
       return {
@@ -273,13 +248,34 @@ export class AuthService {
       };
     }
 
-    const { token, hashedToken, tokenExpiry } = await TempToken.generate();
+    if (user.emailVerifyTokenSentAt) {
+      const secondsSinceSent =
+        (Date.now() - user.emailVerifyTokenSentAt.getTime()) / 1000;
+      if (secondsSinceSent < RESEND_COOLDOWN_SECONDS) {
+        const waitSeconds = Math.ceil(
+          RESEND_COOLDOWN_SECONDS - secondsSinceSent
+        );
+        throw new ApiError(
+          429,
+          `Please wait ${waitSeconds} seconds before requesting another email`
+        );
+      }
+    }
+
+    const { token, hashedToken, expiry } = await Tokens.generateTempTokens();
+
+    const verificationLink = `${env.FRONTEND_URL}/verify-email?token=${token}`;
+    try {
+      await sendMail(user, verificationLink, 'verification');
+    } catch (err) {
+      throw new ApiError(500, 'Error sending email. Please try again');
+    }
 
     await db
       .update(usersTable)
       .set({
         emailVerifyToken: hashedToken,
-        emailVerifyTokenExpiry: tokenExpiry,
+        emailVerifyTokenExpiry: expiry,
         emailVerifyTokenSentAt: new Date(),
       })
       .where(eq(usersTable.id, user.id));
@@ -293,10 +289,9 @@ export class AuthService {
       'Verification email resent'
     );
 
-    const verificationLink = `${env.FRONTEND_URL}/verify-email?token=${token}`;
-    sendMail(user, verificationLink, 'verification');
-
-    return { message: 'Verification email sent successfully' };
+    return {
+      message: 'Verification email resent.',
+    };
   }
 
   static async refreshAccessToken(
@@ -340,7 +335,7 @@ export class AuthService {
         'Token reuse detected!!'
       );
 
-      await AuthTokens.revokeTokenFamily(storedToken.tokenFamilyId);
+      await Tokens.revokeTokenFamily(storedToken.tokenFamilyId);
 
       throw new ApiError(
         401,
@@ -357,21 +352,20 @@ export class AuthService {
         role: usersTable.role,
         emailVerified: usersTable.emailVerified,
         isActive: usersTable.isActive,
+        createdAt: usersTable.createdAt,
       })
       .from(usersTable)
       .where(
         and(
           eq(usersTable.id, storedToken.userId),
-          eq(usersTable.emailVerified, true)
+          eq(usersTable.emailVerified, true),
+          eq(usersTable.isActive, true)
         )
       )
       .limit(1);
 
     if (!user) {
-      await db
-        .delete(refreshTokensTable)
-        .where(eq(refreshTokensTable.userId, storedToken.userId));
-
+      await Tokens.revokeTokenFamily(storedToken.tokenFamilyId);
       throw new ApiError(401, 'Session expired. Please sign in again.');
     }
 
@@ -381,10 +375,10 @@ export class AuthService {
         .set({ rotatedAt: new Date() })
         .where(eq(refreshTokensTable.id, storedToken.id));
 
-      return await AuthTokens.generateAndUpdate(
+      return await Tokens.generateAuthTokens(
         user,
-        storedToken.tokenFamilyId,
         deviceInfo,
+        storedToken.tokenFamilyId,
         tx
       );
     });
@@ -395,13 +389,11 @@ export class AuthService {
   }
 
   static async logout(refreshToken: string, deviceInfo: DeviceInfo) {
-    if (!refreshToken) {
-      return { message: 'You have been signed out successfully.' };
-    }
     const hashedToken = cryptoHash(refreshToken);
 
     const [deletedToken] = await db
-      .delete(refreshTokensTable)
+      .update(refreshTokensTable)
+      .set({ isRevoked: true, revokedAt: new Date() })
       .where(eq(refreshTokensTable.tokenHash, hashedToken))
       .returning({ userId: refreshTokensTable.userId });
 
@@ -420,8 +412,9 @@ export class AuthService {
 
   static async logoutAll(userId: string, deviceInfo: DeviceInfo) {
     await db
-      .delete(refreshTokensTable)
-      .where(eq(refreshTokensTable.userId, userId));
+      .update(refreshTokensTable)
+      .set({ isRevoked: true, revokedAt: new Date() })
+      .returning({ userId: refreshTokensTable.userId });
 
     logger.info(
       {
@@ -431,12 +424,10 @@ export class AuthService {
       'User logged out from all devices'
     );
 
-    return { message: 'Successful logout from all devices' };
+    return { message: 'Logout successful' };
   }
 
   static async forgotPassword(email: string, deviceInfo: DeviceInfo) {
-    const normalisedEmail = email.toLowerCase();
-
     const [user] = await db
       .select({
         id: usersTable.id,
@@ -445,41 +436,46 @@ export class AuthService {
         role: usersTable.role,
       })
       .from(usersTable)
-      .where(eq(usersTable.email, normalisedEmail))
+      .where(eq(usersTable.email, email))
       .limit(1);
 
     if (!user) {
       logger.info(
-        `Password reset requested for non-existent email: ${normalisedEmail}`
+        { email, ip: deviceInfo.ip },
+        `Password reset requested for unregistered email: ${email}`
       );
 
       return {
-        success: true,
         message: `If email exists, We'll send a reset link`,
       };
     }
 
-    await db
-      .delete(passwordResetTokensTable)
-      .where(eq(passwordResetTokensTable.userId, user.id));
-
     const {
       token,
       hashedToken: tokenHash,
-      tokenExpiry: expiresAt,
-    } = await TempToken.generate();
-
-    await db.insert(passwordResetTokensTable).values({
-      userId: user.id,
-      tokenHash,
-      expiresAt,
-      ipAddress: deviceInfo.ip,
-      attempts: 0,
-    });
+      expiry: expiresAt,
+    } = await Tokens.generateTempTokens();
 
     const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${token}`;
+    try {
+      await sendMail(user, resetUrl, 'forgotPassword');
+    } catch (err) {
+      throw new ApiError(500, 'Error sending email. Please try again');
+    }
 
-    sendMail(user, resetUrl, 'forgotPassword');
+    await Promise.all([
+      await db
+        .delete(passwordResetTokensTable)
+        .where(eq(passwordResetTokensTable.userId, user.id)),
+
+      await db.insert(passwordResetTokensTable).values({
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+        ipAddress: deviceInfo.ip,
+        attempts: 0,
+      }),
+    ]);
 
     logger.info(
       {
@@ -498,16 +494,11 @@ export class AuthService {
   }
 
   static async resetPassword(
-    passwordResetToken: string,
-    passwords: {
-      newPassword: string;
-      confirmNewPassword: string;
-    },
+    token: string,
+    newPassword: string,
     deviceInfo: DeviceInfo
   ) {
-    const { newPassword } = passwords;
-
-    const hashedToken = cryptoHash(passwordResetToken);
+    const hashedToken = cryptoHash(token);
 
     const [resetToken] = await db
       .select()
@@ -518,25 +509,26 @@ export class AuthService {
     if (!resetToken) {
       throw new ApiError(
         403,
-        'This password reset link is invalid or has expired. Please request a new one.'
+        'This password reset link is invalid. Please request a new one.'
       );
     }
 
-    if (resetToken.expiresAt < new Date()) {
+    if (resetToken.used || resetToken.expiresAt < new Date()) {
       await db
-        .delete(passwordResetTokensTable)
+        .update(passwordResetTokensTable)
+        .set({ attempts: sql`${passwordResetTokensTable.attempts} + 1` })
         .where(eq(passwordResetTokensTable.id, resetToken.id));
 
       throw new ApiError(
         403,
-        'This password reset link has expired. Please request a new one.'
+        'This password reset link is invalid or has expired.'
       );
     }
 
-    if (resetToken.used) {
+    if (resetToken.attempts >= 5) {
       throw new ApiError(
         403,
-        'This password reset link has already been used. Please request a new one if needed.'
+        'This reset link has been invalidated. Please request a new one.'
       );
     }
 
@@ -587,6 +579,7 @@ export class AuthService {
         .set({
           used: true,
           usedAt: new Date(),
+          attempts: sql`${passwordResetTokensTable.attempts} + 1`,
         })
         .where(eq(passwordResetTokensTable.id, resetToken.id));
 
@@ -595,7 +588,14 @@ export class AuthService {
         .where(eq(refreshTokensTable.userId, user.id));
     });
 
-    sendMail(user, '', 'changePassword');
+    try {
+      await sendMail(user, '', 'changePassword');
+    } catch (err) {
+      logger.error(
+        { userId: user.id },
+        'Failed to send password change confirmation email'
+      );
+    }
 
     logger.info(
       {
@@ -606,10 +606,6 @@ export class AuthService {
       },
       'Password reset audit:'
     );
-
-    return {
-      message: `Password reset was successful`,
-    };
   }
 
   static async changePassword(
@@ -617,7 +613,6 @@ export class AuthService {
     passwords: {
       currentPassword: string;
       newPassword: string;
-      confirmNewPassword: string;
     },
     deviceInfo: DeviceInfo
   ) {
@@ -634,7 +629,14 @@ export class AuthService {
       .where(eq(usersTable.id, userId));
 
     if (!user) {
-      throw new ApiError(404, 'User not found');
+      throw new ApiError(401, 'User not found');
+    }
+
+    if (newPassword === currentPassword) {
+      throw new ApiError(
+        422,
+        'Your new password must be different from your current password.'
+      );
     }
 
     const iscurrentPasswordCorrect = await bcryptCompare(
@@ -644,13 +646,6 @@ export class AuthService {
 
     if (!iscurrentPasswordCorrect) {
       throw new ApiError(403, 'Your current password is incorrect');
-    }
-
-    if (newPassword === currentPassword) {
-      throw new ApiError(
-        422,
-        'Your new password must be different from your current password.'
-      );
     }
 
     const newPasswordHash = await bcryptHash(newPassword);
@@ -669,8 +664,14 @@ export class AuthService {
         .where(eq(refreshTokensTable.userId, user.id));
     });
 
-    sendMail(user, '', 'changePassword');
-
+    try {
+      await sendMail(user, '', 'changePassword');
+    } catch (err) {
+      logger.error(
+        { userId: user.id },
+        'Failed to send password change confirmation email'
+      );
+    }
     logger.info(
       {
         id: user.id,
@@ -680,20 +681,9 @@ export class AuthService {
       },
       'Password change audit:'
     );
-
-    return;
   }
 
   static async updateUser(userId: string, data: updateInput) {
-    const [existing] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, userId));
-
-    if (!existing) {
-      throw new ApiError(404, 'User not found');
-    }
-
     const [updatedUser] = await db
       .update(usersTable)
       .set(data)
@@ -707,17 +697,17 @@ export class AuthService {
       });
 
     if (!updatedUser) {
-      throw new ApiError(500, 'Error updating address');
+      throw new ApiError(500, 'Error updating user');
     }
 
-    return { updatedUser };
+    return updatedUser;
   }
 
   static async verifyPassword(userId: string, password: string) {
     const [existing] = await db
       .select({
-        password: usersTable.passwordHash,
         id: usersTable.id,
+        password: usersTable.passwordHash,
         firstName: usersTable.firstName,
         email: usersTable.email,
       })
@@ -725,7 +715,7 @@ export class AuthService {
       .where(eq(usersTable.id, userId));
 
     if (!existing) {
-      throw new ApiError(404, 'User not found');
+      throw new ApiError(401, 'User not found');
     }
 
     const isPasswordValid = await bcryptCompare(password, existing.password);
@@ -781,7 +771,15 @@ export class AuthService {
       throw new ApiError(500, 'Error deleting user');
     }
     const link = `${process.env.FRONTEND_URL}/`;
-    await sendMail(existing, link);
+
+    try {
+      await sendMail(existing, link, 'accountDeletion');
+    } catch (err) {
+      logger.error(
+        { userId: existing.id },
+        'Failed to send user deletion email'
+      );
+    }
 
     return;
   }

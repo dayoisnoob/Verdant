@@ -1,84 +1,74 @@
 import crypto from 'crypto';
-import { cryptoHash, randomBytes } from './hash.util.js';
-import type { DeviceInfo, JwtPayload, User } from '../../types/types.js';
-import { db } from '../../config/db.js';
-import { jwtToken } from './jwt.util.js';
-import { refreshTokensTable } from '../../models/refreshToken.js';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { logger } from '../../config/pino.js';
 import { eq } from 'drizzle-orm';
+import { db } from '../../config/db.js';
+import { logger } from '../../config/pino.js';
+import { refreshTokensTable } from '../../models/refreshToken.js';
+import type { DeviceInfo, JwtPayload, User } from '../../types/types.js';
+import { tokenExpiry } from '../helpers.js';
+import { cryptoHash, randomBytes } from './hash.util.js';
+import { jwtToken } from './jwt.util.js';
 
-export class TempToken {
-  static async generate(): Promise<{
-    token: string;
-    hashedToken: string;
-    tokenExpiry: Date;
-  }> {
-    const token = this.generateToken();
+type DbOrTx = Parameters<Parameters<typeof db.transaction>[0]>[0] | typeof db;
+type PartialUser = Pick<
+  User,
+  | 'id'
+  | 'email'
+  | 'role'
+  | 'firstName'
+  | 'lastName'
+  | 'emailVerified'
+  | 'isActive'
+  | 'createdAt'
+>;
+
+export class Tokens {
+  static async generateTempTokens() {
+    const token = crypto.randomBytes(64).toString('hex');
     const hashedToken = cryptoHash(token);
-    const tokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    const expiry = tokenExpiry('temp');
 
-    return { token, hashedToken, tokenExpiry };
+    return { token, hashedToken, expiry };
   }
 
-  static generateToken() {
-    return crypto.randomBytes(64).toString('hex');
-  }
-}
-
-export class AuthTokens {
-  static async generateAndUpdate(
-    user: Pick<
-      User,
-      | 'id'
-      | 'email'
-      | 'role'
-      | 'firstName'
-      | 'lastName'
-      | 'emailVerified'
-      | 'isActive'
-      | 'createdAt'
-    >,
-    tokenFamilyId: string,
+  static async generateAuthTokens(
+    userData: PartialUser,
     deviceInfo: DeviceInfo,
-    transaction: NodePgDatabase = db
+    storedFamilyId?: string,
+    tx: DbOrTx = db
   ) {
     const jwtPayload: JwtPayload = {
-      id: user.id,
-      role: user.role,
-      email: user.email,
-      isActive: user.isActive,
+      id: userData.id,
+      role: userData.role,
+      email: userData.email,
+      isActive: userData.isActive,
     };
 
     const accessToken = jwtToken(jwtPayload);
     const refreshToken = randomBytes();
     const hashedRefreshToken = cryptoHash(refreshToken);
+    const tokenFamilyId = storedFamilyId ?? crypto.randomUUID();
 
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-    console.log('login', refreshToken);
-
-    await transaction.insert(refreshTokensTable).values({
-      userId: user.id,
+    await db.insert(refreshTokensTable).values({
+      userId: userData.id,
       tokenHash: hashedRefreshToken,
       tokenFamilyId,
-      expiresAt,
+      expiresAt: tokenExpiry('refresh'),
       lastUsedAt: new Date(),
       ipAddress: deviceInfo?.ip || null,
       userAgent: deviceInfo?.userAgent || null,
       deviceId: deviceInfo?.deviceId || null,
     });
 
-    const cleanUser = {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      isVerified: user.emailVerified,
-      createdAt: user.createdAt,
+    const user = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      role: userData.role,
+      isVerified: userData.emailVerified,
+      createdAt: userData.createdAt,
     };
 
-    return { accessToken, refreshToken, updatedUser: cleanUser };
+    return { accessToken, refreshToken, user };
   }
 
   static async revokeTokenFamily(tokenFamilyId: string) {

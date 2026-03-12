@@ -7,28 +7,31 @@ import {
   forgotPasswordRecentLimiter,
   loginEmailLimiter,
   loginIpLimiter,
+  refreshTokenLimiter,
   registerIpLimiter,
   resendVerificationLimiter,
+  resetPasswordLimiter,
 } from '../middlewares/rateLimit.ts';
-import { validateInput } from '../middlewares/validation.ts';
+import { validateInput, validateUrlParams } from '../middlewares/validation.ts';
 import { asyncHandler } from '../utils/asyncHandler.ts';
 import {
   changePasswordSchema,
   deleteAccountSchema,
-  forgotPasswordSchemaValidation,
-  loginSchemaValidation,
+  forgotPasswordSchema,
+  loginSchema,
   resendEmailSchemaValidation,
   resetPasswordSchemaValidation,
-  signupSchemaValidation,
+  signupSchema,
   updateUserSchema,
 } from '../validations/auth.validations.ts';
+import { urlParamsSchema } from '../validations/urlParams.ts';
 
 const router = Router();
 
 router.post(
   '/register',
   registerIpLimiter,
-  validateInput(signupSchemaValidation),
+  validateInput(signupSchema),
   asyncHandler(AuthController.register)
 );
 
@@ -38,16 +41,8 @@ router.post(
   '/login',
   loginEmailLimiter,
   loginIpLimiter,
-  validateInput(loginSchemaValidation),
+  validateInput(loginSchema),
   asyncHandler(AuthController.login)
-);
-
-router.post(
-  '/admin/login',
-  // loginEmailLimiter,
-  // loginIpLimiter,
-  validateInput(loginSchemaValidation),
-  asyncHandler(AuthController.loginAsAdmin)
 );
 
 router.post(
@@ -57,20 +52,25 @@ router.post(
   asyncHandler(AuthController.resendVerificationMail)
 );
 
-router.post('/refresh-token', asyncHandler(AuthController.refreshAccessToken));
+router.post(
+  '/refresh-token',
+  refreshTokenLimiter,
+  asyncHandler(AuthController.refreshAccessToken)
+);
 
 router.post(
   '/forgot-password',
   forgotPasswordRecentLimiter,
   forgotPasswordHourlyLimiter,
-  validateInput(forgotPasswordSchemaValidation),
-  AuthController.forgotPassword
+  validateInput(forgotPasswordSchema),
+  asyncHandler(AuthController.forgotPassword)
 );
 
 router.post(
   '/reset-password',
+  resetPasswordLimiter,
   validateInput(resetPasswordSchemaValidation),
-  AuthController.resetPassword
+  asyncHandler(AuthController.resetPassword)
 );
 
 // //Authenticated Routes
@@ -81,9 +81,9 @@ router.post('/logout-all', asyncHandler(AuthController.logoutAll));
 
 router.post(
   '/change-password',
-  // changePasswordLimiter,
+  changePasswordLimiter,
   validateInput(changePasswordSchema),
-  AuthController.changePassword
+  asyncHandler(AuthController.changePassword)
 );
 
 router.patch(

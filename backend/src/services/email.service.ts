@@ -3,7 +3,12 @@ import nodemailer from 'nodemailer';
 import { logger } from '../config/pino.ts';
 import type { SendMail } from '../types/types.ts';
 
-type EmailType = 'verification' | 'forgotPassword' | 'changePassword';
+type EmailType =
+  | 'verification'
+  | 'forgotPassword'
+  | 'changePassword'
+  | 'accountDeletion'
+  | 'orderCreation';
 
 interface EmailConfig {
   intro: string;
@@ -37,7 +42,7 @@ export const sendMail = async (
 ): Promise<void> => {
   const emailConfig: Record<EmailType, EmailConfig> = {
     verification: {
-      intro: "Welcome to Nova Store! We're very excited to have you on board.",
+      intro: "Welcome to Verdant! We're very excited to have you on board.",
       instructions: 'Please click the button below to verify your email',
       buttonText: 'Verify Email',
       subject: 'Email verification',
@@ -52,6 +57,16 @@ export const sendMail = async (
       intro: 'Your password was changed',
       instructions: 'If this was not you, please contact support',
       subject: 'Password was changed',
+    },
+    accountDeletion: {
+      intro: `We're sad to see you go`,
+      instructions: 'If this was not you, please contact support',
+      subject: 'Account deleted',
+    },
+    orderCreation: {
+      intro: `We've received your order and we're processing it`,
+      instructions: 'If this was not you, please contact support',
+      subject: 'Order deleted',
     },
   };
 

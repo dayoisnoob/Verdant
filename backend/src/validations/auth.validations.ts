@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const signupSchemaValidation = z.object({
+export const signupSchema = z.object({
   firstName: z.string().min(2).trim(),
   lastName: z.string().min(2).trim().optional(),
   email: z.string().email('please enter a valid email').trim().toLowerCase(),
@@ -12,7 +12,7 @@ export const signupSchemaValidation = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number'),
 });
 
-export const loginSchemaValidation = z.object({
+export const loginSchema = z.object({
   email: z.string().email('please enter a valid email').trim().toLowerCase(),
   password: z.string().min(1, 'password is required'),
 });
@@ -21,7 +21,7 @@ export const resendEmailSchemaValidation = z.object({
   email: z.string().email('please enter a valid email').trim().toLowerCase(),
 });
 
-export const forgotPasswordSchemaValidation = z.object({
+export const forgotPasswordSchema = z.object({
   email: z.string().email('please enter a valid email').trim().toLowerCase(),
 });
 
@@ -57,15 +57,14 @@ export const changePasswordSchema = z
   });
 
 export const updateUserSchema = z.object({
-  firstName: z.string().min(2).trim(),
+  firstName: z.string().min(2).trim().optional(),
   lastName: z.string().min(2).trim().optional(),
-  email: z.string().email('please enter a valid email').trim().toLowerCase(),
 });
 
 export const deleteAccountSchema = z.object({
   password: z.string().min(1, 'password is required'),
 });
 
-export type SignupInput = z.infer<typeof signupSchemaValidation>;
-export type LoginInput = z.infer<typeof loginSchemaValidation>;
+export type SignupInput = z.infer<typeof signupSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
 export type updateInput = z.infer<typeof updateUserSchema>;
