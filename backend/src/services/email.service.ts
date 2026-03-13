@@ -42,31 +42,36 @@ export const sendMail = async (
 ): Promise<void> => {
   const emailConfig: Record<EmailType, EmailConfig> = {
     verification: {
-      intro: "Welcome to Verdant! We're very excited to have you on board.",
-      instructions: 'Please click the button below to verify your email',
-      buttonText: 'Verify Email',
-      subject: 'Email verification',
+      intro: 'Welcome to Verdant! One last step before you can start shopping.',
+      instructions:
+        'Click the button below to verify your email address. This link expires in 1 hour.',
+      buttonText: 'Verify My Email',
+      subject: 'Verify your Verdant account',
     },
     forgotPassword: {
-      intro: 'We received a request to reset your password',
-      instructions: 'Please click the button below to reset your password',
-      buttonText: 'Reset Password',
-      subject: 'Reset Your Password',
+      intro:
+        'We received a request to reset the password for your Verdant account.',
+      instructions:
+        'Click the button below to choose a new password. This link expires in 1 hour and can only be used once.',
+      buttonText: 'Reset My Password',
+      subject: 'Reset your Verdant password',
     },
     changePassword: {
-      intro: 'Your password was changed',
+      intro: 'Your Verdant account password was successfully changed.',
       instructions: 'If this was not you, please contact support',
-      subject: 'Password was changed',
+      subject: 'Your password has been changed',
     },
     accountDeletion: {
-      intro: `We're sad to see you go`,
-      instructions: 'If this was not you, please contact support',
-      subject: 'Account deleted',
+      intro: 'Your Verdant account has been permanently deleted.',
+      instructions:
+        "All your personal data has been removed. Your order history has been retained for legal and accounting purposes. If you didn't request this, please contact our support team immediately.",
+      subject: 'Your account has been deleted',
     },
     orderCreation: {
-      intro: `We've received your order and we're processing it`,
-      instructions: 'If this was not you, please contact support',
-      subject: 'Order deleted',
+      intro: 'Your order has been confirmed and is being prepared.',
+      instructions:
+        "Our farmers are already picking your produce. You'll receive another email once your order is on its way.",
+      subject: "Order confirmed — we're on it",
     },
   };
 

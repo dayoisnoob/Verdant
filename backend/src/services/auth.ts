@@ -372,7 +372,7 @@ export class AuthService {
     const result = await db.transaction(async (tx) => {
       await tx
         .update(refreshTokensTable)
-        .set({ rotatedAt: new Date() })
+        .set({ rotatedAt: new Date(), isRevoked: true, revokedAt: new Date() })
         .where(eq(refreshTokensTable.id, storedToken.id));
 
       return await Tokens.generateAuthTokens(
@@ -665,7 +665,7 @@ export class AuthService {
     });
 
     try {
-      await sendMail(user, '', 'changePassword');
+      // await sendMail(user, '', 'changePassword');
     } catch (err) {
       logger.error(
         { userId: user.id },

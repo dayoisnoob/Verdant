@@ -1,6 +1,9 @@
+import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
+import { UserApi } from "@/types";
 import { ApiError } from "@/util";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
+import { getCart, mergeGuestCart } from "./api";
 
 // lib/shipping.ts
 export function calculateOrderTotal(subtotalPence: number): {
@@ -48,3 +51,20 @@ export function handleFormError<T extends FieldValues>(
   }
   toast.error(err.message ?? "Something went wrong");
 }
+
+export const initiateLogin = async (res: UserApi) => {
+  useAuthStore.getState().login(res.data.user, res.data.accessToken);
+
+  try {
+    const guestItems = useGuestCartStore.getState().items;
+    if (guestItems.length > 0) {
+      await mergeGuestCart(guestItems);
+      useGuestCartStore.getState().clearCart();
+    }
+
+    const cart = await getCart();
+    useCartStore.getState().setCart(cart);
+  } catch (err) {
+    console.error("Cart sync failed after login", err);
+  }
+};

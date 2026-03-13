@@ -26,7 +26,7 @@ export const getWindows = (period: number) => {
 export const tokenExpiry = (token: 'refresh' | 'temp') => {
   return token === 'refresh'
     ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    : new Date(Date.now() + 15 * 60 * 1000);
+    : new Date(Date.now() + 60 * 60 * 1000);
 };
 
 export const RESEND_COOLDOWN_SECONDS = 60;

@@ -1,19 +1,13 @@
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 // import type { NewCartItem } from '../schema/cart.schema';
-import { cartsTable, type Cart } from '../models/cart';
 import { db } from '../config/db';
-import {
-  cartItemsTable,
-  type CartItem,
-  type NewCartItem,
-} from '../models/cartItems';
-import { CouponController } from '../controllers/coupon';
-import { CouponService } from './coupon';
-import { ApiError } from '../utils/apiResponse';
 import { productsTable } from '../models';
+import { cartsTable, type Cart } from '../models/cart';
+import { cartItemsTable, type CartItem } from '../models/cartItems';
+import { ApiError } from '../utils/apiResponse';
+import { CouponService } from './coupon';
 
 export type CartWithItems = Cart & { items: CartItem[] };
-/** Get or create a cart for a user. Always use this — never query carts directly. */
 
 export class CartService {
   static async getCart(userId: string) {
@@ -21,18 +15,17 @@ export class CartService {
   }
 
   static async addItem(userId: string, productId: string, quantity: number) {
-    const cart = await CartService.getOrCreateCart(userId);
-
-    if (!productId) throw new ApiError(400, 'ProductId is required');
+    const { cart } = await CartService.getOrCreateCart(userId);
 
     const [product] = await db
       .select()
       .from(productsTable)
-      .where(eq(productsTable.id, productId));
+      .where(
+        and(eq(productsTable.id, productId), eq(productsTable.inStock, true))
+      );
 
-    if (!product) throw new ApiError(404, 'Product not found');
-
-    if (!product.inStock) throw new ApiError(400, 'ProductId is out of stock');
+    if (!product)
+      throw new ApiError(404, 'Product not found or is out of stock');
 
     const payload = {
       productId: product.id,
@@ -50,7 +43,7 @@ export class CartService {
 
     if (existing) {
       const newQty = existing.quantity + (payload.quantity ?? 1);
-      return CartService.updateQuantity(userId, existing.productId, newQty);
+      return CartService.updateQuantity(userId, existing.id, newQty);
     }
 
     const [item] = await db
@@ -63,19 +56,17 @@ export class CartService {
 
   static async updateQuantity(
     userId: string,
-    productId: string,
+    itemId: string,
     quantity: number
   ) {
-    if (quantity < 1) return;
-
-    const cart = await CartService.getOrCreateCart(userId);
+    const { cart } = await CartService.getOrCreateCart(userId);
 
     const [updated] = await db
       .update(cartItemsTable)
       .set({ quantity, updatedAt: new Date() })
       .where(
         and(
-          eq(cartItemsTable.productId, productId),
+          eq(cartItemsTable.id, itemId),
           eq(cartItemsTable.cartId, cart.id as string)
         )
       )
@@ -97,29 +88,25 @@ export class CartService {
     return { quantity: updated.quantity };
   }
 
-  static async removeItem(userId: string, productId: string) {
-    const cart = await CartService.getOrCreateCart(userId);
+  static async removeItem(userId: string, itemId: string) {
+    const { cart } = await CartService.getOrCreateCart(userId);
 
     await db
       .delete(cartItemsTable)
       .where(
         and(
-          eq(cartItemsTable.productId, productId),
+          eq(cartItemsTable.id, itemId),
           eq(cartItemsTable.cartId, cart.id as string)
         )
       );
-
-    return;
   }
 
   static async clearCart(userId: string) {
-    const cart = await CartService.getOrCreateCart(userId);
+    const { cart } = await CartService.getOrCreateCart(userId);
 
     await db
       .delete(cartItemsTable)
       .where(eq(cartItemsTable.cartId, cart.id as string));
-
-    return { success: true };
   }
 
   static async mergeGuestCart(
@@ -133,7 +120,7 @@ export class CartService {
   }
 
   static async getCartTotal(userId: string) {
-    const cart = await CartService.getOrCreateCart(userId);
+    const { cart } = await CartService.getOrCreateCart(userId);
 
     const subtotalPence = cart.items.reduce(
       (sum, item) => sum + item.pricePence * item.quantity,
@@ -185,7 +172,7 @@ export class CartService {
         .from(cartItemsTable)
         .where(eq(cartItemsTable.cartId, existing.id));
 
-      return { ...existing, items };
+      return { cart: { ...existing, items } };
     }
 
     const [created] = await db
@@ -193,6 +180,6 @@ export class CartService {
       .values({ userId })
       .returning();
 
-    return { ...created, items: [] };
+    return { cart: { ...created, items: [] } };
   }
 }

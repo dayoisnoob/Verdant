@@ -76,11 +76,10 @@ export interface UserData {
 }
 
 export interface UserApi {
-  success: string;
-  statusCode: number;
-  message: string;
-  data: UserData;
-  accessToken: string;
+  data: {
+    user: UserData;
+    accessToken: string;
+  };
 }
 
 export interface User {
@@ -112,36 +111,40 @@ export interface CartItems {
 }
 
 export interface CartApi {
-  id: string;
-  userId: string;
-  couponCode: string;
-  discount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  items: {
+  cart: {
     id: string;
-    productId: string;
-    name: string;
-    slug: string;
-    imageUrl: string;
-    unit: string;
-    farm: string;
-    isOrganic: boolean;
-    pricePence: number;
-    quantity: number;
-  }[];
+    userId: string;
+    couponCode: string;
+    discount: number;
+    createdAt: Date;
+    updatedAt: Date;
+    items: {
+      id: string;
+      productId: string;
+      name: string;
+      slug: string;
+      imageUrl: string;
+      unit: string;
+      farm: string;
+      isOrganic: boolean;
+      pricePence: number;
+      quantity: number;
+    }[];
+  };
 }
 
 export interface Totals {
-  subtotalPence: number;
-  discountPence: number;
-  deliveryPence: number;
-  totalPence: number;
-  subtotal: string;
-  discount: string;
-  delivery: string;
-  total: string;
-  itemCount: number;
+  totals: {
+    subtotalPence: number;
+    discountPence: number;
+    deliveryPence: number;
+    totalPence: number;
+    subtotal: string;
+    discount: string;
+    delivery: string;
+    total: string;
+    itemCount: number;
+  };
 }
 
 //////////////////////////////////////////
@@ -214,15 +217,17 @@ export interface OrderSession {
 //////////// ADDRESS TYPES ///////////////
 //////////////////////////////////////////
 
-export interface Address {
-  id: string;
-  firstName: string;
-  lastName?: string;
-  phone1: string;
-  phone2?: string;
-  streetAddress: string;
-  state: string;
-  isDefault: boolean;
+export interface AddressApi {
+  address: {
+    id: string;
+    firstName: string;
+    lastName?: string;
+    phone1: string;
+    phone2?: string;
+    streetAddress: string;
+    state: string;
+    isDefault: boolean;
+  };
 }
 
 //////////////////////////////////////////
@@ -322,4 +327,8 @@ export interface AdminStore {
   accessToken: string | null;
   login: (admin: AdminUser, accessToken: string) => void;
   logout: () => void;
+}
+
+export interface ApplyCouponApi {
+  discount: number;
 }

@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { CartService } from '../services/cart';
-import { ApiResponse } from '../utils/apiResponse';
+import { ApiError, ApiResponse } from '../utils/apiResponse';
 
 export class CartController {
   static async getCart(req: Request, res: Response) {
@@ -15,33 +15,33 @@ export class CartController {
     const userId = req.user!.id;
     const { productId, quantity = 1 } = req.body;
 
+    if (!productId) throw new ApiError(400, 'ProductId is required');
+
     const item = await CartService.addItem(userId, productId, Number(quantity));
 
-    res.json(new ApiResponse(201, 'Item added successfully', item));
+    res.json(new ApiResponse(201, 'Item added successfully', { item }));
   }
 
   static async getTotal(req: Request, res: Response) {
     const userId = req.user!.id;
 
-    const total = await CartService.getCartTotal(userId);
-    res.json(new ApiResponse(200, 'Totals retrieved successfully', total));
+    const totals = await CartService.getCartTotal(userId);
+    res.json(new ApiResponse(200, 'Totals retrieved successfully', { totals }));
   }
 
   static async updateItem(req: Request, res: Response) {
     const userId = req.user!.id;
     const { itemId } = req.params;
-    const { newQuantity } = req.body;
+    const { quantity } = req.body;
 
-    if (newQuantity === undefined || newQuantity < 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'newQuantity must be >= 0' });
+    if (quantity === undefined || quantity < 0) {
+      throw new ApiError(400, 'New quantity must be >= 0');
     }
 
     const result = await CartService.updateQuantity(
       userId,
       itemId as string,
-      Number(newQuantity)
+      Number(quantity)
     );
 
     res.json(new ApiResponse(200, 'Item updated successfully', result));
@@ -49,9 +49,9 @@ export class CartController {
 
   static async removeItem(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { productId } = req.params;
+    const { itemId } = req.params;
 
-    await CartService.removeItem(userId, productId as string);
+    await CartService.removeItem(userId, itemId as string);
     res.json(new ApiResponse(200, 'Item removed successfully'));
   }
 
@@ -73,6 +73,6 @@ export class CartController {
     }
 
     const cart = await CartService.mergeGuestCart(userId, items);
-    res.json({ success: true, data: cart });
+    res.json({ success: true, data: { cart } });
   }
 }

@@ -98,6 +98,4 @@ router.delete(
   asyncHandler(AuthController.deleteUser)
 );
 
-// router.use(requireAdmin);
-
 export default router;

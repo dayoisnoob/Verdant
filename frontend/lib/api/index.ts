@@ -1,14 +1,14 @@
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
 import {
-  Address,
+  AddressApi,
   AllOrders,
   ApiResponse,
+  ApplyCouponApi,
   CartApi,
   OrderSession,
   // OrderSession,
   Product,
   ProductsApi,
-  RefreshTokenApi,
   SingleOrder,
   Totals,
   UserApi,
@@ -17,6 +17,7 @@ import {
 } from "@/types";
 import { handleApiError } from "@/util";
 import { AddressFormData, RegistrationForm } from "@/validations";
+import { initiateLogin } from "../helpers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "${BASE_URL}";
 
@@ -59,20 +60,12 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 // ----------------------------------------------------------------------------------------------
 
 export const login = async (data: { email: string; password: string }) => {
-  const user = await apiFetch<UserApi>(`/api/auth/login`, {
+  const res = await apiFetch<UserApi>(`/api/auth/login`, {
     method: "POST",
     body: JSON.stringify(data),
   });
 
-  useAuthStore.getState().login(user.data, user.accessToken);
-
-  const guestItems = useGuestCartStore.getState().items;
-
-  await mergeGuestCart(guestItems);
-  useGuestCartStore.getState().clearCart();
-
-  const cart = await getCart();
-  useCartStore.getState().setCart(cart);
+  await initiateLogin(res);
 };
 
 export const registerApi = async (data: RegistrationForm) => {
@@ -83,7 +76,9 @@ export const registerApi = async (data: RegistrationForm) => {
 };
 
 export const verifyEmail = async (token: string) => {
-  return apiFetch<{ message: string }>(`/api/auth/verify-email?token=${token}`);
+  const res = await apiFetch<UserApi>(`/api/auth/verify-email?token=${token}`);
+
+  await initiateLogin(res);
 };
 
 export const logoutApi = async () => {
@@ -186,7 +181,7 @@ export const updateItem = async ({
 }: {
   itemId: string;
   newQuantity: number;
-}): Promise<ApiResponse<CartApi>> => {
+}) => {
   return apiFetch(`/api/cart/items/${itemId}`, {
     method: "PATCH",
     body: JSON.stringify({ newQuantity }),
@@ -206,10 +201,8 @@ export const addItemToCartApi = async ({
   });
 };
 
-export const removeItemFromCartApi = async (
-  productId: string,
-): Promise<ApiResponse<CartApi>> => {
-  return apiFetch(`/api/cart/items/${productId}`, {
+export const removeItemFromCartApi = async (itemId: string) => {
+  return apiFetch(`/api/cart/items/${itemId}`, {
     method: "DELETE",
   });
 };
@@ -239,25 +232,24 @@ interface AddAddress {
   state: string;
 }
 
-export const addUserAddress = async (
-  data: AddAddress,
-): Promise<ApiResponse<Address>> => {
-  console.log(data);
-  return apiFetch("/api/address", {
+export const addUserAddress = async (data: AddAddress): Promise<AddressApi> => {
+  const res = await apiFetch<{ data: AddressApi }>("/api/address", {
     method: "POST",
     body: JSON.stringify(data),
   });
+
+  return res.data;
 };
 
-export const getUserAddresses = async (): Promise<ApiResponse<Address[]>> => {
-  return apiFetch("/api/address", {
+export const getUserAddresses = async (): Promise<AddressApi[]> => {
+  const res = await apiFetch<{ data: AddressApi[] }>("/api/address", {
     method: "GET",
   });
+
+  return res.data;
 };
 
-export const setDefaultAddress = async (
-  addressId: string,
-): Promise<ApiResponse<Address[]>> => {
+export const setDefaultAddress = async (addressId: string) => {
   return apiFetch(`/api/address/${addressId}/set-default`, {
     method: "PATCH",
   });
@@ -269,16 +261,14 @@ export const updateUserAddresses = async ({
 }: {
   addressId: string;
   data: AddressFormData;
-}): Promise<ApiResponse<null>> => {
+}) => {
   return apiFetch(`/api/address/${addressId}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 };
 
-export const removeAddress = async (
-  addressId: string,
-): Promise<ApiResponse<null>> => {
+export const removeAddress = async (addressId: string) => {
   return apiFetch(`/api/address/${addressId}`, {
     method: "DELETE",
   });
@@ -425,26 +415,22 @@ export const getCategories = async (): Promise<string[]> => {
   return res.data;
 };
 
-// ----------------------------------------------------------------------------------------------
-// ------------------------------------------COUPONS  API----------------------------------------
-// ----------------------------------------------------------------------------------------------
+// ------------COUPONS  API---------------
 
-export const applyCouponApi = (
+export const applyCouponApi = async (
   code: string,
   subtotal: number,
-): Promise<ApiResponse<Coupon>> => {
-  return apiFetch("/api/coupons/apply", {
+): Promise<ApplyCouponApi> => {
+  const res = await apiFetch<{ data: ApplyCouponApi }>("/api/coupons/apply", {
     method: "POST",
     body: JSON.stringify({ code, subtotal }),
   });
+
+  return res.data;
 };
 
-export const removeCouponApi = (): Promise<ApiResponse<Coupon>> => {
+export const removeCouponApi = () => {
   return apiFetch("/api/coupons", {
     method: "DELETE",
   });
 };
-
-interface Coupon {
-  discountAmount: number;
-}

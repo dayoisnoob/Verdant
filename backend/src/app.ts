@@ -1,5 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import helmet from 'helmet';
 import express, { type Request, type Response } from 'express';
 import { globalErrorHandler, notFoundError } from './middlewares/error';
 import addressRouter from './router/address.ts';
@@ -10,17 +11,22 @@ import orderRouter from './router/orders.ts';
 import paymentRouter from './router/payments.ts';
 import productRouter from './router/products.ts';
 import wishlistRouter from './router/wishlist.ts';
+import { env } from './config/env.ts';
+import { globalLimiter } from './middlewares/rateLimit.ts';
 
 export const app = express();
 
+app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: env.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+app.use(globalLimiter);
 
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
@@ -30,7 +36,7 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({
     status: 'up',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime,
+    uptime: process.uptime(),
   });
 });
 

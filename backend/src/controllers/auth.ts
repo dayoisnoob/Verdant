@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { COOKIE_OPTIONS } from '../constants/constants.js';
-import { AuthService } from '../services/auth.service.js';
+import { AuthService } from '../services/auth.js';
 import { ApiError, ApiResponse } from '../utils/apiResponse.js';
 
 export class AuthController {
@@ -12,7 +12,7 @@ export class AuthController {
     };
   }
 
-  static async register(req: Request, res: Response): Promise<void> {
+  static async register(req: Request, res: Response) {
     const user = await AuthService.register(
       req.body,
       AuthController.deviceInfo(req)

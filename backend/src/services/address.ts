@@ -45,7 +45,20 @@ export class AddressService {
     const [address] = await db
       .insert(addressesTable)
       .values(addressMetadata)
-      .returning();
+      .returning({
+        id: addressesTable.id,
+        firstName: addressesTable.firstName,
+        lastName: addressesTable.lastName,
+        phone1: addressesTable.phone1,
+        phone2: addressesTable.phone2,
+        streetAddress: addressesTable.streetAddress,
+        state: addressesTable.state,
+        isDefault: addressesTable.isDefault,
+      });
+
+    if (!address) {
+      throw new ApiError(500, 'Error adding address');
+    }
 
     return address;
   }

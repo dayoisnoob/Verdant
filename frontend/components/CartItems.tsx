@@ -12,26 +12,26 @@ export default function CartItems({
 }: {
   items: Items[];
   handleUpdateQuantity: (
-    productId: string,
+    itemId: string,
     delta: number,
     current: number,
   ) => void;
-  handleRemoveItem: (productId: string) => void;
+  handleRemoveItem: (itemId: string) => void;
 }) {
   const [pendingRemove, setPendingRemove] = useState<{
-    productId: string;
+    itemId: string;
     name: string;
   } | null>(null);
 
-  const { toggle } = useWishlistToggle(pendingRemove?.productId ?? "");
+  const { toggle } = useWishlistToggle(pendingRemove?.itemId ?? "");
 
-  function confirmRemove(productId: string, name: string) {
-    setPendingRemove({ productId, name });
+  function confirmRemove(itemId: string, name: string) {
+    setPendingRemove({ itemId, name });
   }
 
   function handleConfirmRemove() {
     if (!pendingRemove) return;
-    handleRemoveItem(pendingRemove.productId);
+    handleRemoveItem(pendingRemove.itemId);
     setPendingRemove(null);
   }
 
@@ -39,7 +39,7 @@ export default function CartItems({
     if (!pendingRemove) return;
 
     toggle(e);
-    handleRemoveItem(pendingRemove.productId);
+    handleRemoveItem(pendingRemove.itemId);
     setPendingRemove(null);
   }
 
@@ -88,9 +88,7 @@ export default function CartItems({
                   {/* Quantity stepper */}
                   <div className="flex items-center rounded-full border border-[#e5e5e5] overflow-hidden w-fit flex-shrink-0">
                     <button
-                      onClick={() =>
-                        handleUpdateQuantity(p.productId, -1, p.quantity)
-                      }
+                      onClick={() => handleUpdateQuantity(p.id, -1, p.quantity)}
                       className="w-8 h-8 flex items-center justify-center text-verdant-muted hover:bg-green-pale hover:text-green transition-colors text-base font-medium"
                     >
                       −
@@ -99,9 +97,7 @@ export default function CartItems({
                       {p.quantity}
                     </span>
                     <button
-                      onClick={() =>
-                        handleUpdateQuantity(p.productId, 1, p.quantity)
-                      }
+                      onClick={() => handleUpdateQuantity(p.id, 1, p.quantity)}
                       className="w-8 h-8 flex items-center justify-center text-verdant-muted hover:bg-green-pale hover:text-green transition-colors text-base font-medium"
                     >
                       +
