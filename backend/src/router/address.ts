@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { AddressController } from '../controllers/address';
 import { authenticate } from '../middlewares/auth.middleware';
-import { validateInput } from '../middlewares/validation';
+import { validateInput, validateUrlParams } from '../middlewares/validation';
 import { asyncHandler } from '../utils/asyncHandler';
 import { addressSchema } from '../validations/address';
+import { addressIdParamsSchema } from '../validations/urlParams';
 
 const router = Router();
 
@@ -18,11 +19,13 @@ router.post(
 
 router.patch(
   '/:addressId/set-default',
+  validateUrlParams(addressIdParamsSchema),
   asyncHandler(AddressController.setDefaultAddress)
 );
 
 router.patch(
   '/:addressId',
+  validateUrlParams(addressIdParamsSchema),
   validateInput(addressSchema),
   asyncHandler(AddressController.updateAddress)
 );

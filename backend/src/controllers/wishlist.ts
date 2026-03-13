@@ -5,30 +5,37 @@ import { WishlistService } from '../services/wishlist';
 export class WishlistController {
   static async addItem(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { productId } = req.query;
+    const { productId } = req.params;
 
     const result = await WishlistService.addItem(userId, productId as string);
 
-    res.json(new ApiResponse(201, result.message, result.newItem));
+    res
+      .status(201)
+      .json(
+        new ApiResponse(
+          result.added ? 201 : 200,
+          result.added
+            ? 'Item added to wishlist'
+            : 'Item removed from wishlist',
+          { item: result.item }
+        )
+      );
   }
 
   static async getItems(req: Request, res: Response) {
     const userId = req.user!.id;
 
-    const result = await WishlistService.getItems(userId);
+    const items = await WishlistService.getItems(userId);
 
-    res.json(new ApiResponse(200, result.message, result.items));
+    res.json(new ApiResponse(200, 'Wishlist retrieved', { items }));
   }
 
   static async removeItem(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { productId } = req.query;
+    const { productId } = req.params;
 
-    const result = await WishlistService.removeItem(
-      userId,
-      productId as string
-    );
+    await WishlistService.removeItem(userId, productId as string);
 
-    res.json(new ApiResponse(201, result.message));
+    res.json(new ApiResponse(200, 'Item removed from wishlist'));
   }
 }

@@ -3,48 +3,59 @@ import { ProductService } from '../services/products';
 import { ApiError, ApiResponse } from '../utils/apiResponse';
 
 export class ProductController {
-  static async getAllProducts(req: Request, res: Response) {
-    const { category, sort, page, limit, filter } = req.query;
+  static async createProduct(req: Request, res: Response) {
+    const result = await ProductService.createProduct(req.body);
 
-    const result = await ProductService.getProducts(
-      category as string,
-      sort as string,
-      Number(page),
-      Number(limit),
-      filter as string
-    );
-
-    res.json(new ApiResponse(200, result.message, result.data));
+    res.status(201).json(new ApiResponse(201, 'Product(s) created', result));
   }
 
   static async getProductBySlug(req: Request, res: Response) {
     const { slug } = req.params;
 
-    const result = await ProductService.getProductBySlug(slug as string);
+    const product = await ProductService.getProductBySlug(slug as string);
 
-    res.status(201).json(new ApiResponse(200, result.message, result.data));
+    res.json(new ApiResponse(200, 'Product fetched', { product }));
   }
 
-  static async createProduct(req: Request, res: Response) {
-    const result = await ProductService.createProduct(req.body);
+  static async getAllProducts(req: Request, res: Response) {
+    const { category, sort, page, limit, filter } = req.query as unknown as {
+      category: string;
+      sort: string;
+      page: number;
+      limit: number;
+      filter: string;
+    };
 
-    res.json(new ApiResponse(201, result.message, result.data));
+    const result = await ProductService.getProducts(
+      category as string,
+      sort as string,
+      page,
+      limit,
+      filter as string
+    );
+
+    res.json(
+      new ApiResponse(200, 'Products fetched', {
+        products: result.products,
+        pagination: result.pagination,
+      })
+    );
   }
 
   static async updateProduct(req: Request, res: Response) {
     const id = req.params.id as string;
 
-    const result = await ProductService.updateProduct(id, req.body);
+    const product = await ProductService.updateProduct(id, req.body);
 
-    res.json(new ApiResponse(200, result.message, result.data));
+    res.json(new ApiResponse(200, 'Product updated', { product }));
   }
 
   static async deleteProduct(req: Request, res: Response) {
     const id = req.params.id as string;
 
-    const result = await ProductService.deleteProduct(id);
+    const product = await ProductService.deleteProduct(id);
 
-    res.json(new ApiResponse(200, result.message, result.data));
+    res.json(new ApiResponse(200, 'Product deleted', { product }));
   }
 
   static async getCategories(req: Request, res: Response) {

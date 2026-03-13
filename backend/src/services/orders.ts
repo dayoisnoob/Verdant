@@ -26,34 +26,23 @@ export interface CreateOrderData {
   shippingFee?: number;
 }
 
-export type statusType =
-  | 'pending'
-  | 'paid'
-  | 'processing'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled'
-  | 'refunded';
-
 export class OrderService {
   static async createOrder(data: CreateOrderData) {
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    const totalCents = Math.round(data.amount * 100);
-    const subtotalCents = Math.round(data.subtotal * 100);
+    const orderNumber = `ORD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
     const shippingFee = data.shippingFee
       ? Math.round(data.shippingFee * 100)
       : null;
 
     const order = await db.transaction(async (tx) => {
-      const [newOrder] = await tx
+      const [orderRecord] = await tx
         .insert(ordersTable)
         .values({
           userId: data.userId,
           orderNumber,
           stripeSessionId: data.stripeSessionId,
           status: 'paid',
-          subtotalCents,
-          totalCents,
+          subtotalCents: data.subtotal,
+          totalCents: data.amount,
           currency: 'usd',
           discountAmount: data.discountAmount ?? null,
           customerEmail: data.customerEmail ?? null,
@@ -63,25 +52,25 @@ export class OrderService {
         })
         .returning();
 
-      if (!newOrder) throw new Error('Failed to create order');
+      if (!orderRecord) throw new Error('Failed to create order');
 
       await tx.insert(orderItemsTable).values(
         data.items.map((item) => ({
-          orderId: newOrder.id,
+          orderId: orderRecord.id,
           productId: item.productId,
           productName: item.name,
           image: item.image,
           quantity: item.quantity,
-          unitPriceCents: String(Math.round(item.price * 100)),
-          totalPriceCents: String(Math.round(item.price * item.quantity * 100)),
+          unitPriceCents: Math.round(item.price * 100),
+          totalPriceCents: Math.round(item.price * item.quantity * 100),
         }))
       );
 
-      await CartService.clearCart(data.userId);
-      await CouponService.removeCouponFromCart(data.userId);
-
-      return newOrder;
+      return orderRecord;
     });
+
+    await CartService.clearCart(data.userId);
+    await CouponService.removeCouponFromCart(data.userId);
 
     return order;
   }
@@ -99,6 +88,7 @@ export class OrderService {
         subtotalCents: ordersTable.subtotalCents,
         totalCents: ordersTable.totalCents,
         createdAt: ordersTable.createdAt,
+        totalCount: sql<number>`count(*) over()`,
       })
       .from(ordersTable)
       .where(eq(ordersTable.userId, userId))
@@ -125,29 +115,20 @@ export class OrderService {
             .where(inArray(orderItemsTable.orderId, orderIds))
         : [];
 
-    const result = orders.map((order) => ({
+    const allOrders = orders.map((order) => ({
       ...order,
       items: items.filter((item) => item.orderId === order.id),
     }));
 
-    const countResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(ordersTable)
-      .where(eq(ordersTable.userId, userId));
-
-    const total = Number(countResult[0]?.count ?? 0);
+    const total = Number(orders[0]?.totalCount ?? 0);
     const pagination = {
       total,
-      page,
-      limit,
+      page: parsedPage,
+      limit: parsedLimit,
       totalPages: Math.ceil(total / parsedLimit),
     };
 
-    return {
-      message: 'Orders fetched successfully',
-      data: result,
-      pagination,
-    };
+    return { allOrders, pagination };
   }
 
   static async getOrderBySessionId(userId: string, sessionId: string) {
@@ -166,14 +147,11 @@ export class OrderService {
       throw new ApiError(404, 'Order not found');
     }
 
-    return {
-      message: 'Order retrieved successfully.',
-      order,
-    };
+    return order;
   }
 
   static async getOrderById(userId: string, orderId: string) {
-    const [order] = await db
+    const [orderRecord] = await db
       .select({
         id: ordersTable.id,
         userId: ordersTable.userId,
@@ -205,7 +183,7 @@ export class OrderService {
       .where(and(eq(ordersTable.id, orderId), eq(ordersTable.userId, userId)))
       .limit(1);
 
-    if (!order) {
+    if (!orderRecord) {
       throw new ApiError(404, 'Order not found');
     }
 
@@ -214,15 +192,12 @@ export class OrderService {
       .from(orderItemsTable)
       .where(eq(orderItemsTable.orderId, orderId));
 
-    const formattedOrder = {
-      order,
+    const order = {
+      orderRecord,
       items,
     };
 
-    return {
-      message: 'Order retrieved successfully.',
-      formattedOrder,
-    };
+    return order;
   }
 
   // static async updateOrderStatus(

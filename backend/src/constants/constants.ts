@@ -8,3 +8,5 @@ export const COOKIE_OPTIONS: CookieOptions = {
   maxAge: +env.REFRESH_COOKIE_MAX_AGE,
   path: '/',
 };
+
+export const RESEND_COOLDOWN_SECONDS = 60;

@@ -1,88 +1,11 @@
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
 import { db } from '../config/db';
 import { productsTable } from '../models';
 import type { Product } from '../types/types';
 import { ApiError } from '../utils/apiResponse';
-// import { skuGenerator } from '../utils/helpers';
 import type { UpdateProductInput } from '../validations/products';
 
 export class ProductService {
-  static async getProducts(
-    category: string,
-    sort: string,
-    page: number,
-    limit: number,
-    filter?: string
-  ) {
-    const parsedLimit = Number(limit) || 12;
-    const parsedPage = Number(page) || 1;
-    const offset = (parsedPage - 1) * parsedLimit;
-
-    const conditions = [];
-    if (category && category !== 'All')
-      conditions.push(eq(productsTable.category, category));
-
-    if (filter === 'organic')
-      conditions.push(eq(productsTable.isOrganic, true));
-    if (filter === 'seasonal')
-      conditions.push(eq(productsTable.isSeasonal, true));
-    if (filter === 'on-sale') conditions.push(eq(productsTable.isOnSale, true));
-    if (filter === 'in-stock') conditions.push(eq(productsTable.inStock, true));
-
-    const sortMap: Record<string, any> = {
-      'price-asc': asc(productsTable.price),
-      'price-desc': desc(productsTable.price),
-      'name-asc': asc(productsTable.name),
-      newest: desc(productsTable.createdAt),
-    };
-
-    const where = conditions.length > 0 ? and(...conditions) : undefined;
-
-    const [products, countResult] = await Promise.all([
-      db
-        .select()
-        .from(productsTable)
-        .where(where)
-        .orderBy(sortMap[sort] ?? sortMap['newest'])
-        .limit(parsedLimit)
-        .offset(offset),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(productsTable)
-        .where(where),
-    ]);
-
-    const totalItems = Number(countResult[0]?.count ?? 0);
-    const pagination = {
-      totalItems,
-      currentPage: page,
-      limit,
-      totalPages: Math.ceil(totalItems / limit),
-    };
-
-    return {
-      message: 'Products fetched successfully',
-      data: { products, pagination },
-    };
-  }
-
-  static async getProductBySlug(slug: string) {
-    const [product] = await db
-      .select()
-      .from(productsTable)
-      .where(eq(productsTable.slug, slug))
-      .limit(1);
-
-    if (!product) {
-      throw new ApiError(
-        404,
-        'Product not found. It may have been removed or the link is incorrect.'
-      );
-    }
-
-    return { message: 'Product retrieved successfully.', data: product };
-  }
-
   static async createProduct(data: Product | Product[]) {
     if (Array.isArray(data)) {
       const slugs = data.map((d) => d.slug);
@@ -110,12 +33,7 @@ export class ProductService {
         throw new ApiError(500, 'Failed to create products. Please try again.');
       }
 
-      return {
-        message: 'Products created successfully',
-        data: {
-          count: newProducts.length,
-        },
-      };
+      return { count: newProducts.length, products: newProducts };
     }
 
     const [existing] = await db
@@ -140,58 +58,85 @@ export class ProductService {
       throw new ApiError(500, 'Failed to create product. Please try again.');
     }
 
-    return { message: 'Product created successfully', data: newProduct };
+    return { count: 1, product: newProduct };
   }
 
-  static async updateProduct(id: string, updateData: UpdateProductInput) {
-    const [existing] = await db
-      .select({ id: productsTable.id })
+  static async getProductBySlug(slug: string) {
+    const [product] = await db
+      .select()
       .from(productsTable)
-      .where(eq(productsTable.id, id))
+      .where(eq(productsTable.slug, slug))
       .limit(1);
 
-    if (!existing) {
-      throw new ApiError(404, 'Product not found');
+    if (!product) {
+      throw new ApiError(
+        404,
+        'Product not found. It may have been removed or the link is incorrect.'
+      );
     }
 
-    if (Object.keys(updateData).length === 0) {
-      throw new ApiError(400, 'No fields provided to update');
-    }
-
-    const [updatedProduct] = await db
-      .update(productsTable)
-      .set(updateData)
-      .where(eq(productsTable.id, id))
-      .returning();
-
-    if (!updatedProduct) {
-      throw new ApiError(500, 'Failed to update product. Please try again.');
-    }
-
-    return { message: 'Product updated successfully', data: updatedProduct };
+    return product;
   }
 
-  static async deleteProduct(id: string) {
-    const [existing] = await db
-      .select({ id: productsTable.id })
-      .from(productsTable)
-      .where(eq(productsTable.id, id))
-      .limit(1);
+  static async getProducts(
+    category: string,
+    sort: string,
+    page: number,
+    limit: number,
+    filter?: string
+  ) {
+    const parsedLimit = Number(limit) || 12;
+    const parsedPage = Number(page) || 1;
+    const offset = (parsedPage - 1) * parsedLimit;
 
-    if (!existing) {
-      throw new ApiError(404, 'Product not found');
-    }
+    const normalisedCategory = category
+      ? category.at(0)?.toUpperCase() + category.slice(1)
+      : 'All';
 
-    const [deletedProduct] = await db
-      .delete(productsTable)
-      .where(eq(productsTable.id, id))
-      .returning();
+    const conditions = [];
+    if (normalisedCategory && normalisedCategory !== 'All')
+      conditions.push(eq(productsTable.category, normalisedCategory));
 
-    if (!deletedProduct) {
-      throw new ApiError(500, 'Failed to delete product. Please try again.');
-    }
+    if (filter === 'organic')
+      conditions.push(eq(productsTable.isOrganic, true));
+    if (filter === 'seasonal')
+      conditions.push(eq(productsTable.isSeasonal, true));
+    if (filter === 'on-sale') conditions.push(eq(productsTable.isOnSale, true));
+    if (filter === 'in-stock') conditions.push(eq(productsTable.inStock, true));
 
-    return { message: 'Product deleted successfully', data: deletedProduct };
+    const sortMap: Record<string, SQL> = {
+      'price-asc': asc(productsTable.price),
+      'price-desc': desc(productsTable.price),
+      'name-asc': asc(productsTable.name),
+      newest: desc(productsTable.createdAt),
+    };
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    const orderBy: SQL = sortMap[sort] ?? desc(productsTable.createdAt);
+
+    const [products, countResult] = await Promise.all([
+      db
+        .select()
+        .from(productsTable)
+        .where(where)
+        .orderBy(orderBy)
+        .limit(parsedLimit)
+        .offset(offset),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(productsTable)
+        .where(where),
+    ]);
+
+    const totalItems = Number(countResult[0]?.count ?? 0);
+    const pagination = {
+      totalItems,
+      currentPage: parsedPage,
+      limit: parsedLimit,
+      totalPages: Math.ceil(totalItems / parsedLimit),
+    };
+
+    return { products, pagination };
   }
 
   static async getCategories() {
@@ -203,5 +148,36 @@ export class ProductService {
     const uniqueCategories = categories.map((p) => p.category);
 
     return uniqueCategories;
+  }
+
+  static async updateProduct(id: string, updateData: UpdateProductInput) {
+    if (Object.keys(updateData).length === 0) {
+      throw new ApiError(400, 'No fields provided to update');
+    }
+
+    const [updatedProduct] = await db
+      .update(productsTable)
+      .set(updateData)
+      .where(eq(productsTable.id, id))
+      .returning();
+
+    if (!updatedProduct) {
+      throw new ApiError(404, 'Product not found');
+    }
+
+    return updatedProduct;
+  }
+
+  static async deleteProduct(id: string) {
+    const [deletedProduct] = await db
+      .delete(productsTable)
+      .where(eq(productsTable.id, id))
+      .returning();
+
+    if (!deletedProduct) {
+      throw new ApiError(404, 'Product not found');
+    }
+
+    return deletedProduct;
   }
 }

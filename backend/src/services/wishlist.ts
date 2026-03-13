@@ -5,10 +5,6 @@ import { ApiError } from '../utils/apiResponse';
 
 export class WishlistService {
   static async addItem(userId: string, productId: string) {
-    if (!productId) {
-      throw new ApiError(400, 'Product id is required');
-    }
-
     const [existing] = await db
       .select({ id: wishlistsTable.id })
       .from(wishlistsTable)
@@ -23,18 +19,15 @@ export class WishlistService {
     if (existing) {
       await WishlistService.removeItem(userId, productId);
 
-      return {
-        message: 'Product successfully removed from wishlist',
-        newItem: null,
-      };
+      return { added: false, item: null };
     }
 
-    const [newItem] = await db
+    const [item] = await db
       .insert(wishlistsTable)
       .values({ userId, productId })
       .returning();
 
-    return { message: 'Product successfully added to wishlist', newItem };
+    return { added: true, item };
   }
 
   static async getItems(userId: string) {
@@ -49,14 +42,10 @@ export class WishlistService {
       ...products,
     }));
 
-    return { message: 'Items successfully retrieved', items };
+    return items;
   }
 
   static async removeItem(userId: string, productId: string) {
-    if (!productId) {
-      throw new ApiError(400, 'Product id is required');
-    }
-
     const [removedItem] = await db
       .delete(wishlistsTable)
       .where(
@@ -68,11 +57,7 @@ export class WishlistService {
       .returning();
 
     if (!removedItem) {
-      throw new ApiError(500, 'Item not found in wishlist');
+      throw new ApiError(404, 'Item not found in wishlist');
     }
-
-    return {
-      message: 'Product successfully removed from wishlist',
-    };
   }
 }

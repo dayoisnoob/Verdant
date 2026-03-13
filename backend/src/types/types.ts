@@ -66,3 +66,26 @@ export interface Product {
   storageInstructions: string;
   images: ProductImage[];
 }
+
+// export interface CartItem {
+//   id: string;
+//   productId: string;
+//   name: string;
+//   slug: string;
+//   imageUrl: string;
+//   unit: string;
+//   farm: string;
+//   isOrganic: boolean;
+//   pricePence: number;
+//   quantity: number;
+// }
+
+// export interface Cart {
+//   id: string;
+//   userId: string;
+//   couponCode: string;
+//   discount: string;
+//   createdAt: Date;
+//   updatedAt: Date;
+//   items: [];
+// }

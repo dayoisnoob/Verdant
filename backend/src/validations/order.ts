@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const getOrdersSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(50).default(10),
+});
+
 const itemSchema = z.object({
   productId: z.string().uuid('Invalid product ID'),
   quantity: z.number().int().min(1).max(100),

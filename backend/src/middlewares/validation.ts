@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import type { ParsedQs } from 'qs';
 import { asyncHandler } from '../utils/asyncHandler';
 import type { z, ZodTypeAny } from 'zod';
 import { ApiError } from '../utils/apiResponse';
@@ -35,6 +36,25 @@ export const validateUrlParams = <T extends ZodTypeAny>(schema: T) => {
       }
 
       req.params = result.data as Record<string, string>;
+      next();
+    }
+  );
+};
+export const validateUrlQuery = <T extends ZodTypeAny>(schema: T) => {
+  return asyncHandler(
+    async (req: Request, _res: Response, next: NextFunction) => {
+      const result = schema.safeParse(req.query);
+
+      if (!result.success) {
+        const errors = result.error.issues.map((issue) => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        }));
+
+        throw new ApiError(400, 'Invalid query parameters', errors);
+      }
+
+      req.query = result.data as unknown as ParsedQs;
       next();
     }
   );

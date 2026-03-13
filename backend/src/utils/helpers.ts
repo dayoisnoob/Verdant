@@ -29,4 +29,3 @@ export const tokenExpiry = (token: 'refresh' | 'temp') => {
     : new Date(Date.now() + 60 * 60 * 1000);
 };
 
-export const RESEND_COOLDOWN_SECONDS = 60;

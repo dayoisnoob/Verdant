@@ -18,7 +18,7 @@ import { refreshTokensTable } from '../models/refreshToken.ts';
 import { wishlistsTable } from '../models/wishlist.ts';
 import type { DeviceInfo } from '../types/types.ts';
 import { Tokens } from '../utils/auth/tokens.util.ts';
-import { RESEND_COOLDOWN_SECONDS } from '../utils/helpers.ts';
+import { RESEND_COOLDOWN_SECONDS } from '../constants/constants.ts';
 import type {
   LoginInput,
   SignupInput,

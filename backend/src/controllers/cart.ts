@@ -15,9 +15,7 @@ export class CartController {
     const userId = req.user!.id;
     const { productId, quantity = 1 } = req.body;
 
-    if (!productId) throw new ApiError(400, 'ProductId is required');
-
-    const item = await CartService.addItem(userId, productId, Number(quantity));
+    const item = await CartService.addItem(userId, productId, quantity);
 
     res.json(new ApiResponse(201, 'Item added successfully', { item }));
   }
@@ -34,14 +32,10 @@ export class CartController {
     const { itemId } = req.params;
     const { quantity } = req.body;
 
-    if (quantity === undefined || quantity < 0) {
-      throw new ApiError(400, 'New quantity must be >= 0');
-    }
-
     const result = await CartService.updateQuantity(
       userId,
       itemId as string,
-      Number(quantity)
+      quantity
     );
 
     res.json(new ApiResponse(200, 'Item updated successfully', result));
@@ -66,13 +60,7 @@ export class CartController {
     const userId = req.user!.id;
     const items = req.body;
 
-    if (!Array.isArray(items)) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'items must be an array' });
-    }
-
     const cart = await CartService.mergeGuestCart(userId, items);
-    res.json({ success: true, data: { cart } });
+    res.json(new ApiResponse(200, 'Cart merged successfully', { cart }));
   }
 }

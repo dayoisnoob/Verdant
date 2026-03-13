@@ -7,15 +7,21 @@ import { cartItemsTable, type CartItem } from '../models/cartItems';
 import { ApiError } from '../utils/apiResponse';
 import { CouponService } from './coupon';
 
-export type CartWithItems = Cart & { items: CartItem[] };
-
+type CartWithItems = Cart & { items: CartItem[] };
 export class CartService {
   static async getCart(userId: string) {
     return await CartService.getOrCreateCart(userId);
   }
 
-  static async addItem(userId: string, productId: string, quantity: number) {
-    const { cart } = await CartService.getOrCreateCart(userId);
+  static async addItem(
+    userId: string,
+    productId: string,
+    quantity: number,
+    existingCart?: CartWithItems
+  ) {
+    const { cart } = existingCart
+      ? { cart: existingCart }
+      : await CartService.getOrCreateCart(userId);
 
     const [product] = await db
       .select()
@@ -43,7 +49,12 @@ export class CartService {
 
     if (existing) {
       const newQty = existing.quantity + (payload.quantity ?? 1);
-      return CartService.updateQuantity(userId, existing.id, newQty);
+      return CartService.updateQuantity(
+        userId,
+        existing.id,
+        newQty,
+        existingCart
+      );
     }
 
     const [item] = await db
@@ -57,9 +68,12 @@ export class CartService {
   static async updateQuantity(
     userId: string,
     itemId: string,
-    quantity: number
+    quantity: number,
+    existingCart?: CartWithItems
   ) {
-    const { cart } = await CartService.getOrCreateCart(userId);
+    const { cart } = existingCart
+      ? { cart: existingCart }
+      : await CartService.getOrCreateCart(userId);
 
     const [updated] = await db
       .update(cartItemsTable)
@@ -74,7 +88,10 @@ export class CartService {
 
     if (!updated) throw new ApiError(404, 'Cart Item not found');
 
-    const { subtotal, discount } = await CartService.getCartTotal(userId);
+    const { subtotal, discount } = await CartService.getCartTotal(
+      userId,
+      existingCart
+    );
 
     if (Number(discount) > 0 && subtotal <= discount) {
       await CouponService.removeCouponFromCart(userId);
@@ -89,38 +106,57 @@ export class CartService {
   }
 
   static async removeItem(userId: string, itemId: string) {
-    const { cart } = await CartService.getOrCreateCart(userId);
-
-    await db
+    const [removed] = await db
       .delete(cartItemsTable)
       .where(
         and(
           eq(cartItemsTable.id, itemId),
-          eq(cartItemsTable.cartId, cart.id as string)
+          eq(
+            cartItemsTable.cartId,
+            db
+              .select({ id: cartsTable.id })
+              .from(cartsTable)
+              .where(eq(cartsTable.userId, userId))
+              .limit(1)
+          )
         )
-      );
+      )
+      .returning({ id: cartItemsTable.id });
+
+    if (!removed) throw new ApiError(404, 'Cart item not found');
   }
 
   static async clearCart(userId: string) {
-    const { cart } = await CartService.getOrCreateCart(userId);
-
     await db
       .delete(cartItemsTable)
-      .where(eq(cartItemsTable.cartId, cart.id as string));
+      .where(
+        eq(
+          cartItemsTable.cartId,
+          db
+            .select({ id: cartsTable.id })
+            .from(cartsTable)
+            .where(eq(cartsTable.userId, userId))
+            .limit(1)
+        )
+      );
   }
 
   static async mergeGuestCart(
     userId: string,
     guestItems: { productId: string; quantity: number }[]
   ) {
-    for (const item of guestItems) {
-      await CartService.addItem(userId, item.productId, item.quantity);
-    }
+    await Promise.all(
+      guestItems.map((item) =>
+        CartService.addItem(userId, item.productId, item.quantity)
+      )
+    );
     return CartService.getCart(userId);
   }
 
-  static async getCartTotal(userId: string) {
-    const { cart } = await CartService.getOrCreateCart(userId);
+  static async getCartTotal(userId: string, existingCart?: CartWithItems) {
+    const { cart } = existingCart
+      ? { cart: existingCart }
+      : await CartService.getOrCreateCart(userId);
 
     const subtotalPence = cart.items.reduce(
       (sum, item) => sum + item.pricePence * item.quantity,
@@ -133,8 +169,6 @@ export class CartService {
     const discountedSubtotal = subtotalPence - discountPence;
     const deliveryPence = discountedSubtotal >= 10000 ? 0 : 499;
     const totalPence = discountedSubtotal + deliveryPence;
-
-    console.log(discountedSubtotal, totalPence, deliveryPence);
 
     return {
       subtotalPence,

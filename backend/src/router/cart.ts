@@ -1,13 +1,14 @@
 import { Router } from 'express';
-import { authenticate } from '../middlewares/auth.middleware';
-import { asyncHandler } from '../utils/asyncHandler';
 import { CartController } from '../controllers/cart';
-import { validateInput } from '../middlewares/validation';
+import { authenticate } from '../middlewares/auth.middleware';
+import { validateInput, validateUrlParams } from '../middlewares/validation';
+import { asyncHandler } from '../utils/asyncHandler';
 import {
   addItemSchema,
   mergeCartsSchema,
   updateItemSchema,
 } from '../validations/cart';
+import { itemIdIdParamsSchema } from '../validations/urlParams';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get('/total', asyncHandler(CartController.getTotal));
 router.post(
   '/merge',
   validateInput(mergeCartsSchema),
-  CartController.mergeGuestCart
+  asyncHandler(CartController.mergeGuestCart)
 );
 router.post(
   '/items',
@@ -30,10 +31,15 @@ router.post(
 router.patch(
   '/items/:itemId',
   validateInput(updateItemSchema),
+  validateUrlParams(itemIdIdParamsSchema),
   asyncHandler(CartController.updateItem)
 );
 
-router.delete('/', CartController.clearCart);
-router.delete('/items/:itemId', asyncHandler(CartController.removeItem));
+router.delete('/', asyncHandler(CartController.clearCart));
+router.delete(
+  '/items/:itemId',
+  validateUrlParams(itemIdIdParamsSchema),
+  asyncHandler(CartController.removeItem)
+);
 
 export default router;

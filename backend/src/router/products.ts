@@ -1,44 +1,53 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/products';
-import { validateInput, validateUrlParams } from '../middlewares/validation';
-import { urlParamsSchema } from '../validations/urlParams';
+import { authenticate, requireAdmin } from '../middlewares/auth.middleware';
+import {
+  validateInput,
+  validateUrlParams,
+  validateUrlQuery,
+} from '../middlewares/validation';
+import { asyncHandler } from '../utils/asyncHandler';
 import {
   createProductValidation,
+  getProductsSchema,
   updateProductSchema,
 } from '../validations/products';
-import { authenticate, requireAdmin } from '../middlewares/auth.middleware';
-import { asyncHandler } from '../utils/asyncHandler';
+import { idParamsSchema, slugParamsSchema } from '../validations/urlParams';
 
 const router = Router();
 
-router.get('/', asyncHandler(ProductController.getAllProducts));
+router.get(
+  '/',
+  validateUrlQuery(getProductsSchema),
+  asyncHandler(ProductController.getAllProducts)
+);
 router.get('/categories', asyncHandler(ProductController.getCategories));
 
 router.get(
   '/:slug',
-  validateUrlParams(urlParamsSchema),
+  validateUrlParams(slugParamsSchema),
   asyncHandler(ProductController.getProductBySlug)
 );
 
-// router.use(authenticate, requireAdmin);
+router.use(authenticate, requireAdmin);
 
 router.post(
   '/',
   validateInput(createProductValidation),
-  ProductController.createProduct
+  asyncHandler(ProductController.createProduct)
 );
 
-// router.patch(
-//   '/:id',
-//   validateUrlParams(urlParamsSchema),
-//   validateInput(updateProductSchema),
-//   ProductController.updateProduct
-// );
+router.patch(
+  '/:id',
+  validateUrlParams(idParamsSchema),
+  validateInput(updateProductSchema),
+  asyncHandler(ProductController.updateProduct)
+);
 
-// router.delete(
-//   '/:id',
-//   validateUrlParams(urlParamsSchema),
-//   ProductController.deleteProduct
-// );
+router.delete(
+  '/:id',
+  validateUrlParams(idParamsSchema),
+  asyncHandler(ProductController.deleteProduct)
+);
 
 export default router;

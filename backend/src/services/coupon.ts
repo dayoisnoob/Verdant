@@ -179,7 +179,7 @@ export class CouponService {
         ? (subtotal * existing.discountValue) / 100
         : existing.discountValue * 100;
 
-    const cart = await CartService.getOrCreateCart(userId);
+    const { cart } = await CartService.getOrCreateCart(userId);
 
     const [updated] = await db
       .update(cartsTable)
@@ -194,7 +194,7 @@ export class CouponService {
     return discount;
   }
   static async removeCouponFromCart(userId: string) {
-    const cart = await CartService.getOrCreateCart(userId);
+    const { cart } = await CartService.getOrCreateCart(userId);
 
     const [updated] = await db
       .update(cartsTable)

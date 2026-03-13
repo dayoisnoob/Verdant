@@ -1,16 +1,21 @@
 import { Router } from 'express';
 import { CouponController } from '../controllers/coupon';
 import { authenticate } from '../middlewares/auth.middleware';
-import { validateInput } from '../middlewares/validation';
+import { validateInput, validateUrlParams } from '../middlewares/validation';
 import { asyncHandler } from '../utils/asyncHandler';
 import { applyCouponSchema, createCouponSchema } from '../validations/coupon';
+import { codeParamsSchema } from '../validations/urlParams';
 
 const router = Router();
 
 router.use(authenticate);
 
 router.get('/', asyncHandler(CouponController.getCoupons));
-router.get('/:code', asyncHandler(CouponController.getCouponByCode));
+router.get(
+  '/:code',
+  validateUrlParams(codeParamsSchema),
+  asyncHandler(CouponController.getCouponByCode)
+);
 router.post(
   '/apply',
   validateInput(applyCouponSchema),

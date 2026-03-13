@@ -20,6 +20,6 @@ export const orderItemsTable = pgTable('order_items', {
   productName: varchar('product_name', { length: 255 }).notNull(),
   image: varchar('image'),
   quantity: integer('quantity').notNull().default(1),
-  unitPriceCents: numeric('unit_price_cents').notNull(),
-  totalPriceCents: numeric('total_price_cents').notNull(),
+  unitPriceCents: integer('unit_price_cents').notNull(),
+  totalPriceCents: integer('total_price_cents').notNull(),
 });

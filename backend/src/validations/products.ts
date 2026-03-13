@@ -93,13 +93,13 @@ export const updateProductSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export const updateInventorySchema = z.object({
-  quantity: z.number().int().min(0, 'Quantity cannot be negative').optional(),
-  weightGrams: z.number().positive().optional().nullable(),
-  sku: z.string().max(100).optional().nullable(),
-  lowStockThreshold: z.number().int().min(0).optional(),
+export const getProductsSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(50).default(10),
+  category: z.string().default('All'),
+  filter: z.string().default('All'),
+  sort: z.string().default('newest'),
 });
 
 export type CreateProductSchema = z.infer<typeof productSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
-export type UpdateInventoryInput = z.infer<typeof updateInventorySchema>;
