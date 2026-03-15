@@ -13,6 +13,8 @@ import { convertDate } from "@/lib/helpers";
 import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
 import {
+  CircleCheck,
+  CircleCheckBig,
   Heart,
   LogOut,
   MapPin,
@@ -72,14 +74,15 @@ export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
+  const { wishlist, wishlistError, refetchWishlist } = useWishlist();
   const {
-    data: orders = [],
+    data: orderData,
     isLoading: ordersLoading,
     isError: ordersError,
     refetch: refetchOrders,
   } = useQuery({
     queryKey: ["orders"],
-    queryFn: async () => (await getuserOrders()).data,
+    queryFn: () => getuserOrders(),
   });
 
   const {
@@ -89,12 +92,12 @@ export default function ProfilePage() {
     refetch: refetchAddresses,
   } = useQuery({
     queryKey: ["addresses"],
-    queryFn: async () => (await getUserAddresses()).data,
+    queryFn: () => getUserAddresses(),
   });
 
-  const { wishlist, wishlistError, refetchWishlist } = useWishlist();
-
   if (!user) return null;
+
+  const orders = orderData?.orders || [];
 
   if (ordersLoading || addressesLoading) {
     return (
@@ -157,20 +160,8 @@ export default function ProfilePage() {
                       {initials}
                     </div>
                     {user.isVerified && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-light rounded-full border-2 border-[#111f17] flex items-center justify-center">
-                        <svg
-                          viewBox="0 0 10 10"
-                          className="w-2 h-2"
-                          fill="none"
-                        >
-                          <path
-                            d="M2 5l2 2 4-4"
-                            stroke="white"
-                            strokeWidth={1.5}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-orange-light rounded-full border-2 border-[#111f17] flex items-center justify-center">
+                        <CircleCheckBig size={36} />
                       </div>
                     )}
                   </div>
@@ -309,7 +300,7 @@ export default function ProfilePage() {
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white rounded-2xl border border-[#e8e4dc] p-5 flex items-center gap-4">
-                      ordersLoading{" "}
+                      orders{" "}
                       <div className="w-10 h-10 bg-green-pale rounded-xl flex items-center justify-center text-lg flex-shrink-0">
                         📦
                       </div>

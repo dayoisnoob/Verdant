@@ -121,7 +121,7 @@ export default function ProductCard({ product: p }: ProductCardProps) {
           <div className="flex flex-col">
             <div className="flex items-baseline gap-1.5">
               <span className="font-semibold text-verdant-dark text-base">
-                £{p.price}
+                £{Number(p.price).toFixed(2)}
               </span>
               {p.originalPrice && (
                 <span className="text-xs text-[#c0c0c0] line-through">

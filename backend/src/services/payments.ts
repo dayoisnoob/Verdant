@@ -89,7 +89,7 @@ export class PaymentService {
       cancel_url: `${process.env.FRONTEND_URL}/checkout`,
     });
 
-    return { url: session.url };
+    return session.url;
   }
 
   static async handleWebhookEvent(rawBody: Buffer, signature: string) {
@@ -144,10 +144,9 @@ export class PaymentService {
           })
           .filter((item) => !!item.productId);
 
-        const subtotal = items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        );
+        const subtotal =
+          items.reduce((sum, item) => sum + item.price * item.quantity, 0) *
+          100;
 
         let order;
 
@@ -157,14 +156,14 @@ export class PaymentService {
             items,
             stripeSessionId: session.id,
             subtotal,
-            amount: (session.amount_total ?? 0) / 100,
+            amount: session.amount_total ?? 0,
             customerEmail: session.customer_details?.email ?? null,
             shippingAddressId: addressId!,
             discountAmount: discount,
             deliveryNotes: deliveryNotes,
             shippingFee: shippingFee,
           });
-          logger.info(order, 'order created:' );
+          logger.info(order, 'order created:');
         } catch (err) {
           logger.error(err, 'createOrder failed:');
           throw err;

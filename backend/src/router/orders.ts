@@ -17,7 +17,6 @@ router.get(
 );
 router.get(
   '/session/:sessionId',
-  validateUrlParams(sessionIdParamsSchema),
   asyncHandler(OrderController.getOrderBySession)
 );
 router.get('/:id', asyncHandler(OrderController.getOrderById));

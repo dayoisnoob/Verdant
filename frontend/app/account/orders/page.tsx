@@ -5,12 +5,10 @@ import Navbar from "@/components/Navbar";
 import { OrderCard } from "@/components/OrderCard";
 import { getuserOrders } from "@/lib/api";
 import { ORDER_STATUS_CONFIG } from "@/lib/constants";
-import { useAuthStore } from "@/store/store";
 import { FilterStatus } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { Package } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { useState } from "react";
 
 const FILTERS: { id: FilterStatus; label: string }[] = [
@@ -22,24 +20,23 @@ const FILTERS: { id: FilterStatus; label: string }[] = [
 ];
 
 export default function OrdersPage() {
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const [filter, setFilter] = useState<FilterStatus>("all");
 
-  if (!isLoggedIn) {
-    redirect("/login?redirect=/orders");
-  }
-  const { data: orders = [], isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["orders"],
-    queryFn: async () => {
-      const res = await getuserOrders();
-      return res.data;
-    },
+    queryFn: async () => getuserOrders(),
   });
 
-  const filtered =
-    filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  if (!data) return null;
 
-  const counts = orders.reduce<Record<string, number>>((acc, o) => {
+  const ORDERS = data?.orders || [];
+
+  console.log(ORDERS);
+
+  const filtered =
+    filter === "all" ? ORDERS : ORDERS.filter((o) => o.status === filter);
+
+  const counts = ORDERS.reduce<Record<string, number>>((acc, o) => {
     acc[o.status] = (acc[o.status] ?? 0) + 1;
     return acc;
   }, {});
@@ -62,12 +59,12 @@ export default function OrdersPage() {
               <p className="text-verdant-muted mt-2 text-sm">
                 {isLoading
                   ? "Loading your orders…"
-                  : `${orders.length} order${orders.length !== 1 ? "s" : ""} placed`}
+                  : `${ORDERS.length} order${ORDERS.length !== 1 ? "s" : ""} placed`}
               </p>
             </div>
 
             {/* Quick stats — only when data is loaded */}
-            {!isLoading && orders.length > 0 && (
+            {!isLoading && ORDERS.length > 0 && (
               <div className="flex items-center gap-3 flex-wrap">
                 {(["shipped", "delivered"] as const).map((s) => {
                   if (!counts[s]) return null;
@@ -91,11 +88,11 @@ export default function OrdersPage() {
           </div>
 
           {/* Filter tabs */}
-          {!isLoading && orders.length > 0 && (
+          {!isLoading && ORDERS.length > 0 && (
             <div className="flex items-center gap-1.5 mt-7 flex-wrap">
               {FILTERS.map((f) => {
                 const count =
-                  f.id === "all" ? orders.length : (counts[f.id] ?? 0);
+                  f.id === "all" ? ORDERS.length : (counts[f.id] ?? 0);
                 if (f.id !== "all" && count === 0) return null;
                 return (
                   <button
@@ -134,13 +131,13 @@ export default function OrdersPage() {
                 <div className="absolute inset-0 rounded-full border-[3px] border-t-green border-r-transparent border-b-transparent border-l-transparent animate-spin" />
               </div>
               <p className="text-sm text-verdant-muted">
-                Fetching your orders…
+                Fetching your orders...
               </p>
             </div>
           )}
 
-          {/* Empty state — no orders at all */}
-          {!isLoading && orders.length === 0 && (
+          {/* Empty state — no ORDERS at all */}
+          {!isLoading && ORDERS.length === 0 && (
             <div className="flex flex-col items-center justify-center py-28 text-center">
               <div className="w-20 h-20 bg-green-pale rounded-2xl flex items-center justify-center mb-6">
                 <Package className="text-green w-9 h-9" />
@@ -162,7 +159,7 @@ export default function OrdersPage() {
           )}
 
           {/* Empty state — filter has no results */}
-          {!isLoading && orders.length > 0 && filtered.length === 0 && (
+          {!isLoading && ORDERS.length > 0 && filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="text-4xl mb-4">🔍</div>
               <p className="text-verdant-dark font-semibold mb-1">

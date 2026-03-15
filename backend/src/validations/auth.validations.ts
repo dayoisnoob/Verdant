@@ -57,8 +57,8 @@ export const changePasswordSchema = z
   });
 
 export const updateUserSchema = z.object({
-  firstName: z.string().min(2).trim().optional(),
-  lastName: z.string().min(2).trim().optional(),
+  firstName: z.string().min(1).trim().optional(),
+  lastName: z.string().min(1).trim().optional(),
 });
 
 export const deleteAccountSchema = z.object({

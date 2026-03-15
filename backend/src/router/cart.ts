@@ -8,7 +8,7 @@ import {
   mergeCartsSchema,
   updateItemSchema,
 } from '../validations/cart';
-import { itemIdIdParamsSchema } from '../validations/urlParams';
+import { productIdParamsSchema } from '../validations/urlParams';
 
 const router = Router();
 
@@ -29,16 +29,16 @@ router.post(
 );
 
 router.patch(
-  '/items/:itemId',
+  '/items/:productId',
   validateInput(updateItemSchema),
-  validateUrlParams(itemIdIdParamsSchema),
+  validateUrlParams(productIdParamsSchema),
   asyncHandler(CartController.updateItem)
 );
 
 router.delete('/', asyncHandler(CartController.clearCart));
 router.delete(
-  '/items/:itemId',
-  validateUrlParams(itemIdIdParamsSchema),
+  '/items/:productId',
+  validateUrlParams(productIdParamsSchema),
   asyncHandler(CartController.removeItem)
 );
 

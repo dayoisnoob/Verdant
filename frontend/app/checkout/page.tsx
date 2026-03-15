@@ -128,7 +128,6 @@ function PayButton({
 export default function CheckoutPage() {
   const router = useRouter();
 
-  const user = useAuthStore((s) => s.user);
   const hydrated = useAuthStore.persist.hasHydrated();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
@@ -156,7 +155,7 @@ export default function CheckoutPage() {
     isError: addressesError,
   } = useQuery({
     queryKey: ["addresses"],
-    queryFn: async () => (await getUserAddresses()).data,
+    queryFn: async () => await getUserAddresses(),
   });
 
   useEffect(() => {
@@ -226,7 +225,8 @@ export default function CheckoutPage() {
         image: i.imageUrl,
         productId: i.productId,
       }));
-      const { data } = await createCheckoutSession({
+      console.log(items);
+      const res = await createCheckoutSession({
         items,
         shippingFee,
         addressId,
@@ -234,9 +234,11 @@ export default function CheckoutPage() {
         couponCode,
         deliveryNotes,
       });
-      router.push(data.url);
-    } finally {
+
+      router.push(res.url);
+    } catch (err) {
       setIsPaying(false);
+      throw err;
     }
   };
 
@@ -245,16 +247,17 @@ export default function CheckoutPage() {
   };
 
   const onSubmit = async (data: CheckoutForm) => {
+    console.log("submitting");
     try {
       const newAddress = await addUserAddress({
-        firstName: user!.firstName,
-        lastName: user!.lastName,
+        firstName: data.firstName,
+        lastName: data.lastName,
         streetAddress: data.streetAddress,
         phone1: data.phone1,
         phone2: data.phone2,
         state: data.state,
       });
-      await proceedToPayment(newAddress.data.id, data.deliveryNotes);
+      await proceedToPayment(newAddress.id, data.deliveryNotes);
     } catch (err) {
       if (err instanceof ApiError && err.errors) {
         for (const { field, message } of err.errors) {
@@ -321,6 +324,29 @@ export default function CheckoutPage() {
                         ← Saved addresses
                       </button>
                     )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <Field label="First Name" error={errors.firstName?.message}>
+                      <input
+                        {...register("firstName")}
+                        type="text"
+                        placeholder="Jane"
+                        className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"
+                      />
+                    </Field>
+                    <Field
+                      label="Last Name"
+                      optional
+                      error={errors.lastName?.message}
+                    >
+                      <input
+                        {...register("lastName")}
+                        type="text"
+                        placeholder="Doe"
+                        className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"
+                      />
+                    </Field>
                   </div>
 
                   <div className="px-6 py-6 flex flex-col gap-5">
@@ -446,6 +472,9 @@ export default function CheckoutPage() {
                                   </span>
                                 )}
                               </div>
+                              <p className="text-sm text-verdant-dark flex items-center gap-1 mt-0.5">
+                                To: {address.firstName} {address.lastName}
+                              </p>
                               <p className="text-xs text-verdant-muted flex items-center gap-1 mt-0.5">
                                 <MapPin size={10} className="flex-shrink-0" />
                                 {address.state}
@@ -473,7 +502,7 @@ export default function CheckoutPage() {
                 <PayButton
                   type="button"
                   loading={isProcessing}
-                  disabled={!selectedAddressId}
+                  disabled={!selectedAddressId || isProcessing}
                   onClick={onContinueWithSaved}
                 />
               </div>

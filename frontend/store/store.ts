@@ -1,12 +1,6 @@
-import {
-  addItemToCartApi,
-  getCart,
-  removeCouponApi,
-  removeItemFromCartApi,
-} from "@/lib/api";
+import { addItemToCart, getCart, removeItemFromCart } from "@/lib/api";
 import {
   AddressStore,
-  AdminUser,
   AuthCartStore,
   AuthStore,
   CartItems,
@@ -49,7 +43,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
     }
 
     try {
-      await addItemToCartApi({ productId: product.id, quantity });
+      await addItemToCart({ productId: product.id, quantity });
     } catch (err) {
       console.log(err);
       set((state) => ({
@@ -63,6 +57,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
       items: cart.items,
       couponCode: cart.couponCode ?? "",
       discount: cart.discount,
+      isLoading: false,
     }),
 
   removeItem: async (id: string) => {
@@ -71,7 +66,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
     }));
 
     try {
-      await removeItemFromCartApi(id);
+      await removeItemFromCart(id);
     } catch {
       const cart = await getCart();
       useCartStore.getState().setCart(cart);
@@ -102,12 +97,6 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
 
   removeCoupon: async () => {
     set({ couponCode: "", discount: 0 });
-
-    try {
-      await removeCouponApi();
-    } catch (err) {
-      console.log(err);
-    }
   },
 
   itemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
@@ -123,7 +112,6 @@ export const useGuestCartStore = create(
       couponCode: "",
       discount: 0,
 
-      // Accepts a Product but stores it flat — same shape as CartItems
       addItem: (product: Product, quantity = 1) => {
         set((state) => {
           const existing = state.items.find((i) => i.productId === product.id);
@@ -198,35 +186,34 @@ export const useAuthStore = create<AuthStore>()(
       isLoggedIn: false,
       accessToken: null,
       signUpEmail: "",
+      isHydrated: false,
 
       setEmail: (email: string) => set({ signUpEmail: email }),
 
       login: (user, accessToken) =>
         set({ user, accessToken, isLoggedIn: true }),
 
-      setUser: (data) => set({ user: data }),
+      setUser: (user) => set({ user }),
 
       setAccessToken: (token) => set({ accessToken: token }),
 
       logout: () => set({ user: null, isLoggedIn: false, accessToken: null }),
+
+      setHydrated: () => set({ isHydrated: true }),
     }),
-    { name: "verdant" },
+    {
+      name: "auth-store",
+      partialize: (state) => ({
+        user: state.user,
+        isLoggedIn: state.isLoggedIn,
+        signUpEmail: state.signUpEmail,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(); // called when localStorage is read
+      },
+    },
   ),
 );
-
-interface AdminStore {
-  admin: AdminUser | null;
-  accessToken: string | null;
-  login: (admin: AdminUser, accessToken: string) => void;
-  logout: () => void;
-}
-
-export const useAdminStore = create<AdminStore>((set) => ({
-  admin: null,
-  accessToken: null,
-  login: (admin, accessToken) => set({ admin, accessToken }),
-  logout: () => set({ admin: null, accessToken: null }),
-}));
 
 export const useAddressStore = create<AddressStore>()(
   persist(

@@ -53,7 +53,7 @@ export function handleFormError<T extends FieldValues>(
 }
 
 export const initiateLogin = async (res: UserApi) => {
-  useAuthStore.getState().login(res.data.user, res.data.accessToken);
+  useAuthStore.getState().login(res.user, res.accessToken);
 
   try {
     const guestItems = useGuestCartStore.getState().items;
@@ -64,6 +64,7 @@ export const initiateLogin = async (res: UserApi) => {
 
     const cart = await getCart();
     useCartStore.getState().setCart(cart);
+    useCartStore.getState().setLoading(false);
   } catch (err) {
     console.error("Cart sync failed after login", err);
   }

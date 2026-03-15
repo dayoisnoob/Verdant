@@ -32,6 +32,8 @@ const envSchema = z.object({
   FRONTEND_URL: z.string().default('http://localhost:3000'),
 
   REFRESH_COOKIE_MAX_AGE: z.string(),
+
+  RESEND_API: z.string(),
 });
 
 const result = envSchema.safeParse(process.env);

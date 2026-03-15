@@ -31,14 +31,14 @@ const createLimiter = ({
 
 export const loginEmailLimiter = createLimiter({
   keyGenerator: (req) => req.body.email,
-  max: 5,
-  windowMinutes: 15,
+  max: 55,
+  windowMinutes: 155,
   message: 'Too many login attempts for this email. Wait 15 minutes.',
 });
 export const loginIpLimiter = createLimiter({
   keyGenerator: (req) => req.ip,
-  max: 10,
-  windowMinutes: 60,
+  max: 105,
+  windowMinutes: 605,
 });
 
 export const forgotPasswordRecentLimiter = createLimiter({
@@ -72,13 +72,13 @@ export const resendVerificationLimiter = createLimiter({
 
 export const changePasswordLimiter = createLimiter({
   keyGenerator: (req) => req.user!.id,
-  max: 5,
+  max: 55,
   windowMinutes: 60,
 });
 
 export const refreshTokenLimiter = createLimiter({
   keyGenerator: (req) => req.ip,
-  max: 20,
+  max: 600,
   windowMinutes: 60,
 });
 

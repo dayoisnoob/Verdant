@@ -37,7 +37,7 @@ export default function ProductPage({
     refetch,
   } = useQuery({
     queryKey: ["product", slug],
-    queryFn: async () => (await getProductBySlug(slug)).data,
+    queryFn: async () => await getProductBySlug(slug),
   });
 
   const { data } = useQuery({

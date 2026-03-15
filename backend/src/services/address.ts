@@ -59,7 +59,6 @@ export class AddressService {
     if (!address) {
       throw new ApiError(500, 'Error adding address');
     }
-
     return address;
   }
 

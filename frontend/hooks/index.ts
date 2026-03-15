@@ -1,92 +1,61 @@
-import {
-  addToWishlist,
-  getUserWishlist,
-  logoutApi,
-  removeFromWishlist,
-} from "@/lib/api";
-import {
-  useAdminStore,
-  useAuthStore,
-  useCartStore,
-  useGuestCartStore,
-} from "@/store/store";
+import { addToWishlist, getUserWishlist, logoutApi } from "@/lib/api";
+import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
+import { CartItems } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-export const useAuthCart = () => {
-  const items = useCartStore((state) => state.items);
-  const isLoading = useCartStore((state) => state.isLoading);
-  const cartError = useCartStore((state) => state.isError);
-
-  const itemCount = items.length;
-  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
-  const subtotal = Number(
+const cartStats = (items: CartItems[]) => ({
+  itemCount: items.length,
+  totalQuantity: items.reduce((sum, i) => sum + i.quantity, 0),
+  subtotal: Number(
     items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0).toFixed(2),
-  );
-
-  return { itemCount, totalQuantity, subtotal, isLoading, cartError };
-};
-
-export const useGuestCart = () => {
-  const items = useGuestCartStore((state) => state.items);
-
-  const itemCount = items.length;
-  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
-  const subtotal = Number(
-    items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0).toFixed(2),
-  );
-
-  return {
-    itemCount,
-    totalQuantity,
-    subtotal,
-    isLoading: false,
-    cartError: false,
-  };
-};
+  ),
+});
 
 export const useCart = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
 
-  const authCart = useAuthCart();
-  const guestCart = useGuestCart();
-  const authActions = useCartStore();
-  const guestActions = useGuestCartStore();
+  const authUserCart = useCartStore();
+  const guestUserCart = useGuestCartStore();
 
-  const cart = isLoggedIn ? authCart : guestCart;
-  const actions = isLoggedIn ? authActions : guestActions;
+  const cart = isLoggedIn ? authUserCart : guestUserCart;
+  const stats = cartStats(cart.items);
 
-  return { ...cart, ...actions };
-};
-
-export const useLogout = () => {
-  const logout = useAuthStore((state) => state.logout);
-  const clearCart = useCartStore((state) => state.clearCart);
-  const queryClient = useQueryClient();
-  const router = useRouter();
-
-  return async () => {
-    await logoutApi();
-    logout();
-    router.push("/login");
-    queryClient.clear();
-    clearCart();
+  return {
+    ...stats,
+    items: cart.items,
+    isLoading: !isHydrated || (isLoggedIn ? authUserCart.isLoading : false),
+    cartError: isLoggedIn ? authUserCart.isError : false,
+    addItem: cart.addItem,
+    removeItem: cart.removeItem,
+    updateQuantity: cart.updateQuantity,
+    couponCode: cart.couponCode,
+    discount: cart.discount,
+    clearCart: cart.clearCart,
+    applyCoupon: cart.applyCoupon,
+    removeCoupon: cart.removeCoupon,
   };
 };
 
-export const useAdminLogout = () => {
-  const router = useRouter();
-  const logout = useAdminStore((state) => state.logout);
-
+export const useLogout = () => {
+  const queryClient = useQueryClient();
+  const logout = useAuthStore((state) => state.logout);
+  const clearCart = useCartStore((state) => state.clearCart);
   return async () => {
-    await logoutApi();
     logout();
-    router.push("/admin/login");
+    clearCart();
+    queryClient.clear();
+
+    window.location.replace("/login");
+
+    logoutApi();
   };
 };
 
 export const useWishlist = () => {
+  const user = useAuthStore((state) => state.user);
+
   const {
     data: wishlist = [],
     isLoading,
@@ -94,10 +63,8 @@ export const useWishlist = () => {
     refetch: refetchWishlist,
   } = useQuery({
     queryKey: ["wishlist"],
-    queryFn: async () => {
-      const res = await getUserWishlist();
-      return res.data;
-    },
+    enabled: !!user,
+    queryFn: getUserWishlist,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -107,25 +74,20 @@ export const useWishlist = () => {
 export const useWishlistToggle = (productId: string) => {
   const { wishlist } = useWishlist();
   const queryClient = useQueryClient();
-
   const wishlisted = wishlist.some((l) => l.id === productId);
 
   const toggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const prev = wishlisted;
-
     try {
-      if (prev) {
-        await removeFromWishlist(productId);
-        toast.success("Item removed");
-      } else {
-        await addToWishlist(productId);
-        toast.success("Item added");
-      }
-      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-    } catch {}
+      await addToWishlist(productId);
+      toast.success("Wishlist updated successfully");
+    } catch (err) {
+      console.error("Error toggling wishlist", err);
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["wishlist"] });
   };
 
   return { wishlisted, toggle };

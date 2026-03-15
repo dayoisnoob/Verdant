@@ -21,21 +21,20 @@ export function OrderCard({ order }: { order: AllOrders }) {
 
   const { data: orderDetails, isLoading } = useQuery({
     queryKey: ["order", order.id],
-    queryFn: async () => {
-      const res = await getOrderById(order.id);
-      return res.data;
-    },
+    queryFn: () => getOrderById(order.id),
     enabled: expanded,
   });
 
   const expandedItems = orderDetails?.items ?? [];
-  const details = orderDetails?.order ?? null;
+  const details = orderDetails ?? null;
+
+  console.log(details);
 
   const previewItems = order.items.slice(0, ORDER_PREVIEW_LIMIT);
   const overflow = order.items.length - ORDER_PREVIEW_LIMIT;
 
   return (
-    <div className="bg-[#faf8f4] rounded-2xl border border-green/10 overflow-hidden hover:border-green/20 hover:shadow-sm transition-all duration-200">
+    <div className="bg-white/80 rounded-2xl border border-green/10 overflow-hidden hover:border-green/20 hover:shadow-sm transition-all duration-200">
       {/* ── Always-visible header ── */}
       <div className="px-5 py-4 sm:px-6 sm:py-5">
         <div className="flex items-start gap-4">
@@ -190,6 +189,10 @@ export function OrderCard({ order }: { order: AllOrders }) {
                   {details.shippingAddress ? (
                     <div className="flex flex-col gap-1">
                       <p className="text-sm font-medium text-verdant-dark">
+                        To: {details.shippingAddress.firstName}{" "}
+                        {details.shippingAddress.lastName}
+                      </p>
+                      <p className="text-sm font-medium text-verdant-dark">
                         {details.shippingAddress.streetAddress}
                       </p>
                       <p className="text-xs text-verdant-muted">
@@ -197,11 +200,11 @@ export function OrderCard({ order }: { order: AllOrders }) {
                       </p>
                       <div className="flex flex-col gap-0.5 mt-1.5">
                         <p className="text-xs text-[#bbb]">
-                          📞 +234 {details.shippingAddress.phone1}
+                          📞 {details.shippingAddress.phone1}
                         </p>
                         {details.shippingAddress.phone2 && (
                           <p className="text-xs text-[#bbb]">
-                            📞 +234 {details.shippingAddress.phone2}
+                            📞 {details.shippingAddress.phone2}
                           </p>
                         )}
                       </div>

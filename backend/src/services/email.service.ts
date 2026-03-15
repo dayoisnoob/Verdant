@@ -1,7 +1,10 @@
 import Mailgen from 'mailgen';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { logger } from '../config/pino.ts';
 import type { SendMail } from '../types/types.ts';
+import { env } from '../config/env.ts';
+
+const resend = new Resend(env.RESEND_API);
 
 type EmailType =
   | 'verification'
@@ -17,20 +20,10 @@ interface EmailConfig {
   subject: string;
 }
 
-const transport = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: +process.env.EMAIL_PORT!,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
-
 const mailGenerator = new Mailgen({
   theme: 'default',
   product: {
-    name: 'Nova Store',
+    name: 'Verdant',
     link: process.env.FRONTEND_URL!,
   },
 });
@@ -108,16 +101,13 @@ export const sendMail = async (
   const emailBody = mailGenerator.generate(email);
   const emailText = mailGenerator.generatePlaintext(email);
 
-  try {
-    await transport.sendMail({
-      from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
-      to: user.email,
-      subject: config.subject,
-      html: emailBody,
-      text: emailText,
-    });
-    logger.info({ email: user.email, type }, 'Email sent successfully');
-  } catch (error) {
-    logger.error({ error, email: user.email, type }, 'Failed to send email');
-  }
+  await resend.emails.send({
+    from: 'Verdant <onboarding@resend.dev>',
+    to: [user.email],
+    subject: config.subject,
+    html: emailBody,
+    text: emailText,
+  });
+
+  logger.info({ email: user.email, type }, 'Email sent successfully');
 };

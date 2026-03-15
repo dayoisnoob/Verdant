@@ -101,12 +101,6 @@ export class CouponService {
   }
 
   static async applyCoupon(userId: string, code: string, subtotal: number) {
-    if (!code || code === '') {
-      throw new ApiError(400, 'Please enter a coupon code');
-    }
-
-    console.log(code);
-
     const [existing] = await db
       .select()
       .from(couponsTable)

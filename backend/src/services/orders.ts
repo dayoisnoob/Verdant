@@ -4,6 +4,7 @@ import { addressesTable, orderItemsTable, ordersTable } from '../models';
 import { ApiError } from '../utils/apiResponse';
 import { CartService } from './cart';
 import { CouponService } from './coupon';
+import { generateOrderNumber } from '../utils/helpers';
 
 export interface CheckoutItem {
   productId: string;
@@ -28,7 +29,7 @@ export interface CreateOrderData {
 
 export class OrderService {
   static async createOrder(data: CreateOrderData) {
-    const orderNumber = `ORD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    const orderNumber = generateOrderNumber();
     const shippingFee = data.shippingFee
       ? Math.round(data.shippingFee * 100)
       : null;
@@ -147,7 +148,7 @@ export class OrderService {
       throw new ApiError(404, 'Order not found');
     }
 
-    return order;
+    return order.orderNumber;
   }
 
   static async getOrderById(userId: string, orderId: string) {
@@ -192,12 +193,7 @@ export class OrderService {
       .from(orderItemsTable)
       .where(eq(orderItemsTable.orderId, orderId));
 
-    const order = {
-      orderRecord,
-      items,
-    };
-
-    return order;
+    return { order: { ...orderRecord, items } };
   }
 
   // static async updateOrderStatus(

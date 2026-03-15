@@ -2,7 +2,6 @@
 
 import { getUserAddresses, updateUserAddresses } from "@/lib/api";
 import { MAX_ADDRESSES } from "@/lib/constants";
-import { Address } from "@/types";
 import { AddressFormData } from "@/validations";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, Plus, X } from "lucide-react";
@@ -22,9 +21,9 @@ export default function AddressesTab() {
     isError,
     error,
     refetch,
-  } = useQuery<Address[]>({
+  } = useQuery({
     queryKey: ["addresses"],
-    queryFn: async () => (await getUserAddresses()).data,
+    queryFn: async () => await getUserAddresses(),
   });
 
   const handleEdit = async (id: string, data: AddressFormData) => {

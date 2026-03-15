@@ -21,6 +21,8 @@ export const loginSchema = z.object({
 });
 
 export const checkoutSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().optional(),
   streetAddress: z.string().min(1, "Address is required"),
   phone1: z.string().min(10, "Enter a valid phone number"),
   phone2: z.string().optional(),
@@ -46,7 +48,6 @@ export const addressSchema = z.object({
 export const updateProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Enter a valid email"),
 });
 
 export const changePasswordSchema = z

@@ -30,9 +30,9 @@ export default function OrderConfirmationPage() {
     return () => clearTimeout(timer);
   }, [clearCart, removeCoupon, sessionId]);
 
-  const { data: order, isError } = useQuery({
+  const { data: orderNumber, isError } = useQuery({
     queryKey: ["order", sessionId],
-    queryFn: async () => (await getOrderBySessionId(sessionId!)).data,
+    queryFn: async () => await getOrderBySessionId(sessionId!),
     enabled: !!sessionId && ready,
   });
 
@@ -112,11 +112,11 @@ export default function OrderConfirmationPage() {
               </p>
 
               {/* Order number */}
-              {order?.orderNumber && (
+              {orderNumber && (
                 <div className="inline-flex items-center gap-2 mt-5 bg-green-pale px-4 py-2 rounded-full">
                   <span className="text-xs text-verdant-muted">Order</span>
                   <span className="font-mono font-bold text-green text-sm tracking-wide">
-                    {order.orderNumber}
+                    {orderNumber}
                   </span>
                 </div>
               )}

@@ -25,9 +25,12 @@ export class OrderController {
     const userId = req.user!.id;
     const sessionId = req.params.sessionId as string;
 
-    const order = await OrderService.getOrderBySessionId(userId, sessionId);
+    const orderNumber = await OrderService.getOrderBySessionId(
+      userId,
+      sessionId
+    );
 
-    res.json(new ApiResponse(200, 'Order session retrieved', { order }));
+    res.json(new ApiResponse(200, 'Order session retrieved', { orderNumber }));
   }
 
   static async getOrderById(req: Request, res: Response) {
@@ -36,7 +39,7 @@ export class OrderController {
 
     const order = await OrderService.getOrderById(userId, id);
 
-    res.json(new ApiResponse(200, 'Order fetched', { order }));
+    res.json(new ApiResponse(200, 'Order fetched', order));
   }
 
   //   static async updateOrder(req: Request, res: Response) {

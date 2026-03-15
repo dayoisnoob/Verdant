@@ -44,7 +44,7 @@ export default function CartPage() {
     refetch: refetchProducts,
   } = useQuery({
     queryKey: ["products"],
-    queryFn: async () => getProducts(undefined, undefined, undefined, 1, 999),
+    queryFn: async () => getProducts(undefined, undefined, undefined, 1, 100),
   });
 
   const PRODUCTS = data?.products;
@@ -100,16 +100,16 @@ export default function CartPage() {
   const hasFreeDelivery = discountedSubtotal >= FREE_DELIVERY_THRESHOLD;
 
   const handleUpdateQuantity = async (
-    itemId: string,
+    productId: string,
     delta: number,
     currentQuantity: number,
   ) => {
-    const newQuantity = currentQuantity + delta;
+    const quantity = currentQuantity + delta;
 
-    if (subtotal) updateQuantity(itemId, delta);
+    if (subtotal) updateQuantity(productId, delta);
 
     try {
-      await updateItem({ itemId, newQuantity });
+      await updateItem({ productId, quantity });
     } catch (err) {
       if (err instanceof ApiError) {
         handleRemoveCoupon(err.message);
@@ -152,17 +152,17 @@ export default function CartPage() {
     try {
       await applyCouponApi(coupon, subtotal);
 
-      const data = await getCartTotal();
-      const discountApi = parseFloat((data.discountPence / 100).toFixed(2));
-      const totalApi = parseFloat((data.totalPence / 100).toFixed(2));
-      const deliveryApi = parseFloat((data.deliveryPence / 100).toFixed(2));
+      const res = await getCartTotal();
+      const discountApi = parseFloat((res.discountPence / 100).toFixed(2));
+      const totalApi = parseFloat((res.totalPence / 100).toFixed(2));
+      const deliveryApi = parseFloat((res.deliveryPence / 100).toFixed(2));
 
       // setDiscount(discountApi);
       setTotal(totalApi);
       setDelivery(deliveryApi);
 
       if (discountApi > 0) {
-        applyCouponToStore(coupon, data.discountPence);
+        applyCouponToStore(coupon, res.discountPence);
       } else {
         setCouponError("This coupon has no discount value");
       }

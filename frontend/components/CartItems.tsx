@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useWishlistToggle } from "@/hooks";
+import { X } from "lucide-react";
 
 export default function CartItems({
   items,
@@ -12,26 +13,26 @@ export default function CartItems({
 }: {
   items: Items[];
   handleUpdateQuantity: (
-    itemId: string,
+    productId: string,
     delta: number,
     current: number,
   ) => void;
   handleRemoveItem: (itemId: string) => void;
 }) {
   const [pendingRemove, setPendingRemove] = useState<{
-    itemId: string;
+    productId: string;
     name: string;
   } | null>(null);
 
-  const { toggle } = useWishlistToggle(pendingRemove?.itemId ?? "");
+  const { toggle } = useWishlistToggle(pendingRemove?.productId ?? "");
 
-  function confirmRemove(itemId: string, name: string) {
-    setPendingRemove({ itemId, name });
+  function confirmRemove(productId: string, name: string) {
+    setPendingRemove({ productId, name });
   }
 
   function handleConfirmRemove() {
     if (!pendingRemove) return;
-    handleRemoveItem(pendingRemove.itemId);
+    handleRemoveItem(pendingRemove.productId);
     setPendingRemove(null);
   }
 
@@ -39,7 +40,7 @@ export default function CartItems({
     if (!pendingRemove) return;
 
     toggle(e);
-    handleRemoveItem(pendingRemove.itemId);
+    handleRemoveItem(pendingRemove.productId);
     setPendingRemove(null);
   }
 
@@ -88,7 +89,9 @@ export default function CartItems({
                   {/* Quantity stepper */}
                   <div className="flex items-center rounded-full border border-[#e5e5e5] overflow-hidden w-fit flex-shrink-0">
                     <button
-                      onClick={() => handleUpdateQuantity(p.id, -1, p.quantity)}
+                      onClick={() =>
+                        handleUpdateQuantity(p.productId, -1, p.quantity)
+                      }
                       className="w-8 h-8 flex items-center justify-center text-verdant-muted hover:bg-green-pale hover:text-green transition-colors text-base font-medium"
                     >
                       −
@@ -97,7 +100,9 @@ export default function CartItems({
                       {p.quantity}
                     </span>
                     <button
-                      onClick={() => handleUpdateQuantity(p.id, 1, p.quantity)}
+                      onClick={() =>
+                        handleUpdateQuantity(p.productId, 1, p.quantity)
+                      }
                       className="w-8 h-8 flex items-center justify-center text-verdant-muted hover:bg-green-pale hover:text-green transition-colors text-base font-medium"
                     >
                       +
@@ -124,15 +129,7 @@ export default function CartItems({
                 className="w-7 h-7 rounded-full flex items-center justify-center text-[#ccc] hover:bg-red-50 hover:text-red-400 transition-colors flex-shrink-0 mt-0.5"
                 aria-label="Remove item"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-                </svg>
+                <X size={14} color="red" />
               </button>
             </div>
           </div>

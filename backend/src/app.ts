@@ -26,7 +26,9 @@ app.use(
   })
 );
 
-app.use(globalLimiter);
+if (env.NODE_ENV !== 'development') {
+  app.use(globalLimiter);
+}
 
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 

@@ -29,12 +29,12 @@ export class CartController {
 
   static async updateItem(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { itemId } = req.params;
+    const { productId } = req.params;
     const { quantity } = req.body;
 
     const result = await CartService.updateQuantity(
       userId,
-      itemId as string,
+      productId as string,
       quantity
     );
 
@@ -43,9 +43,9 @@ export class CartController {
 
   static async removeItem(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { itemId } = req.params;
+    const { productId } = req.params;
 
-    await CartService.removeItem(userId, itemId as string);
+    await CartService.removeItem(userId, productId as string);
     res.json(new ApiResponse(200, 'Item removed successfully'));
   }
 

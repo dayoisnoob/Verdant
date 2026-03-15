@@ -78,6 +78,8 @@ function ShopContent() {
     staleTime: 1000 * 60 * 10,
   });
 
+  console.log(CATEGORIES);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);

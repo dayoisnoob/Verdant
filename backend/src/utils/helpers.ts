@@ -5,7 +5,7 @@ export const skuGenerator = (name: string, category: string) => {
 };
 
 export const generateOrderNumber = () => {
-  return `ORD${Date.now().toString().slice(0, 4)}-${nanoid(6)}`;
+  return `ORD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 };
 
 export const getWindows = (period: number) => {
@@ -28,4 +28,3 @@ export const tokenExpiry = (token: 'refresh' | 'temp') => {
     ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     : new Date(Date.now() + 60 * 60 * 1000);
 };
-

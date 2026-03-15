@@ -23,12 +23,10 @@ export default function VerifyEmailPage() {
 
     const verify = async () => {
       try {
-        const data = await verifyEmail(token);
+        await verifyEmail(token);
         setStatus("success");
         setTimeout(() => {
-          router.push(
-            `/login?message=${encodeURIComponent(data.message || "Email verified! You can now sign in.")}`,
-          );
+          router.push("/");
         }, 2000);
       } catch (err) {
         setStatus("error");
@@ -102,7 +100,7 @@ export default function VerifyEmailPage() {
                     You&apos;re verified!
                   </h1>
                   <p className="text-verdant-muted text-sm leading-relaxed mb-8">
-                    Your email has been confirmed. Redirecting you to sign in...
+                    Your email has been confirmed. Redirecting you...
                   </p>
 
                   {/* Progress bar */}

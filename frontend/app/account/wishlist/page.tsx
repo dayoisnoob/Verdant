@@ -10,11 +10,6 @@ import { redirect } from "next/navigation";
 
 export default function WishlistPage() {
   const { wishlist, isLoading, wishlistError, refetchWishlist } = useWishlist();
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-
-  if (!isLoggedIn) {
-    redirect("/login?redirect=/orders");
-  }
 
   if (isLoading) {
     return (
@@ -23,7 +18,9 @@ export default function WishlistPage() {
         <div className="min-h-screen bg-[#f2efe8] flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 rounded-full border-2 border-green border-t-transparent animate-spin" />
-            <p className="text-xs text-verdant-muted">Loading your Basket...</p>
+            <p className="text-xs text-verdant-muted">
+              Loading your Wishlist...
+            </p>
           </div>
         </div>
         <Footer />

@@ -1,7 +1,6 @@
 "use client";
 
 import { removeAddress, setDefaultAddress } from "@/lib/api";
-import { Address } from "@/types";
 import { AddressFormData, addressSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,12 +9,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { AddressFields } from "./AddressFields";
+import { AddressApi } from "@/types";
 
 export default function AddressCard({
   address,
   onEdit,
 }: {
-  address: Address;
+  address: AddressApi;
   onEdit: (id: string, data: AddressFormData) => Promise<void>;
 }) {
   const qc = useQueryClient();
@@ -46,9 +46,9 @@ export default function AddressCard({
 
   const handleSetDefault = async (id: string) => {
     try {
-      const res = await setDefaultAddress(id);
+      await setDefaultAddress(id);
       qc.invalidateQueries({ queryKey: ["addresses"] });
-      toast.success(res.message);
+      toast.success("Default address changed successfully");
     } catch {
       toast.error("Failed to update default address");
     }
@@ -57,9 +57,9 @@ export default function AddressCard({
   const handleRemoveAddress = async (id: string) => {
     setIsRemovingAddress(true);
     try {
-      const res = await removeAddress(id);
+      await removeAddress(id);
       qc.invalidateQueries({ queryKey: ["addresses"] });
-      toast.success(res.message);
+      toast.success("Address removed successfully");
     } catch {
       toast.error("Failed to remove address");
     } finally {

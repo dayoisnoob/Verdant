@@ -1,5 +1,4 @@
 import { and, eq } from 'drizzle-orm';
-// import type { NewCartItem } from '../schema/cart.schema';
 import { db } from '../config/db';
 import { productsTable } from '../models';
 import { cartsTable, type Cart } from '../models/cart';
@@ -51,7 +50,7 @@ export class CartService {
       const newQty = existing.quantity + (payload.quantity ?? 1);
       return CartService.updateQuantity(
         userId,
-        existing.id,
+        existing.productId,
         newQty,
         existingCart
       );
@@ -67,7 +66,7 @@ export class CartService {
 
   static async updateQuantity(
     userId: string,
-    itemId: string,
+    productId: string,
     quantity: number,
     existingCart?: CartWithItems
   ) {
@@ -75,12 +74,13 @@ export class CartService {
       ? { cart: existingCart }
       : await CartService.getOrCreateCart(userId);
 
+    if (quantity === 0) return;
     const [updated] = await db
       .update(cartItemsTable)
       .set({ quantity, updatedAt: new Date() })
       .where(
         and(
-          eq(cartItemsTable.id, itemId),
+          eq(cartItemsTable.productId, productId),
           eq(cartItemsTable.cartId, cart.id as string)
         )
       )
@@ -105,12 +105,12 @@ export class CartService {
     return { quantity: updated.quantity };
   }
 
-  static async removeItem(userId: string, itemId: string) {
+  static async removeItem(userId: string, productId: string) {
     const [removed] = await db
       .delete(cartItemsTable)
       .where(
         and(
-          eq(cartItemsTable.id, itemId),
+          eq(cartItemsTable.productId, productId),
           eq(
             cartItemsTable.cartId,
             db

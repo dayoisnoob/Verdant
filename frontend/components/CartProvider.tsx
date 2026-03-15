@@ -7,8 +7,11 @@ import { useEffect } from "react";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
 
   useEffect(() => {
+    if (!isHydrated) return;
+
     const { setCart, setLoading, setError } = useCartStore.getState();
 
     if (!isLoggedIn) {
@@ -30,7 +33,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     rehydrate();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isHydrated]);
 
   return <>{children}</>;
 };

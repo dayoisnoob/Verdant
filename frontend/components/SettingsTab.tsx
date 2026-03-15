@@ -16,6 +16,7 @@ import {
   ProfileForm,
   updateProfileSchema,
 } from "@/validations";
+import { useLogout } from "@/hooks";
 
 // ── Field wrapper ──────────────────────────────────────────────────────────
 function Field({
@@ -40,9 +41,10 @@ function Field({
 
 export default function SettingsTab({ user }: { user: UserData }) {
   const setUser = useAuthStore((s) => s.setUser);
+  const logout = useLogout();
 
   const [profileSaved, setProfileSaved] = useState(false);
-  const [passwordSaved, setPasswordSaved] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const {
@@ -59,15 +61,14 @@ export default function SettingsTab({ user }: { user: UserData }) {
     defaultValues: {
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email,
     },
   });
 
   const onSaveProfile = async (data: ProfileForm) => {
     try {
-      const res = await updateProfile(data);
-      setUser(res.data);
-      toast.success(res.message);
+      const user = await updateProfile(data);
+      setUser(user);
+      toast.success("User updated successfully");
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2500);
     } catch (err) {
@@ -84,20 +85,20 @@ export default function SettingsTab({ user }: { user: UserData }) {
   const {
     register: rPassword,
     handleSubmit: handlePassword,
-    reset: resetPassword,
     setError: setPasswordError,
-    formState: { errors: passwordErrors, isSubmitting: savingPassword },
+    formState: { errors: passwordErrors },
   } = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
   });
 
   const onSavePassword = async (data: ChangePasswordForm) => {
+    setPasswordSaving(true);
     try {
-      const res = await changePassword(data);
-      resetPassword();
-      setPasswordSaved(true);
-      setTimeout(() => setPasswordSaved(false), 2500);
-      toast.success(res.message);
+      await changePassword(data);
+      setPasswordSaving(false);
+      toast.success("Password successfully changed, please sign in again");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await logout();
     } catch (err) {
       handleFormError(err, setPasswordError, {
         401: {
@@ -153,21 +154,6 @@ export default function SettingsTab({ user }: { user: UserData }) {
               />
             </Field>
           </div>
-
-          <Field label="Email" error={profileErrors.email?.message}>
-            <div className="relative">
-              <input
-                {...rProfile("email")}
-                type="email"
-                className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark pr-24"
-              />
-              {user.isVerified && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[0.6rem] bg-green-pale text-green font-bold uppercase tracking-wider px-2 py-1 rounded-full">
-                  Verified
-                </span>
-              )}
-            </div>
-          </Field>
         </div>
 
         <div className="px-6 pb-6 flex items-center gap-4">
@@ -239,14 +225,10 @@ export default function SettingsTab({ user }: { user: UserData }) {
         <div className="px-6 pb-6">
           <button
             type="submit"
-            disabled={savingPassword}
+            disabled={passwordSaving}
             className="bg-green text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(45,106,79,0.28)] disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none"
           >
-            {savingPassword
-              ? "Updating…"
-              : passwordSaved
-                ? "✓ Updated"
-                : "Update Password"}
+            {passwordSaving ? "Updating…" : "Update Password"}
           </button>
         </div>
       </form>

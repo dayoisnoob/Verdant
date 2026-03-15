@@ -6,7 +6,7 @@ export const addItemSchema = z.object({
 });
 
 export const updateItemSchema = z.object({
-  quantity: z.number().int().positive('Quantity must be a positive number'),
+  quantity: z.number(),
 });
 
 export const mergeCartsSchema = z

@@ -1,10 +1,10 @@
 "use client";
 
-import { login, resendVerificationEmail } from "@/lib/api";
+import { loginApi, resendVerificationEmail } from "@/lib/api";
 import { ApiError } from "@/util";
 import { LoginForm, loginSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { CircleAlert, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -34,8 +34,10 @@ export default function LoginPage() {
     setBannerError("");
     setNotVerified(false);
     try {
-      await login(data);
+      console.log("try logged in");
 
+      await loginApi(data);
+      console.log("logged in");
       const redirect = searchParams.get("redirect") || "/";
       router.replace(redirect);
     } catch (err) {
@@ -140,16 +142,7 @@ export default function LoginPage() {
               ) : bannerError ? (
                 <div className="rounded-2xl overflow-hidden border border-red-200/60">
                   <div className="bg-red-500 px-4 py-2 flex items-center gap-2">
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-3.5 h-3.5 text-white flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
-                    </svg>
+                    <CircleAlert size={14} color="white" />
                     <p className="text-white text-[0.7rem] font-bold uppercase tracking-wider">
                       Sign in failed
                     </p>

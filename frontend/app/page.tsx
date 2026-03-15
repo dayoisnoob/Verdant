@@ -21,7 +21,7 @@ export default function HomePage() {
     refetch: refetchProduct,
   } = useQuery({
     queryKey: ["products"],
-    queryFn: () => getProducts(undefined, undefined, undefined, 1, 999),
+    queryFn: () => getProducts(undefined, undefined, undefined, 1, 100),
   });
 
   const PRODUCTS = data?.products;

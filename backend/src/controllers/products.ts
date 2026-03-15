@@ -18,7 +18,7 @@ export class ProductController {
   }
 
   static async getAllProducts(req: Request, res: Response) {
-    const { category, sort, page, limit, filter } = req.query as unknown as {
+    const { category, sort, page, limit, filter } = req.parsedQuery as {
       category: string;
       sort: string;
       page: number;
@@ -59,14 +59,12 @@ export class ProductController {
   }
 
   static async getCategories(req: Request, res: Response) {
-    const uniqueCategories = await ProductService.getCategories();
+    const categories = await ProductService.getCategories();
 
     res.json(
-      new ApiResponse(
-        200,
-        'All unique categories retrieved successfully',
-        uniqueCategories
-      )
+      new ApiResponse(200, 'All unique categories retrieved successfully', {
+        categories,
+      })
     );
   }
 }

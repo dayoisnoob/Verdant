@@ -14,7 +14,7 @@ export class PaymentController {
     } = req.body;
     const userId = req.user!.id;
 
-    const result = await PaymentService.createCheckoutSession(
+    const url = await PaymentService.createCheckoutSession(
       userId,
       items,
       shippingFee,
@@ -23,7 +23,8 @@ export class PaymentController {
       couponCode,
       deliveryNotes
     );
-    res.json(new ApiResponse(200, 'Session created', result));
+
+    res.json(new ApiResponse(200, 'Session created', { url }));
   }
 
   static async handleWebhook(req: Request, res: Response) {

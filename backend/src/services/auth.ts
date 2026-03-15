@@ -304,9 +304,6 @@ export class AuthService {
 
     const hashedToken = cryptoHash(refreshToken);
 
-    console.log('onRefresh', refreshToken);
-    console.log('hashed', hashedToken);
-
     const [storedToken] = await db
       .select()
       .from(refreshTokensTable)
@@ -665,7 +662,7 @@ export class AuthService {
     });
 
     try {
-      // await sendMail(user, '', 'changePassword');
+      await sendMail(user, '', 'changePassword');
     } catch (err) {
       logger.error(
         { userId: user.id },
