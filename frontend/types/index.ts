@@ -9,7 +9,13 @@ export type {
   FilterStatus,
   SingleOrder,
 } from "./order.types";
-export type { CategoryMeta, Product, ProductsApi } from "./product.types";
+export type {
+  CategoryMeta,
+  Product,
+  ProductsApi,
+  ProductCard,
+  ProductSectionProps,
+} from "./product.types";
 export type {
   AddressStore,
   AuthCartStore,

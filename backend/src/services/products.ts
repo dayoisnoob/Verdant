@@ -1,6 +1,19 @@
-import { and, asc, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  ne,
+  notInArray,
+  or,
+  SQL,
+  sql,
+} from 'drizzle-orm';
 import { db } from '../config/db';
-import { productsTable } from '../models';
+import { orderItemsTable, ordersTable, productsTable } from '../models';
 import type { Product } from '../types/types';
 import { ApiError } from '../utils/apiResponse';
 import type { UpdateProductInput } from '../validations/products';
@@ -78,14 +91,15 @@ export class ProductService {
     return product;
   }
 
-  static async getProducts(
+  static async getPaginatedProducts(
     category: string,
     sort: string,
     page: number,
     limit: number,
-    filter?: string
+    filter?: string,
+    search?: string
   ) {
-    const parsedLimit = Number(limit) || 12;
+    const parsedLimit = Number(limit) ?? undefined;
     const parsedPage = Number(page) || 1;
     const offset = (parsedPage - 1) * parsedLimit;
 
@@ -103,6 +117,18 @@ export class ProductService {
       conditions.push(eq(productsTable.isSeasonal, true));
     if (filter === 'on-sale') conditions.push(eq(productsTable.isOnSale, true));
     if (filter === 'in-stock') conditions.push(eq(productsTable.inStock, true));
+    if (filter === 'featured')
+      conditions.push(eq(productsTable.isFeatured, true));
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(productsTable.name, `%${search}%`),
+          ilike(productsTable.category, `%${search}%`),
+          ilike(productsTable.farm, `%${search}%`)
+        )
+      );
+    }
 
     const sortMap: Record<string, SQL> = {
       'price-asc': asc(productsTable.price),
@@ -116,7 +142,23 @@ export class ProductService {
 
     const [products, countResult] = await Promise.all([
       db
-        .select()
+        .select({
+          id: productsTable.id,
+          name: productsTable.name,
+          slug: productsTable.slug,
+          price: productsTable.price,
+          originalPrice: productsTable.originalPrice,
+          images: productsTable.images,
+          farm: productsTable.farm,
+          unit: productsTable.unit,
+          isOrganic: productsTable.isOrganic,
+          reviewCount: productsTable.reviewCount,
+          rating: productsTable.rating,
+          isSeasonal: productsTable.isSeasonal,
+          isOnSale: productsTable.isOnSale,
+          origin: productsTable.origin,
+          inStock: productsTable.inStock,
+        })
         .from(productsTable)
         .where(where)
         .orderBy(orderBy)
@@ -137,6 +179,107 @@ export class ProductService {
     };
 
     return { products, pagination };
+  }
+
+  static async getAllProducts() {
+    const products = db
+      .select({
+        id: productsTable.id,
+        name: productsTable.name,
+        slug: productsTable.slug,
+        category: productsTable.category,
+        price: productsTable.price,
+        originalPrice: productsTable.originalPrice,
+        images: productsTable.images,
+        farm: productsTable.farm,
+        unit: productsTable.unit,
+        isOrganic: productsTable.isOrganic,
+        reviewCount: productsTable.reviewCount,
+        rating: productsTable.rating,
+        isSeasonal: productsTable.isSeasonal,
+        isOnSale: productsTable.isOnSale,
+        origin: productsTable.origin,
+        inStock: productsTable.inStock,
+      })
+      .from(productsTable);
+
+    return products;
+  }
+
+  static async getSuggestedProducts(productIds: string[]) {
+    console.log(productIds);
+    const products = db
+      .select({
+        id: productsTable.id,
+        name: productsTable.name,
+        slug: productsTable.slug,
+        category: productsTable.category,
+        price: productsTable.price,
+        originalPrice: productsTable.originalPrice,
+        images: productsTable.images,
+        farm: productsTable.farm,
+        unit: productsTable.unit,
+        isOrganic: productsTable.isOrganic,
+        reviewCount: productsTable.reviewCount,
+        rating: productsTable.rating,
+        isSeasonal: productsTable.isSeasonal,
+        isOnSale: productsTable.isOnSale,
+        origin: productsTable.origin,
+        inStock: productsTable.inStock,
+      })
+      .from(productsTable)
+      .where(notInArray(productsTable.id, productIds))
+      .orderBy(sql`RANDOM()`)
+      .limit(4);
+
+    return products;
+  }
+
+  static async getRelatedProducts(slug: string) {
+    const products = db
+      .select({
+        id: productsTable.id,
+        name: productsTable.name,
+        slug: productsTable.slug,
+        category: productsTable.category,
+        price: productsTable.price,
+        originalPrice: productsTable.originalPrice,
+        images: productsTable.images,
+        farm: productsTable.farm,
+        unit: productsTable.unit,
+        isOrganic: productsTable.isOrganic,
+        reviewCount: productsTable.reviewCount,
+        rating: productsTable.rating,
+        isSeasonal: productsTable.isSeasonal,
+        isOnSale: productsTable.isOnSale,
+        origin: productsTable.origin,
+        inStock: productsTable.inStock,
+      })
+      .from(productsTable)
+      .where(
+        and(
+          eq(
+            productsTable.category,
+            db
+              .select({ category: productsTable.category })
+              .from(productsTable)
+              .where(eq(productsTable.slug, slug))
+              .limit(1)
+          ),
+          ne(
+            productsTable.id,
+            db
+              .select({ id: productsTable.id })
+              .from(productsTable)
+              .where(eq(productsTable.slug, slug))
+              .limit(1)
+          )
+        )
+      )
+      .orderBy(sql`RANDOM()`)
+      .limit(4);
+
+    return products;
   }
 
   static async getCategories() {
@@ -168,6 +311,76 @@ export class ProductService {
     return updatedProduct;
   }
 
+  static async bestSelling() {
+    const bestSelling = await db
+      .select({
+        id: orderItemsTable.productId,
+        totalSold: sql<number>`sum(${orderItemsTable.quantity})`,
+        name: productsTable.name,
+        slug: productsTable.slug,
+        category: productsTable.category,
+        price: productsTable.price,
+        originalPrice: productsTable.originalPrice,
+        images: productsTable.images,
+        farm: productsTable.farm,
+        unit: productsTable.unit,
+        isOrganic: productsTable.isOrganic,
+        reviewCount: productsTable.reviewCount,
+        rating: productsTable.rating,
+        isSeasonal: productsTable.isSeasonal,
+        isOnSale: productsTable.isOnSale,
+        origin: productsTable.origin,
+        inStock: productsTable.inStock,
+      })
+      .from(orderItemsTable)
+      .innerJoin(ordersTable, eq(ordersTable.id, orderItemsTable.orderId))
+      .innerJoin(productsTable, eq(productsTable.id, orderItemsTable.productId))
+      .where(notInArray(ordersTable.status, ['cancelled', 'refunded']))
+      .groupBy(orderItemsTable.productId, productsTable.id)
+      .orderBy(desc(sql`sum(${orderItemsTable.quantity})`))
+      .limit(8);
+
+    return bestSelling;
+  }
+
+  static async trending() {
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+    const trendingProducts = await db
+      .select({
+        id: orderItemsTable.productId,
+        totalSold: sql<number>`sum(${orderItemsTable.quantity})`,
+        name: productsTable.name,
+        slug: productsTable.slug,
+        category: productsTable.category,
+        price: productsTable.price,
+        originalPrice: productsTable.originalPrice,
+        images: productsTable.images,
+        farm: productsTable.farm,
+        unit: productsTable.unit,
+        isOrganic: productsTable.isOrganic,
+        reviewCount: productsTable.reviewCount,
+        rating: productsTable.rating,
+        isSeasonal: productsTable.isSeasonal,
+        isOnSale: productsTable.isOnSale,
+        origin: productsTable.origin,
+        inStock: productsTable.inStock,
+      })
+      .from(orderItemsTable)
+      .innerJoin(ordersTable, eq(ordersTable.id, orderItemsTable.orderId))
+      .innerJoin(productsTable, eq(productsTable.id, orderItemsTable.productId))
+      .where(
+        and(
+          gte(ordersTable.createdAt, threeDaysAgo),
+          notInArray(ordersTable.status, ['cancelled', 'refunded'])
+        )
+      )
+      .groupBy(orderItemsTable.productId, productsTable.id)
+      .orderBy(desc(sql`sum(${orderItemsTable.quantity})`))
+      .limit(8);
+
+    return trendingProducts;
+  }
   static async deleteProduct(id: string) {
     const [deletedProduct] = await db
       .delete(productsTable)

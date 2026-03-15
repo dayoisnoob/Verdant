@@ -7,7 +7,6 @@ interface HeroProps {
 }
 
 export default function Hero({ hero }: HeroProps) {
-  console.log(hero);
   return (
     <section className="relative min-h-screen flex flex-col lg:flex-row overflow-hidden bg-cream">
       {/* ── Left — Copy ── */}

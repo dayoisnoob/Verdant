@@ -99,6 +99,7 @@ export const getProductsSchema = z.object({
   category: z.string().default('All'),
   filter: z.string().default('All'),
   sort: z.string().default('newest'),
+  search: z.string().default(''),
 });
 
 export type CreateProductSchema = z.infer<typeof productSchema>;

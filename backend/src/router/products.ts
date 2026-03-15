@@ -19,8 +19,16 @@ const router = Router();
 router.get(
   '/',
   validateUrlQuery(getProductsSchema),
-  asyncHandler(ProductController.getAllProducts)
+  asyncHandler(ProductController.getPaginatedProducts)
 );
+router.get('/all', asyncHandler(ProductController.getAllProducts));
+
+router.post('/suggested', asyncHandler(ProductController.getSuggestedProducts));
+router.get(
+  '/related/:slug',
+  asyncHandler(ProductController.getRelatedProducts)
+);
+
 router.get('/categories', asyncHandler(ProductController.getCategories));
 
 router.get(
@@ -49,5 +57,11 @@ router.delete(
   validateUrlParams(idParamsSchema),
   asyncHandler(ProductController.deleteProduct)
 );
+
+router.get(
+  '/analytics/best-selling',
+  asyncHandler(ProductController.bestSelling)
+);
+router.get('/analytics/trending', asyncHandler(ProductController.trending));
 
 export default router;

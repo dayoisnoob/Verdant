@@ -6,7 +6,8 @@ import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
 import { useWishlistToggle } from "@/hooks";
-import { getProductBySlug, getProducts } from "@/lib/api";
+import { getProductBySlug } from "@/lib/api";
+import { getRelated } from "@/lib/api/product.api";
 import { useCartStore } from "@/store/store";
 import { Product } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -36,14 +37,13 @@ export default function ProductPage({
     error,
     refetch,
   } = useQuery({
-    queryKey: ["product", slug],
+    queryKey: ["single-product", slug],
     queryFn: async () => await getProductBySlug(slug),
   });
 
-  const { data } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () =>
-      await getProducts(undefined, undefined, undefined, 1, 20),
+  const { data: relatedProducts } = useQuery({
+    queryKey: ["related-products"],
+    queryFn: () => getRelated(slug),
   });
 
   const { toggle, wishlisted } = useWishlistToggle(product?.id as string);
@@ -63,10 +63,6 @@ export default function ProductPage({
     );
 
   if (!product) notFound();
-
-  const related = data?.products
-    ?.filter((p) => p.category === product.category && p.slug !== product.slug)
-    .slice(0, 4);
 
   const discountPct = product.originalPrice
     ? Math.round(
@@ -400,7 +396,7 @@ export default function ProductPage({
         </div>
 
         {/* ── Related products ── */}
-        {(related?.length ?? 0) > 0 && (
+        {(relatedProducts?.length ?? 0) > 0 && (
           <div className="border-t border-green/10 px-4 sm:px-8 md:px-16 lg:px-20 py-14">
             <div className="flex items-end justify-between mb-8">
               <div>
@@ -421,7 +417,7 @@ export default function ProductPage({
 
             {/* Horizontal scroll on mobile, grid on desktop */}
             <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 md:grid-cols-4 sm:overflow-visible sm:pb-0">
-              {related?.map((p) => (
+              {relatedProducts?.map((p) => (
                 <div key={p.slug} className="min-w-[220px] sm:min-w-0">
                   <ProductCard product={p} />
                 </div>

@@ -1,6 +1,6 @@
 import { UserData } from "./auth.types";
 import { CartApi, CartItems } from "./cart.types";
-import { Product } from "./product.types";
+import { ProductCard } from "./product.types";
 
 export interface AuthCartStore {
   items: CartItems[];
@@ -9,7 +9,7 @@ export interface AuthCartStore {
   isLoading: boolean;
   isError: boolean;
 
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: ProductCard, quantity?: number) => void;
   setCart: (cartItems: CartApi) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
@@ -26,7 +26,7 @@ export interface GuestCartStore {
   couponCode: string;
   discount: number;
 
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: ProductCard, quantity?: number) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;

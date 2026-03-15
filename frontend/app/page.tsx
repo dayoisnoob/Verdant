@@ -1,63 +1,61 @@
 "use client";
 
-import Link from "next/link";
-
 import Container from "@/components/Container";
+import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
-import ProductCard from "@/components/ProductCard";
-import { getProducts } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import ProductSection from "@/components/ProductSection";
 import { FeaturedSkeleton, HeroSkeleton } from "@/components/Skeletons";
-import { ErrorState } from "@/components/ErrorState";
+import { getBestSelling, getPaginatedProducts, getTrending } from "@/lib/api";
+
+import { useQuery } from "@tanstack/react-query";
 
 export default function HomePage() {
   const {
     data,
-    isLoading,
+    isLoading: featuredLoading,
     isError,
-    error,
-    refetch: refetchProduct,
+    refetch,
   } = useQuery({
     queryKey: ["products"],
-    queryFn: () => getProducts(undefined, undefined, undefined, 1, 100),
+    queryFn: () => getPaginatedProducts(undefined, undefined, "featured", 1, 4),
+  });
+  const { data: bestSelling, isLoading: bestSellingLoading } = useQuery({
+    queryKey: ["best-selling"],
+    queryFn: getBestSelling,
+  });
+  const { data: trending, isLoading: trendingLoading } = useQuery({
+    queryKey: ["trending"],
+    queryFn: getTrending,
   });
 
-  const PRODUCTS = data?.products;
+  const featuredProducts = data?.products;
 
-  if (isLoading) {
+  if (featuredLoading)
     return (
       <>
-        <style>{`@keyframes shimmer { to { transform: translateX(200%); } }`}</style>
         <Navbar />
-        <main>
-          <HeroSkeleton />
-          <FeaturedSkeleton />
-        </main>
+        <HeroSkeleton />
+        <FeaturedSkeleton />
         <Footer />
       </>
     );
-  }
 
   if (isError) {
     return (
       <>
         <Navbar />
         <ErrorState
-          message={
-            error instanceof Error
-              ? error.message
-              : "Check your connection and try again."
-          }
-          onRetry={refetchProduct}
+          message="Check your connection and try again."
+          onRetry={refetch}
         />
         <Footer />
       </>
     );
   }
 
-  if (!PRODUCTS || PRODUCTS.length === 0) {
+  if (!featuredProducts?.length) {
     return (
       <>
         <Navbar />
@@ -75,11 +73,8 @@ export default function HomePage() {
     );
   }
 
-  const featuredProducts = PRODUCTS.filter((p) => p.isFeatured);
-
   return (
     <Container>
-      <style>{`@keyframes shimmer { to { transform: translateX(200%); } }`}</style>
       <Navbar />
 
       <main className="bg-cream flex flex-col gap-3">
@@ -89,128 +84,42 @@ export default function HomePage() {
         </div>
 
         {/* ── Featured ── */}
-        <div className="bg-white rounded-2xl mx-4 px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
-            <div>
-              <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
-                Staff Picks
-              </p>
-              <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl">
-                This Week&apos;s Best
-              </h2>
-            </div>
-            <Link
-              href="/shop"
-              className="text-green text-sm font-medium hover:opacity-65 transition-opacity self-start sm:self-auto"
-            >
-              Browse all produce →
-            </Link>
-          </div>
-
-          {featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {featuredProducts.slice(0, 4).map((p) => (
-                <ProductCard key={p.slug} product={p} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 text-verdant-muted text-sm">
-              No featured products right now.{" "}
-              <Link
-                href="/shop"
-                className="text-green font-medium hover:underline"
-              >
-                Browse everything →
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* ── Best Selling ── */}
-        <div className="bg-white rounded-2xl mx-4 px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
-            <div>
-              <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
-                Customer Favourites
-              </p>
-              <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl">
-                Best Selling Produce
-              </h2>
-              <p className="text-verdant-muted text-sm mt-2 max-w-sm">
-                What our customers keep coming back for — picked fresh,
-                delivered to your door.
-              </p>
-            </div>
-            <Link
-              href="/shop"
-              className="text-green text-sm font-medium hover:opacity-65 transition-opacity self-start sm:self-auto"
-            >
-              Browse all produce →
-            </Link>
-          </div>
-
-          {PRODUCTS.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {PRODUCTS.slice(4, 12).map((p) => (
-                <ProductCard key={p.slug} product={p} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 text-verdant-muted text-sm">
-              No featured products right now.{" "}
-              <Link
-                href="/shop"
-                className="text-green font-medium hover:underline"
-              >
-                Browse everything →
-              </Link>
-            </div>
-          )}
-        </div>
+        {featuredLoading ? (
+          <FeaturedSkeleton />
+        ) : (
+          <ProductSection
+            label="Staff Picks"
+            title="This Week's Best"
+            products={featuredProducts}
+          />
+        )}
 
         {/* ── Trending ── */}
-        <div className="bg-white rounded-2xl mx-4 px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
-            <div>
-              <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
-                Right Now
-              </p>
-              <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl">
-                Trending Produce
-              </h2>
-              <p className="text-verdant-muted text-sm mt-2 max-w-sm">
-                What everyone&apos;s adding to their basket this week — before
-                it sells out.
-              </p>
-            </div>
-            <Link
-              href="/shop"
-              className="text-green text-sm font-medium hover:opacity-65 transition-opacity self-start sm:self-auto"
-            >
-              Browse all produce →
-            </Link>
-          </div>
+        {trendingLoading ? (
+          <FeaturedSkeleton />
+        ) : (
+          <ProductSection
+            label="Right Now"
+            title="Trending Produce"
+            description="What our customers keep coming back for — picked fresh,
+                delivered to your door."
+            products={trending ?? []}
+          />
+        )}
 
-          {PRODUCTS.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {PRODUCTS.slice(12, 20).map((p) => (
-                <ProductCard key={p.slug} product={p} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 text-verdant-muted text-sm">
-              No trending products right now.{" "}
-              <Link
-                href="/shop"
-                className="text-green font-medium hover:underline"
-              >
-                Browse everything →
-              </Link>
-            </div>
-          )}
-        </div>
+        {/* ── Best Selling ── */}
+        {bestSellingLoading ? (
+          <FeaturedSkeleton />
+        ) : (
+          <ProductSection
+            label="Customer Favourites"
+            title=" Best Selling Produce"
+            description="What everyone's adding to their basket this week — before
+                it sells out."
+            products={bestSelling ?? []}
+          />
+        )}
 
-        {/* ── Trust strip ── */}
         <div className="bg-green rounded-2xl mx-4 px-6 py-10 sm:px-10 lg:px-16">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
             {[
@@ -245,7 +154,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── Newsletter ── */}
         <div className="bg-white rounded-2xl mx-4 px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
           <div className="max-w-xl mx-auto text-center">
             <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-3">
@@ -275,7 +183,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── Footer ── */}
         <div>
           <Footer />
         </div>

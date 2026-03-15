@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   Package,
+  Search,
   ShoppingBasket,
   Sprout,
   User,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import SearchModal from "./SearchModal";
 
 const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
@@ -29,6 +31,7 @@ export default function Navbar() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const user = useAuthStore((s) => s.user);
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -110,6 +113,13 @@ export default function Navbar() {
           </ul>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="text-stone-600 hover:text-stone-900 transition-colors"
+              aria-label="Open search"
+            >
+              <Search size={20} />
+            </button>{" "}
             <div className="flex items-center gap-2">
               {!isHydrated ? (
                 <>
@@ -423,6 +433,8 @@ export default function Navbar() {
           )}
         </div>
       </aside>
+
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

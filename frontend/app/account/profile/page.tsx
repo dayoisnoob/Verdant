@@ -13,7 +13,6 @@ import { convertDate } from "@/lib/helpers";
 import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
 import {
-  CircleCheck,
   CircleCheckBig,
   Heart,
   LogOut,
@@ -192,18 +191,18 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Member since */}
-                <p className="text-white/25 text-[0.6rem] mt-4 text-center">
+                <p className="text-white/25 text-xs mt-4 text-center">
                   Member since {convertDate(user.createdAt)}
                 </p>
               </div>
 
               {/* Nav */}
-              <nav className="bg-white rounded-2xl border border-[#e8e4dc] overflow-hidden">
+              <nav className="bg-white/80 rounded-2xl border border-[#e8e4dc] overflow-hidden">
                 {TABS.map((t, i) => (
                   <button
                     key={t.id}
                     onClick={() => setTab(t.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all duration-150 ${
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm font-light transition-all duration-150 ${
                       i < TABS.length - 1 ? "border-b border-[#f5f2ec]" : ""
                     } ${
                       tab === t.id
@@ -299,7 +298,7 @@ export default function ProfilePage() {
                 <div className="flex flex-col gap-4">
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white rounded-2xl border border-[#e8e4dc] p-5 flex items-center gap-4">
+                    <div className="bg-white/80 rounded-2xl border border-[#e8e4dc] p-5 flex items-center gap-4">
                       orders{" "}
                       <div className="w-10 h-10 bg-green-pale rounded-xl flex items-center justify-center text-lg flex-shrink-0">
                         📦
@@ -315,7 +314,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
                     </div>
-                    <div className="bg-white rounded-2xl border border-[#e8e4dc] p-5 flex items-center gap-4">
+                    <div className="bg-white/80 rounded-2xl border border-[#e8e4dc] p-5 flex items-center gap-4">
                       <div className="w-10 h-10 bg-orange-pale rounded-xl flex items-center justify-center text-lg flex-shrink-0">
                         💳
                       </div>
@@ -331,7 +330,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Latest order */}
-                  <div className="bg-white rounded-2xl border border-[#e8e4dc] overflow-hidden">
+                  <div className="bg-white/80 rounded-2xl border border-[#e8e4dc] overflow-hidden">
                     <div className="px-5 py-4 border-b border-[#f0ede6] flex items-center justify-between">
                       <h3 className="font-semibold text-verdant-dark text-sm">
                         Latest Order
@@ -434,7 +433,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Default address */}
-                  <div className="bg-white rounded-2xl border border-[#e8e4dc] overflow-hidden">
+                  <div className="bg-white/80 rounded-2xl border border-[#e8e4dc] overflow-hidden">
                     <div className="px-5 py-4 border-b border-[#f0ede6] flex items-center justify-between">
                       <h3 className="font-semibold text-verdant-dark text-sm">
                         Default Address

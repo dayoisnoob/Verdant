@@ -87,3 +87,5 @@ export const FILTERS = [
   { label: "On Sale", value: "on-sale" },
   { label: "In Stock", value: "in-stock" },
 ];
+
+export const PAGE_LIMIT = 12;

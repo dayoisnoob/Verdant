@@ -112,7 +112,7 @@ export const useGuestCartStore = create(
       couponCode: "",
       discount: 0,
 
-      addItem: (product: Product, quantity = 1) => {
+      addItem: (product, quantity = 1) => {
         set((state) => {
           const existing = state.items.find((i) => i.productId === product.id);
 

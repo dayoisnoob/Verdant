@@ -35,7 +35,15 @@ export {
   getuserOrders,
 } from "./order.api";
 
-export { getCategories, getProductBySlug, getProducts } from "./product.api";
+export {
+  getCategories,
+  getProductBySlug,
+  getPaginatedProducts,
+  getAllProducts,
+  getBestSelling,
+  getTrending,
+  getSuggested,
+} from "./product.api";
 
 export {
   addToWishlist,

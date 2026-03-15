@@ -1,8 +1,8 @@
-import { Product } from "@/types";
+import { ProductCard } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 
-const MightLike = ({ suggested }: { suggested: Product[] }) => {
+const MightLike = ({ suggested }: { suggested: ProductCard[] }) => {
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-12 md:py-16 border-t border-green/10">
       <h2 className="font-playfair font-bold text-verdant-dark text-xl md:text-2xl mb-6 md:mb-8">

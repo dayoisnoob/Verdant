@@ -9,8 +9,9 @@ import Navbar from "@/components/Navbar";
 import { useCart } from "@/hooks";
 import {
   applyCouponApi,
+  getAllProducts,
   getCartTotal,
-  getProducts,
+  getSuggested,
   updateItem,
 } from "@/lib/api";
 import { calculateOrderTotal } from "@/lib/helpers";
@@ -36,18 +37,23 @@ export default function CartPage() {
   } = useCart();
 
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const productIds = cartItems.map((i) => i.productId);
 
   const {
-    data,
+    data: PRODUCTS,
     isLoading: productsLoading,
     isError: productsError,
     refetch: refetchProducts,
   } = useQuery({
     queryKey: ["products"],
-    queryFn: async () => getProducts(undefined, undefined, undefined, 1, 100),
+    queryFn: async () => getAllProducts(),
   });
 
-  const PRODUCTS = data?.products;
+  const { data: SUGGESTED } = useQuery({
+    queryKey: ["suggested", productIds],
+    queryFn: async () => getSuggested(productIds),
+    enabled: productIds.length > 0,
+  });
 
   const [coupon, setCoupon] = useState("");
   const [couponError, setCouponError] = useState("");
@@ -89,7 +95,6 @@ export default function CartPage() {
   const { shippingFee, totalAmount } = calculateOrderTotal(discountedSubtotal);
 
   if (!PRODUCTS) return null;
-  const SUGGESTED = PRODUCTS.filter((p) => p.isFeatured).slice(0, 3);
 
   const FREE_DELIVERY_THRESHOLD = 10000;
   const progressPct = Math.min((subtotal / FREE_DELIVERY_THRESHOLD) * 100, 100);
@@ -157,7 +162,6 @@ export default function CartPage() {
       const totalApi = parseFloat((res.totalPence / 100).toFixed(2));
       const deliveryApi = parseFloat((res.deliveryPence / 100).toFixed(2));
 
-      // setDiscount(discountApi);
       setTotal(totalApi);
       setDelivery(deliveryApi);
 
@@ -445,7 +449,7 @@ export default function CartPage() {
           </div>
         )}
 
-        {cartItems.length > 0 && <MightLike suggested={SUGGESTED} />}
+        {cartItems.length > 0 && <MightLike suggested={SUGGESTED ?? []} />}
       </main>
 
       <Footer />

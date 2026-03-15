@@ -1,22 +1,22 @@
 "use client";
 
 import { useCart, useWishlistToggle } from "@/hooks";
-import { Product } from "@/types";
+import { ProductCard as ProductCardType } from "@/types";
 import { Heart, ShoppingBasket } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { StarRating } from "./StarRating";
 
-interface ProductCardProps {
-  product: Product;
-}
-
 function discountPct(price: string, original: string) {
   return Math.round((1 - parseFloat(price) / parseFloat(original)) * 100);
 }
 
-export default function ProductCard({ product: p }: ProductCardProps) {
+export default function ProductCard({
+  product: p,
+}: {
+  product: ProductCardType;
+}) {
   const { addItem } = useCart();
 
   const { wishlisted, toggle } = useWishlistToggle(p.id);

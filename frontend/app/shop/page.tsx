@@ -6,8 +6,8 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Pagination } from "@/components/Pagination";
 import ProductCard from "@/components/ProductCard";
-import { getCategories, getProducts } from "@/lib/api";
-import { FILTERS } from "@/lib/constants";
+import { getCategories, getPaginatedProducts } from "@/lib/api";
+import { FILTERS, PAGE_LIMIT } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -54,6 +54,7 @@ function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") ?? "All";
   const initialFilter = searchParams.get("filter") ?? "all";
+  const q = searchParams.get("q") ?? "";
 
   const [sortBy, setSortBy] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,9 +63,23 @@ function ShopContent() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["products", activeCategory, activeFilter, sortBy, currentPage],
+    queryKey: [
+      "products",
+      activeCategory,
+      activeFilter,
+      sortBy,
+      currentPage,
+      q,
+    ],
     queryFn: async () =>
-      await getProducts(activeCategory, sortBy, activeFilter, currentPage),
+      await getPaginatedProducts(
+        activeCategory,
+        sortBy,
+        activeFilter,
+        currentPage,
+        PAGE_LIMIT,
+        q,
+      ),
     placeholderData: (prev) => prev,
   });
 
@@ -78,7 +93,7 @@ function ShopContent() {
     staleTime: 1000 * 60 * 10,
   });
 
-  console.log(CATEGORIES);
+  console.log("searching", q);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });

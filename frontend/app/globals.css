@@ -18,6 +18,12 @@ body {
   overflow-x: hidden;
 }
 
+@keyframes shimmer {
+  to {
+    transform: translateX(200%);
+  }
+}
+
 @layer utilities {
   .animate-delay-100 {
     animation-delay: 100ms;

@@ -43,3 +43,29 @@ interface ProductImage {
   url: string;
   alt: string;
 }
+
+export type ProductCard = Pick<
+  Product,
+  | "id"
+  | "name"
+  | "slug"
+  | "price"
+  | "images"
+  | "farm"
+  | "unit"
+  | "isOrganic"
+  | "inStock"
+  | "originalPrice"
+  | "reviewCount"
+  | "rating"
+  | "origin"
+  | "isSeasonal"
+  | "isOnSale"
+> & { totalSold?: number };
+
+export interface ProductSectionProps {
+  title: string;
+  label: string;
+  description?: string;
+  products: ProductCard[];
+}
