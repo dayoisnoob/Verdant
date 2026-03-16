@@ -9,7 +9,13 @@ import { CouponService } from './coupon';
 type CartWithItems = Cart & { items: CartItem[] };
 export class CartService {
   static async getCart(userId: string) {
-    return await CartService.getOrCreateCart(userId);
+    const { cart } = await CartService.getOrCreateCart(userId);
+    const totals = await CartService.getCartTotal(
+      userId,
+      cart as CartWithItems
+    );
+
+    return { cart, totals };
   }
 
   static async addItem(
@@ -88,12 +94,12 @@ export class CartService {
 
     if (!updated) throw new ApiError(404, 'Cart Item not found');
 
-    const { subtotal, discount } = await CartService.getCartTotal(
+    const { subtotalPence, discountPence } = await CartService.getCartTotal(
       userId,
       existingCart
     );
 
-    if (Number(discount) > 0 && subtotal <= discount) {
+    if (Number(discountPence) > 0 && subtotalPence <= discountPence) {
       await CouponService.removeCouponFromCart(userId);
 
       throw new ApiError(
@@ -167,7 +173,7 @@ export class CartService {
 
     const discountPence = Math.min(couponDiscount ?? 0, subtotalPence);
     const discountedSubtotal = subtotalPence - discountPence;
-    const deliveryPence = discountedSubtotal >= 10000 ? 0 : 499;
+    const deliveryPence = discountedSubtotal >= 4000 ? 0 : 499;
     const totalPence = discountedSubtotal + deliveryPence;
 
     return {
@@ -175,11 +181,7 @@ export class CartService {
       discountPence,
       deliveryPence,
       totalPence,
-      subtotal: (subtotalPence / 100).toFixed(2),
-      discount: (discountPence / 100).toFixed(2),
-      delivery: (deliveryPence / 100).toFixed(2),
-      total: (totalPence / 100).toFixed(2),
-      itemCount: cart.items.reduce((n, i) => n + i.quantity, 0),
+      // itemCount: cart.items.reduce((n, i) => n + i.quantity, 0),
     };
   }
 

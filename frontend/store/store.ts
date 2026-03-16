@@ -1,23 +1,23 @@
-import { addItemToCart, getCart, removeItemFromCart } from "@/lib/api";
+import { addItemToCart, removeItemFromCart, updateItem } from "@/lib/api";
+import { toPence } from "@/lib/utils";
 import {
   AddressStore,
   AuthCartStore,
   AuthStore,
-  CartItems,
   GuestCartStore,
-  Product,
 } from "@/types";
+import { StoreCartItem } from "@/types/cart.types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export const useCartStore = create<AuthCartStore>((set, get) => ({
   items: [],
-  couponCode: "",
-  discount: 0,
+  totals: null,
   isLoading: true,
   isError: false,
 
   addItem: async (product, quantity = 1) => {
+    const previousItems = get().items;
     const existing = get().items.find((i) => i.productId === product.id);
 
     if (existing) {
@@ -35,7 +35,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
             unit: product.unit,
             farm: product.farm,
             isOrganic: product.isOrganic,
-            pricePence: Math.round(parseFloat(product.price) * 100),
+            pricePence: toPence(product.price),
             quantity,
           },
         ],
@@ -44,23 +44,20 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
 
     try {
       await addItemToCart({ productId: product.id, quantity });
-    } catch (err) {
-      console.log(err);
-      set((state) => ({
-        items: state.items.filter((i) => i.productId !== product.id),
-      }));
+    } catch {
+      set({ items: previousItems });
     }
   },
 
-  setCart: (cart) =>
+  setCart: (cart, totals) =>
     set({
       items: cart.items,
-      couponCode: cart.couponCode ?? "",
-      discount: cart.discount,
+      totals: totals,
       isLoading: false,
     }),
 
   removeItem: async (id: string) => {
+    const previousItems = get().items;
     set((state) => ({
       items: state.items.filter((i) => i.productId !== id),
     }));
@@ -68,49 +65,42 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
     try {
       await removeItemFromCart(id);
     } catch {
-      const cart = await getCart();
-      useCartStore.getState().setCart(cart);
+      set({ items: previousItems });
     }
   },
 
   clearCart: () => set({ items: [] }),
 
-  updateQuantity: (id: string, quantity: number) => {
+  updateQuantity: async (id: string, quantity: number) => {
+    const previousItems = get().items;
+
+    const item = previousItems.find((i) => i.productId === id);
+    if (!item) return {};
+
+    const newQuantity = item.quantity + quantity;
+
+    if (newQuantity < 1) return {};
+
     set((state) => {
-      const item = state.items.find((i) => i.productId === id);
-      if (!item) return {};
-
-      const newQuantity = item.quantity + quantity;
-
-      if (newQuantity < 1) return {};
-
       return {
         items: state.items.map((i) =>
           i.productId === id ? { ...i, quantity: newQuantity } : i,
         ),
       };
     });
+
+    try {
+      await updateItem({ productId: id, quantity: item.quantity });
+    } catch {
+      set({ items: previousItems });
+    }
   },
-
-  applyCoupon: (code: string, discount: number) =>
-    set({ couponCode: code, discount }),
-
-  removeCoupon: async () => {
-    set({ couponCode: "", discount: 0 });
-  },
-
-  itemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
-
-  setLoading: (val: boolean) => set({ isLoading: val }),
-  setError: (val: boolean) => set({ isError: val }),
 }));
 
 export const useGuestCartStore = create(
   persist<GuestCartStore>(
     (set, get) => ({
       items: [],
-      couponCode: "",
-      discount: 0,
 
       addItem: (product, quantity = 1) => {
         set((state) => {
@@ -126,7 +116,7 @@ export const useGuestCartStore = create(
             };
           }
 
-          const item: CartItems = {
+          const item: StoreCartItem = {
             id: crypto.randomUUID(),
             productId: product.id,
             name: product.name,
@@ -135,7 +125,7 @@ export const useGuestCartStore = create(
             unit: product.unit,
             farm: product.farm,
             isOrganic: product.isOrganic,
-            pricePence: Math.round(parseFloat(product.price) * 100),
+            pricePence: toPence(product.price),
             quantity,
           };
 
@@ -154,11 +144,11 @@ export const useGuestCartStore = create(
       updateQuantity: (id: string, quantity: number) => {
         set((state) => {
           const item = state.items.find((i) => i.productId === id);
-          if (!item) return state;
+          if (!item) return {};
 
           const newQuantity = item.quantity + quantity;
 
-          if (newQuantity < 1) return state;
+          if (newQuantity < 1) return {};
 
           return {
             items: state.items.map((i) =>
@@ -167,10 +157,6 @@ export const useGuestCartStore = create(
           };
         });
       },
-
-      applyCoupon: (code: string, discount: number) =>
-        set({ couponCode: code, discount }),
-      removeCoupon: () => set({ couponCode: "", discount: 0 }),
 
       itemCount: () =>
         get().items.reduce((sum, item) => sum + item.quantity, 0),
@@ -183,21 +169,19 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,
-      isLoggedIn: false,
       accessToken: null,
-      signUpEmail: "",
       isHydrated: false,
 
-      setEmail: (email: string) => set({ signUpEmail: email }),
+      login: (user, accessToken) => set({ user, accessToken }),
 
-      login: (user, accessToken) =>
-        set({ user, accessToken, isLoggedIn: true }),
-
-      setUser: (user) => set({ user }),
+      updateUser: (user) => set({ user }),
 
       setAccessToken: (token) => set({ accessToken: token }),
 
-      logout: () => set({ user: null, isLoggedIn: false, accessToken: null }),
+      logout: () => {
+        set({ user: null, accessToken: null });
+        useCartStore.getState().clearCart();
+      },
 
       setHydrated: () => set({ isHydrated: true }),
     }),
@@ -205,27 +189,10 @@ export const useAuthStore = create<AuthStore>()(
       name: "auth-store",
       partialize: (state) => ({
         user: state.user,
-        isLoggedIn: state.isLoggedIn,
-        signUpEmail: state.signUpEmail,
       }),
       onRehydrateStorage: () => (state) => {
-        state?.setHydrated(); // called when localStorage is read
+        state?.setHydrated();
       },
-    },
-  ),
-);
-
-export const useAddressStore = create<AddressStore>()(
-  persist(
-    (set) => ({
-      selectedAddressId: null,
-
-      setAddressId: (id) => {
-        set({ selectedAddressId: id });
-      },
-    }),
-    {
-      name: "address-storage",
     },
   ),
 );

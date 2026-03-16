@@ -2,7 +2,14 @@
 
 import { useAuthStore } from "@/store/store";
 import { ApiError } from "@/util";
-import { CircleAlert, CircleX, Eye, EyeClosed, Trash } from "lucide-react";
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -58,127 +65,117 @@ export default function DeleteAccountModal({
 
   return (
     <>
-      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-verdant-dark/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 transition-opacity"
         onClick={handleClose}
       >
-        {/* Modal */}
         <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+          className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="px-7 pt-7 pb-5">
-            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-              <Trash color="red" />
+          <div className="p-6 sm:p-8">
+            <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-6 shadow-sm">
+              <Trash2 className="w-8 h-8 text-red-500" strokeWidth={2} />
             </div>
-            <h2 className="font-playfair font-bold text-verdant-dark text-2xl">
-              Delete your account?
+
+            <h2 className="font-playfair font-black text-verdant-dark text-3xl mb-3">
+              Delete account?
             </h2>
-            <p className="text-verdant-muted text-sm mt-2 leading-relaxed">
-              This will permanently remove your account, order history, saved
-              addresses, and all personal data.{" "}
-              <span className="font-medium text-verdant-dark">
+            <p className="text-gray-500 font-medium text-sm leading-relaxed mb-6">
+              This action will permanently remove your account and all
+              associated data.{" "}
+              <span className="font-bold text-red-500">
                 This cannot be undone.
               </span>
             </p>
-          </div>
 
-          {/* What will be deleted */}
-          <div className="mx-7 mb-5 bg-red-50 rounded-xl px-4 py-3.5 flex flex-col gap-2">
-            {[
-              "Your account and profile",
-              "All order history",
-              "Saved addresses and preferences",
-              "Loyalty points and rewards",
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-2.5 text-sm text-red-400"
-              >
-                <CircleX size={14} /> {item}
-              </div>
-            ))}
-          </div>
-
-          {/* Password field */}
-          <div className="px-7 pb-2">
-            <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider block mb-1.5">
-              Confirm your password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (error) setError("");
-                }}
-                onKeyDown={(e) => e.key === "Enter" && handleConfirm()}
-                placeholder="Enter your password"
-                className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] pr-11 ${
-                  error
-                    ? "border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100"
-                    : "border-[#e5e5e5] focus:border-green focus:ring-2 focus:ring-green/10"
-                }`}
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#bbb] hover:text-verdant-muted transition-colors"
-              >
-                {showPassword ? <EyeClosed /> : <Eye />}
-              </button>
+            <div className="bg-red-50/50 border border-red-100 rounded-2xl p-5 mb-6 flex flex-col gap-3">
+              {[
+                "Your account and profile",
+                "All order history",
+                "Saved addresses and preferences",
+                "Loyalty points and rewards",
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 text-sm font-bold text-red-600"
+                >
+                  <XCircle
+                    size={16}
+                    strokeWidth={2.5}
+                    className="flex-shrink-0"
+                  />
+                  <span className="truncate">{item}</span>
+                </div>
+              ))}
             </div>
-            {error && (
-              <p className="text-xs text-red-400 mt-2 flex items-center gap-1.5">
-                <CircleAlert size={18} />
-                {error}
-              </p>
-            )}
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
+                Confirm your password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError("");
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && handleConfirm()}
+                  placeholder="••••••••"
+                  className={`w-full border-2 bg-gray-50/50 rounded-xl px-4 py-3.5 text-sm outline-none transition-all font-bold text-verdant-dark placeholder:text-gray-400 pr-12 ${
+                    error
+                      ? "border-red-200 focus:border-red-400 focus:bg-white"
+                      : "border-gray-200 focus:border-green hover:bg-white"
+                  }`}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-verdant-dark transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} strokeWidth={2.5} />
+                  ) : (
+                    <Eye size={18} strokeWidth={2.5} />
+                  )}
+                </button>
+              </div>
+              {error && (
+                <p className="text-xs font-bold text-red-500 mt-2 flex items-center gap-1.5">
+                  <AlertCircle size={14} strokeWidth={2.5} />
+                  {error}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Actions */}
-          <div className="px-7 py-6 flex gap-3">
+          <div className="px-6 py-5 sm:px-8 sm:py-6 bg-gray-50/50 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleClose}
               disabled={isLoading}
-              className="flex-1 border border-[#e5e5e5] text-verdant-muted py-3 rounded-full text-sm font-medium hover:border-green hover:text-green transition-all disabled:opacity-40"
+              className="flex-1 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-500 bg-white border-2 border-gray-200 hover:border-gray-300 hover:text-verdant-dark transition-colors order-2 sm:order-1 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
               disabled={isLoading || !password}
-              className="flex-1 bg-red-400 text-white py-3 rounded-full text-sm font-semibold hover:bg-red-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 bg-red-500 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-red-600 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 order-1 sm:order-2"
             >
               {isLoading ? (
                 <>
-                  <svg
-                    className="w-4 h-4 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth={4}
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    />
-                  </svg>
+                  <Loader2
+                    size={16}
+                    strokeWidth={2.5}
+                    className="animate-spin"
+                  />
                   Deleting...
                 </>
               ) : (
-                "Delete my account"
+                "Delete Account"
               )}
             </button>
           </div>

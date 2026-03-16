@@ -1,6 +1,6 @@
 export type { AddressApi } from "./address.types";
 export type { RefreshTokenApi, User, UserApi, UserData } from "./auth.types";
-export type { CartApi, CartItems, GuestCart, Totals } from "./cart.types";
+export type { CartResponse, GuestCart, TotalsRsponse } from "./cart.types";
 export type {
   AllOrders,
   CustomerOrder,
@@ -12,7 +12,6 @@ export type {
 export type {
   CategoryMeta,
   Product,
-  ProductsApi,
   ProductCard,
   ProductSectionProps,
 } from "./product.types";

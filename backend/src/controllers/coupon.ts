@@ -27,13 +27,13 @@ export class CouponController {
     const id = req.user!.id as string;
     const { code, subtotal } = req.body;
 
-    const discount = await CouponService.applyCoupon(
+    const result = await CouponService.applyCoupon(
       id,
       code,
       parseFloat(subtotal)
     );
 
-    res.json(new ApiResponse(200, 'Coupon applied successfully', { discount }));
+    res.json(new ApiResponse(200, 'Coupon applied successfully', result));
   }
 
   static async removeCouponFromCart(req: Request, res: Response) {

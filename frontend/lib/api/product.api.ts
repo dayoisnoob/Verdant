@@ -1,5 +1,6 @@
-import { Product, ProductCard, ProductsApi } from "@/types";
+import { Product, ProductCard } from "@/types";
 import { apiFetch } from "../apiFetch";
+import { Pagination, ProductsResponse } from "@/types/product.types";
 
 export const getPaginatedProducts = async (
   category?: string,
@@ -8,7 +9,7 @@ export const getPaginatedProducts = async (
   page = 1,
   limit = 12,
   q?: string,
-): Promise<ProductsApi> => {
+) => {
   const params = new URLSearchParams();
   if (category && category !== "All") params.set("category", category);
   if (sort && sort !== "default") params.set("sort", sort);
@@ -17,11 +18,14 @@ export const getPaginatedProducts = async (
   params.set("page", String(page));
   params.set("limit", String(limit));
 
-  console.log(q);
+  const res = await apiFetch<ProductsResponse>(
+    `/api/products?${params.toString()}`,
+    {
+      method: "GET",
+    },
+  );
 
-  return apiFetch(`/api/products?${params.toString()}`, {
-    method: "GET",
-  });
+  return res;
 };
 
 export const getAllProducts = async (): Promise<Product[]> => {
@@ -83,8 +87,6 @@ export const getSuggested = async (
     },
   );
 
-  console.log(res);
-
   return res.products;
 };
 
@@ -95,8 +97,6 @@ export const getRelated = async (slug: string): Promise<ProductCard[]> => {
       method: "GET",
     },
   );
-
-  console.log(res);
 
   return res.products;
 };

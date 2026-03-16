@@ -1,10 +1,10 @@
 export {
   changePassword,
-  deleteUserApi,
+  deleteUser,
   forgotPassword,
-  loginApi,
-  logoutApi,
-  registerApi,
+  login,
+  logout,
+  register,
   resendVerificationEmail,
   resetPassword,
   updateProfile,
@@ -16,13 +16,12 @@ export {
   getUserAddresses,
   removeAddress,
   setDefaultAddress,
-  updateUserAddresses,
+  updateUserAddress,
 } from "./address.api";
 
 export {
   addItemToCart,
   getCart,
-  getCartTotal,
   mergeGuestCart,
   removeItemFromCart,
   updateItem,
@@ -32,7 +31,7 @@ export {
   createCheckoutSession,
   getOrderById,
   getOrderBySessionId,
-  getuserOrders,
+  getUserOrders,
 } from "./order.api";
 
 export {
@@ -51,4 +50,6 @@ export {
   removeFromWishlist,
 } from "./wishlist.api";
 
-export { applyCouponApi, removeCouponApi } from "./coupon.api";
+export { applyCoupon, removeCouponApi } from "./coupon.api";
+
+export { refreshAccessToken } from "./token.api";

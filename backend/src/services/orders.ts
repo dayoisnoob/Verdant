@@ -76,7 +76,11 @@ export class OrderService {
     return order;
   }
 
-  static async getOrders(userId: string, page: number = 1, limit: number = 10) {
+  static async getUserOrders(
+    userId: string,
+    page: number = 1,
+    limit: number = 10
+  ) {
     const parsedLimit = Number(limit) || 10;
     const parsedPage = Number(page) || 1;
     const offset = (parsedPage - 1) * parsedLimit;
@@ -194,6 +198,66 @@ export class OrderService {
       .where(eq(orderItemsTable.orderId, orderId));
 
     return { order: { ...orderRecord, items } };
+  }
+  static async getAllOrders() {
+    const orders = await db
+      .select({
+        id: ordersTable.id,
+        userId: ordersTable.userId,
+        orderNumber: ordersTable.orderNumber,
+        stripeSessionId: ordersTable.stripeSessionId,
+        status: ordersTable.status,
+        subtotalCents: ordersTable.subtotalCents,
+        totalCents: ordersTable.totalCents,
+        discountAmount: ordersTable.discountAmount,
+        currency: ordersTable.currency,
+        customerEmail: ordersTable.customerEmail,
+        createdAt: ordersTable.createdAt,
+        deliveryNotes: ordersTable.deliveryNotes,
+        shippingFee: ordersTable.shippingFee,
+        shippingAddress: {
+          firstName: addressesTable.firstName,
+          lastName: addressesTable.lastName,
+          streetAddress: addressesTable.streetAddress,
+          state: addressesTable.state,
+          phone1: addressesTable.phone1,
+          phone2: addressesTable.phone2,
+        },
+        totalCount: sql<number>`count(*) over()`,
+      })
+      .from(ordersTable)
+      .leftJoin(
+        addressesTable,
+        eq(ordersTable.shippingAddressId, addressesTable.id)
+      );
+
+    const orderIds = orders.map((o) => o.id);
+
+    const items =
+      orderIds.length > 0
+        ? await db
+            .select({
+              id: orderItemsTable.id,
+              orderId: orderItemsTable.orderId,
+              productName: orderItemsTable.productName,
+              productId: orderItemsTable.productId,
+              quantity: orderItemsTable.quantity,
+              image: orderItemsTable.image,
+              unitPriceCents: orderItemsTable.unitPriceCents,
+              totalPriceCents: orderItemsTable.totalPriceCents,
+            })
+            .from(orderItemsTable)
+            .where(inArray(orderItemsTable.orderId, orderIds))
+        : [];
+
+    const total = Number(orders[0]?.totalCount ?? 0);
+
+    const allOrders = orders.map((order) => ({
+      ...order,
+      items: items.filter((item) => item.orderId === order.id),
+    }));
+
+    return { total, orders: allOrders };
   }
 
   // static async updateOrderStatus(

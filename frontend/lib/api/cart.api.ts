@@ -1,20 +1,21 @@
-import { CartApi, Totals } from "@/types";
+import {} from "@/types";
 import { apiFetch } from "../apiFetch";
+import { CartItemApi, CartResponse, TotalsResponse } from "@/types/cart.types";
 
-export const getCart = async (): Promise<CartApi> => {
-  const res = await apiFetch<{ cart: CartApi }>("/api/cart", {
-    method: "GET",
-  });
+export interface GetCartResponse {
+  cart: CartResponse;
+  totals: TotalsResponse;
+}
 
-  return res.cart;
-};
+export const getCart = async (): Promise<GetCartResponse> => {
+  const res = await apiFetch<{ cart: CartResponse; totals: TotalsResponse }>(
+    "/api/cart",
+    {
+      method: "GET",
+    },
+  );
 
-export const getCartTotal = async (): Promise<Totals> => {
-  const res = await apiFetch<{ totals: Totals }>("/api/cart/total", {
-    method: "GET",
-  });
-
-  return res.totals;
+  return res;
 };
 
 export const updateItem = async ({
@@ -36,8 +37,8 @@ export const addItemToCart = async ({
 }: {
   productId: string;
   quantity: number;
-}): Promise<CartApi> => {
-  return apiFetch("/api/cart/items/", {
+}): Promise<CartItemApi> => {
+  return apiFetch("/api/cart/items", {
     method: "POST",
     body: JSON.stringify({ productId, quantity }),
   });
@@ -54,7 +55,7 @@ export const mergeGuestCart = async (
     productId: string;
     quantity: number;
   }[],
-): Promise<CartApi> => {
+): Promise<CartResponse> => {
   return apiFetch("/api/cart/merge", {
     method: "POST",
     body: JSON.stringify(data),

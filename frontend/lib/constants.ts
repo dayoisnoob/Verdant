@@ -38,6 +38,9 @@ export const ORDER_STATUS_CONFIG: Record<
 
 export const ORDER_PREVIEW_LIMIT = 4;
 
+export const FREE_SHIPPING_THRESHOLD = 4000;
+export const DELIVERY_FEE = 499;
+
 export const MAX_ADDRESSES = 5;
 
 export const NIGERIAN_STATES = [
@@ -86,6 +89,13 @@ export const FILTERS = [
   { label: "Seasonal", value: "seasonal" },
   { label: "On Sale", value: "on-sale" },
   { label: "In Stock", value: "in-stock" },
+];
+
+export const NAV_LINKS = [
+  { label: "Shop", href: "/shop" },
+  { label: "Farms", href: "/farms" },
+  { label: "Seasonal", href: "/seasonal" },
+  { label: "About", href: "/about" },
 ];
 
 export const PAGE_LIMIT = 12;

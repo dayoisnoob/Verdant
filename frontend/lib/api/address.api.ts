@@ -2,16 +2,9 @@ import { AddressApi } from "@/types";
 import { apiFetch } from "../apiFetch";
 import { AddressFormData } from "@/validations";
 
-interface AddAddress {
-  firstName: string;
-  lastName?: string;
-  streetAddress: string;
-  phone1: string;
-  phone2?: string;
-  state: string;
-}
-
-export const addUserAddress = async (data: AddAddress): Promise<AddressApi> => {
+export const addUserAddress = async (
+  data: AddressFormData,
+): Promise<AddressApi> => {
   const res = await apiFetch<{ address: AddressApi }>("/api/address", {
     method: "POST",
     body: JSON.stringify(data),
@@ -34,7 +27,7 @@ export const setDefaultAddress = async (addressId: string) => {
   });
 };
 
-export const updateUserAddresses = async ({
+export const updateUserAddress = async ({
   addressId,
   data,
 }: {

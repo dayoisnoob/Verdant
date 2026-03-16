@@ -9,31 +9,38 @@ import ProductCard from "@/components/ProductCard";
 import { getCategories, getPaginatedProducts } from "@/lib/api";
 import { FILTERS, PAGE_LIMIT } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
-import { SlidersHorizontal, X } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronDown,
+  SlidersHorizontal,
+  Sprout,
+  X,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 function ProductCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-[#ebebeb] overflow-hidden animate-pulse">
-      <div className="aspect-[4/3] bg-[#f0f0f0]" />
-      <div className="p-4 flex flex-col gap-3">
-        <div className="flex justify-between">
-          <div className="h-2.5 w-1/3 bg-[#e8e8e8] rounded-full" />
-          <div className="h-2.5 w-1/4 bg-[#e8e8e8] rounded-full" />
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse flex flex-col">
+      <div className="w-full aspect-[4/3] bg-gray-100" />
+      <div className="p-5 flex flex-col gap-4 flex-1">
+        <div className="flex justify-between gap-4">
+          <div className="h-3 w-1/3 bg-gray-200 rounded-md" />
+          <div className="h-3 w-1/4 bg-gray-200 rounded-md" />
         </div>
-        <div className="h-4 w-3/4 bg-[#e8e8e8] rounded-md" />
-        <div className="flex gap-1">
+        <div className="h-5 w-3/4 bg-gray-200 rounded-lg mt-1" />
+        <div className="flex gap-1.5 mt-1">
           {[1, 2, 3, 4, 5].map((s) => (
-            <div key={s} className="h-3 w-3 bg-[#e8e8e8] rounded-sm" />
+            <div key={s} className="h-3.5 w-3.5 bg-gray-200 rounded-sm" />
           ))}
         </div>
-        <div className="flex justify-between items-center pt-3 border-t border-[#f5f5f5] mt-1">
-          <div className="flex flex-col gap-1.5">
-            <div className="h-4 w-14 bg-[#e8e8e8] rounded-md" />
-            <div className="h-2.5 w-10 bg-[#e8e8e8] rounded-sm" />
+        <div className="flex-1" />
+        <div className="flex justify-between items-end pt-4 mt-2 border-t border-gray-100">
+          <div className="flex flex-col gap-2">
+            <div className="h-5 w-16 bg-gray-200 rounded-lg" />
+            <div className="h-3 w-10 bg-gray-100 rounded-md" />
           </div>
-          <div className="h-8 w-20 bg-[#e8e8e8] rounded-full" />
+          <div className="h-9 w-24 bg-gray-200 rounded-xl" />
         </div>
       </div>
     </div>
@@ -42,7 +49,7 @@ function ProductCardSkeleton() {
 
 function ProductGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {Array.from({ length: 8 }).map((_, i) => (
         <ProductCardSkeleton key={i} />
       ))}
@@ -93,8 +100,6 @@ function ShopContent() {
     staleTime: 1000 * 60 * 10,
   });
 
-  console.log("searching", q);
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
@@ -125,225 +130,215 @@ function ShopContent() {
 
   if (isError) {
     return (
-      <>
+      <div className="bg-cream min-h-screen flex flex-col">
         <Navbar />
-        <ErrorState
-          message={
-            error instanceof Error
-              ? error.message
-              : "Check your connection and try again."
-          }
-          onRetry={refetch}
-        />
+        <div className="flex-1 flex items-center justify-center pt-24">
+          <ErrorState
+            message={
+              error instanceof Error
+                ? error.message
+                : "Check your connection and try again."
+            }
+            onRetry={refetch}
+          />
+        </div>
         <Footer />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="bg-cream min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="pt-20 pb-20 min-h-screen bg-cream">
-        <div className="px-4 sm:px-8 lg:px-16 xl:px-20">
-          {/* ── Header ── */}
-          <div className="py-10 sm:py-12 border-b border-green/10">
-            <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
+      <main className="flex-1 pt-24 pb-20">
+        <div className="px-6 sm:px-10 lg:px-16 xl:px-20 max-w-[1600px] mx-auto">
+          {/* Header */}
+          <div className="py-8 md:py-12 border-b border-gray-200">
+            <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-4">
               Our Produce
             </p>
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-              <h1 className="font-playfair font-black text-verdant-dark text-4xl sm:text-5xl">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <h1 className="font-playfair font-black text-verdant-dark text-4xl sm:text-5xl lg:text-6xl tracking-tight">
                 Shop All
               </h1>
-              <p className="text-verdant-muted text-sm">
+              <p className="text-gray-500 font-medium text-sm">
                 {isLoading
-                  ? "Loading…"
-                  : `${productCount} product${productCount !== 1 ? "s" : ""}`}
+                  ? "Loading inventory..."
+                  : `Showing ${productCount} product${productCount !== 1 ? "s" : ""}`}
               </p>
             </div>
           </div>
 
-          {/* ── Controls row ── */}
-          <div className="py-5 flex items-center gap-3 flex-wrap border-b border-green/10">
-            {/* Mobile: filter toggle button */}
-            <button
-              onClick={() => setFiltersOpen((v) => !v)}
-              className="sm:hidden flex items-center gap-2 text-sm px-4 py-2 rounded-full border border-[#ddd] bg-white text-verdant-text hover:border-green hover:text-green transition-all"
-            >
-              <SlidersHorizontal size={14} />
-              Filters
-              {hasActiveFilters && (
-                <span className="w-1.5 h-1.5 rounded-full bg-green" />
-              )}
-            </button>
+          {/* Controls & Filters */}
+          <div className="py-6 flex flex-col gap-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              {/* Mobile Filter Toggle */}
+              <button
+                onClick={() => setFiltersOpen((v) => !v)}
+                className="sm:hidden flex items-center justify-center gap-2 text-sm font-bold px-5 py-3 rounded-xl border-2 border-gray-200 bg-white text-verdant-dark hover:border-green transition-colors w-full"
+              >
+                <SlidersHorizontal size={16} />
+                Filters & Sorting
+                {hasActiveFilters && (
+                  <span className="w-2 h-2 rounded-full bg-green ml-1" />
+                )}
+              </button>
 
-            {/* Desktop: filter pills */}
-            <div className="hidden sm:flex items-center gap-2 flex-wrap">
-              {FILTERS.map((f) => (
+              {/* Desktop Filters */}
+              <div className="hidden sm:flex items-center gap-3 flex-wrap">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">
+                  Filter by:
+                </span>
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => handleFilterChange(f.value)}
+                    className={`text-xs font-normal px-5 py-2.5 rounded-xl border-2 transition-colors duration-200 ${
+                      activeFilter === f.value
+                        ? "bg-green text-white border-green"
+                        : "bg-white text-verdant-dark border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors ml-2 uppercase tracking-wider"
+                  >
+                    <X size={14} strokeWidth={2.5} />
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Custom Sort Dropdown */}
+              <div className="hidden sm:block relative min-w-[200px]">
+                <select
+                  value={sortBy}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="w-full appearance-none text-sm font-normal px-5 py-3 rounded-xl border-2 border-gray-200 bg-white text-verdant-dark outline-none focus:border-green hover:border-gray-300 transition-colors cursor-pointer pr-10"
+                >
+                  <option value="default">Sort: Default</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="newest">Newest Arrivals</option>
+                  <option value="rating">Top Rated</option>
+                </select>
+                <ChevronDown
+                  size={16}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </div>
+
+            {/* Mobile Expanded Filters */}
+            {filtersOpen && (
+              <div className="sm:hidden bg-gray-50 rounded-2xl p-5 flex flex-col gap-6 border border-gray-100">
+                <div className="flex flex-col gap-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    Sort By
+                  </p>
+                  <div className="relative">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => handleSortChange(e.target.value)}
+                      className="w-full appearance-none text-sm font-bold px-4 py-3 rounded-xl border border-gray-200 bg-white text-verdant-dark outline-none focus:border-green transition-colors cursor-pointer pr-10"
+                    >
+                      <option value="default">Sort: Default</option>
+                      <option value="price-asc">Price: Low to High</option>
+                      <option value="price-desc">Price: High to Low</option>
+                      <option value="newest">Newest Arrivals</option>
+                      <option value="rating">Top Rated</option>
+                    </select>
+                    <ChevronDown
+                      size={16}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    Filter Type
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    {FILTERS.map((f) => (
+                      <button
+                        key={f.value}
+                        onClick={() => handleFilterChange(f.value)}
+                        className={`text-xs font-bold px-4 py-2.5 rounded-xl border-2 transition-colors ${
+                          activeFilter === f.value
+                            ? "bg-green text-white border-green"
+                            : "bg-white text-verdant-dark border-gray-200"
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Categories (Scrollable row) */}
+            <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2 -mx-6 px-6 sm:mx-0 sm:px-0">
+              {["All", ...CATEGORIES].map((cat) => (
                 <button
-                  key={f.value}
-                  onClick={() => handleFilterChange(f.value)}
-                  className={`text-sm px-4 py-2 rounded-full border transition-all duration-200 ${
-                    activeFilter === f.value
-                      ? "bg-green text-white border-green"
-                      : "bg-white text-verdant-text border-[#ddd] hover:border-green hover:text-green"
+                  key={cat}
+                  onClick={() => handleCategoryChange(cat)}
+                  className={`text-xs font-normal px-5 py-2.5 rounded-xl border-2 whitespace-nowrap transition-colors duration-200 ${
+                    activeCategory === cat
+                      ? "bg-green/10 text-green border-green/20"
+                      : "bg-transparent text-gray-500 border-gray-200 hover:border-gray-300 hover:text-verdant-dark"
                   }`}
                 >
-                  {f.label}
+                  {cat}
                 </button>
               ))}
             </div>
-
-            {/* Clear filters */}
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="hidden sm:flex items-center gap-1.5 text-xs text-verdant-muted hover:text-green transition-colors"
-              >
-                <X size={12} />
-                Clear
-              </button>
-            )}
-
-            {/* Sort — right aligned */}
-            <div className="ml-auto">
-              <select
-                value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value)}
-                className="text-sm px-4 py-2 rounded-full border border-[#ddd] bg-white text-verdant-text outline-none hover:border-green focus:border-green transition-colors cursor-pointer"
-              >
-                <option value="default">Sort: Default</option>
-                <option value="price-asc">Price: Low → High</option>
-                <option value="price-desc">Price: High → Low</option>
-                <option value="newest">Newest</option>
-                <option value="rating">Top Rated</option>
-              </select>
-            </div>
           </div>
 
-          {/* Mobile: expandable filter drawer */}
-          {filtersOpen && (
-            <div className="sm:hidden bg-white border-b border-green/10 px-4 py-5 flex flex-col gap-5">
-              {/* Filter pills */}
-              <div>
-                <p className="text-[0.6rem] uppercase tracking-wider text-verdant-muted mb-3">
-                  Filter
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  {FILTERS.map((f) => (
-                    <button
-                      key={f.value}
-                      onClick={() => handleFilterChange(f.value)}
-                      className={`text-xs px-4 py-2 rounded-full border transition-all ${
-                        activeFilter === f.value
-                          ? "bg-green text-white border-green"
-                          : "bg-white text-verdant-text border-[#ddd]"
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category pills */}
-              <div>
-                <p className="text-[0.6rem] uppercase tracking-wider text-verdant-muted mb-3">
-                  Category
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  {["All", ...CATEGORIES].map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => handleCategoryChange(cat)}
-                      className={`text-xs px-3.5 py-1.5 rounded-full border transition-all ${
-                        activeCategory === cat
-                          ? "bg-green-pale text-green border-green-light font-medium"
-                          : "bg-transparent text-[#888] border-[#e5e5e5]"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {hasActiveFilters && (
-                <button
-                  onClick={() => {
-                    clearFilters();
-                    setFiltersOpen(false);
-                  }}
-                  className="self-start flex items-center gap-1.5 text-xs text-verdant-muted"
-                >
-                  <X size={12} />
-                  Clear all filters
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Desktop: categories row */}
-          <div className="hidden sm:flex gap-2 flex-wrap py-5 border-b border-green/10">
-            {["All", ...CATEGORIES].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => handleCategoryChange(cat)}
-                className={`text-xs px-4 py-1.5 rounded-full border transition-all duration-200 ${
-                  activeCategory === cat
-                    ? "bg-green-pale text-green border-green-light font-medium"
-                    : "bg-transparent text-[#888] border-[#e5e5e5] hover:border-green-light hover:text-green"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* ── Grid ── */}
-          <div className="pt-8">
+          {/* Product Grid */}
+          <div className="pt-10">
             {isLoading ? (
               <ProductGridSkeleton />
-            ) : isError ? (
-              <div className="text-center py-24">
-                <div className="text-5xl mb-4">⚠️</div>
-                <p className="font-playfair text-xl text-verdant-dark mb-2">
-                  Failed to load products
-                </p>
-                <p className="text-sm text-verdant-muted">
-                  Check your connection and try again
-                </p>
-              </div>
             ) : PRODUCTS.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-45gap-4 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
                 {PRODUCTS.map((p) => (
                   <ProductCard key={p.slug} product={p} />
                 ))}
               </div>
             ) : (
-              <div className="text-center py-24">
-                <div className="text-5xl mb-4">🌿</div>
-                <p className="font-playfair text-xl text-verdant-dark mb-2">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6 mt-4">
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
+                  <Sprout className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="font-playfair font-bold text-2xl text-verdant-dark mb-3">
                   No products found
                 </p>
-                <p className="text-sm text-verdant-muted">
-                  Try adjusting your filters
+                <p className="text-gray-500 font-medium text-sm max-w-sm mb-6">
+                  We couldn&apos;t find any produce matching your current
+                  filters. Try adjusting your selection.
                 </p>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="mt-5 text-sm text-green font-medium hover:underline"
+                    className="text-sm font-bold text-white bg-verdant-dark px-6 py-3 rounded-xl hover:bg-black transition-colors"
                   >
-                    Clear all filters
+                    Clear All Filters
                   </button>
                 )}
               </div>
             )}
           </div>
 
-          {/* ── Pagination ── */}
+          {/* Pagination */}
           {pagination && !isLoading && PRODUCTS.length > 0 && (
-            <div className="mt-12">
+            <div className="mt-16 pb-8">
               <Pagination
                 currentPage={currentPage}
                 totalPages={pagination.totalPages}
@@ -357,7 +352,7 @@ function ShopContent() {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
 

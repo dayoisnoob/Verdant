@@ -1,55 +1,70 @@
-import { addToWishlist, getUserWishlist, logoutApi } from "@/lib/api";
+import { addToWishlist, getUserWishlist, refreshAccessToken } from "@/lib/api";
+import { DELIVERY_FEE, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
-import { CartItems } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const cartStats = (items: CartItems[]) => ({
-  itemCount: items.length,
-  totalQuantity: items.reduce((sum, i) => sum + i.quantity, 0),
-  subtotal: Number(
-    items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0).toFixed(2),
-  ),
-});
-
 export const useCart = () => {
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-  const isHydrated = useAuthStore((state) => state.isHydrated);
+  const user = useAuthStore((state) => state.user);
 
   const authUserCart = useCartStore();
   const guestUserCart = useGuestCartStore();
 
-  const cart = isLoggedIn ? authUserCart : guestUserCart;
-  const stats = cartStats(cart.items);
+  const cart = user ? authUserCart : guestUserCart;
+  const itemsQuantity = cart.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+
+  const subtotal = cart.items.reduce(
+    (sum, i) => sum + i.pricePence * i.quantity,
+    0,
+  );
+  const delivery = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
+  const total = subtotal + delivery;
 
   return {
-    ...stats,
     items: cart.items,
-    isLoading: !isHydrated || (isLoggedIn ? authUserCart.isLoading : false),
-    cartError: isLoggedIn ? authUserCart.isError : false,
+    subtotal,
+    delivery,
+    total,
+    subtotalFormatted: (subtotal / 100).toFixed(2),
+    deliveryFormatted: (delivery / 100).toFixed(2),
+    totalFormatted: (total / 100).toFixed(2),
+    itemsQuantity,
     addItem: cart.addItem,
     removeItem: cart.removeItem,
     updateQuantity: cart.updateQuantity,
-    couponCode: cart.couponCode,
-    discount: cart.discount,
     clearCart: cart.clearCart,
-    applyCoupon: cart.applyCoupon,
-    removeCoupon: cart.removeCoupon,
+  };
+};
+
+export const useCheckoutTotals = (discount: number = 0) => {
+  const items = useCartStore((state) => state.items);
+
+  const subtotal = items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0);
+  const discounted = subtotal - discount;
+  const delivery = discounted >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
+  const total = discounted + delivery;
+
+  return {
+    subtotal,
+    delivery,
+    total,
+    subtotalFormatted: (subtotal / 100).toFixed(2),
+    deliveryFormatted: (delivery / 100).toFixed(2),
+    totalFormatted: (total / 100).toFixed(2),
   };
 };
 
 export const useLogout = () => {
   const queryClient = useQueryClient();
   const logout = useAuthStore((state) => state.logout);
-  const clearCart = useCartStore((state) => state.clearCart);
   return async () => {
     logout();
-    clearCart();
     queryClient.clear();
-
     window.location.replace("/login");
-
-    logoutApi();
   };
 };
 
@@ -82,13 +97,33 @@ export const useWishlistToggle = (productId: string) => {
 
     try {
       await addToWishlist(productId);
-      toast.success("Wishlist updated successfully");
-    } catch (err) {
-      console.error("Error toggling wishlist", err);
+      await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      toast.success("Wishlist updated");
+    } catch {
+      toast.error("Failed to update wishlist");
     }
-
-    queryClient.invalidateQueries({ queryKey: ["wishlist"] });
   };
 
   return { wishlisted, toggle };
+};
+
+export const useAppReady = () => {
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const user = useAuthStore((s) => s.user);
+  const [tokenReady, setTokenReady] = useState(false);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    if (!user) {
+      Promise.resolve().then(() => setTokenReady(true));
+      return;
+    }
+
+    refreshAccessToken()
+      .then(() => setTokenReady(true))
+      .catch(() => setTokenReady(true));
+  }, [isHydrated, user]);
+
+  return isHydrated && tokenReady;
 };

@@ -1,17 +1,19 @@
-import { CartItems as Items } from "@/types";
-import { RemoveDialog } from "./RemoveDialog";
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+"use client";
+
 import { useWishlistToggle } from "@/hooks";
-import { X } from "lucide-react";
+import { Minus, Plus, Sprout, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { RemoveDialog } from "./RemoveDialog";
+import { StoreCartItem } from "@/types/cart.types";
 
 export default function CartItems({
   items,
   handleUpdateQuantity,
   handleRemoveItem,
 }: {
-  items: Items[];
+  items: StoreCartItem[];
   handleUpdateQuantity: (
     productId: string,
     delta: number,
@@ -46,97 +48,95 @@ export default function CartItems({
 
   return (
     <>
-      <div className="flex flex-col gap-3 w-full">
+      <div className="flex flex-col gap-4 w-full">
         {items.map((p) => (
           <div
             key={p.slug}
-            className="w-full bg-white rounded-2xl border border-green/10 hover:border-green/20 hover:shadow-sm transition-all duration-200 overflow-hidden"
+            className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-gray-200 transition-all duration-200 p-4 sm:p-5 flex gap-4 sm:gap-6 relative group"
           >
-            <div className="p-4 md:p-5 flex gap-4 items-start w-full">
-              {/* Thumbnail */}
-              <Link
-                href={`/product/${p.slug}`}
-                className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 group"
-              >
-                <Image
-                  src={p.imageUrl}
-                  alt={p.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
+            <Link
+              href={`/product/${p.slug}`}
+              className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50"
+            >
+              <Image
+                src={p.imageUrl}
+                alt={p.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </Link>
 
-              {/* Main info */}
-              <div className="flex-1 min-w-0 w-full">
-                <p className="text-[0.65rem] text-verdant-muted uppercase tracking-wider mb-0.5 hidden sm:block">
-                  {p.farm}
-                </p>
-                <Link href={`/product/${p.slug}`}>
-                  <p className="font-playfair font-bold text-verdant-dark text-base md:text-[1.05rem] leading-snug hover:text-green transition-colors">
-                    {p.name}
+            <div className="flex flex-col flex-1 min-w-0 justify-between py-1">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col min-w-0">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 truncate">
+                    {p.farm}
                   </p>
-                </Link>
-                <p className="text-xs text-verdant-muted mt-0.5">{p.unit}</p>
-
-                {p.isOrganic && (
-                  <span className="hidden sm:inline-flex mt-2 text-[0.58rem] font-bold uppercase tracking-wider bg-green text-white px-2 py-0.5 rounded-full">
-                    Organic
-                  </span>
-                )}
-
-                {/* Bottom row: quantity + price */}
-                <div className="flex items-center justify-between mt-3 gap-3 w-full">
-                  {/* Quantity stepper */}
-                  <div className="flex items-center rounded-full border border-[#e5e5e5] overflow-hidden w-fit flex-shrink-0">
-                    <button
-                      onClick={() =>
-                        handleUpdateQuantity(p.productId, -1, p.quantity)
-                      }
-                      className="w-8 h-8 flex items-center justify-center text-verdant-muted hover:bg-green-pale hover:text-green transition-colors text-base font-medium"
-                    >
-                      −
-                    </button>
-                    <span className="w-7 text-center text-sm font-semibold text-verdant-dark">
-                      {p.quantity}
-                    </span>
-                    <button
-                      onClick={() =>
-                        handleUpdateQuantity(p.productId, 1, p.quantity)
-                      }
-                      className="w-8 h-8 flex items-center justify-center text-verdant-muted hover:bg-green-pale hover:text-green transition-colors text-base font-medium"
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  {/* Price */}
-                  <div className="text-right">
-                    <p className="font-semibold text-verdant-dark text-base">
-                      £{((p.pricePence / 100) * p.quantity).toFixed(2)}
+                  <Link href={`/product/${p.slug}`} className="block truncate">
+                    <p className="font-playfair font-bold text-verdant-dark text-lg sm:text-xl leading-tight hover:text-green transition-colors truncate">
+                      {p.name}
                     </p>
-                    {p.quantity > 1 && (
-                      <p className="text-[0.68rem] text-[#bbb]">
-                        £{(p.pricePence / 100).toFixed(2)} each
-                      </p>
+                  </Link>
+                  <div className="flex items-center gap-3 mt-2 flex-wrap">
+                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                      {p.unit}
+                    </p>
+                    {p.isOrganic && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-green/10 text-green px-2.5 py-1 rounded-md">
+                        <Sprout size={12} strokeWidth={2.5} /> Organic
+                      </span>
                     )}
                   </div>
                 </div>
+
+                <button
+                  onClick={() => confirmRemove(p.productId, p.name)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors flex-shrink-0 -mt-1 -mr-1"
+                  aria-label="Remove item"
+                >
+                  <X size={18} strokeWidth={2.5} />
+                </button>
               </div>
 
-              {/* Remove — now triggers dialog */}
-              <button
-                onClick={() => confirmRemove(p.productId, p.name)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[#ccc] hover:bg-red-50 hover:text-red-400 transition-colors flex-shrink-0 mt-0.5"
-                aria-label="Remove item"
-              >
-                <X size={14} color="red" />
-              </button>
+              <div className="flex items-end justify-between mt-4">
+                <div className="flex items-center border-2 border-gray-100 rounded-xl overflow-hidden bg-white">
+                  <button
+                    onClick={() =>
+                      handleUpdateQuantity(p.productId, -1, p.quantity)
+                    }
+                    className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                  >
+                    <Minus size={16} strokeWidth={2.5} />
+                  </button>
+                  <span className="w-8 text-center text-sm font-bold text-verdant-dark">
+                    {p.quantity}
+                  </span>
+                  <button
+                    onClick={() =>
+                      handleUpdateQuantity(p.productId, 1, p.quantity)
+                    }
+                    className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                  </button>
+                </div>
+
+                <div className="text-right flex flex-col items-end gap-1">
+                  <p className="font-playfair font-black text-verdant-dark text-xl sm:text-2xl leading-none">
+                    £{((p.pricePence / 100) * p.quantity).toFixed(2)}
+                  </p>
+                  {p.quantity > 1 && (
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      £{(p.pricePence / 100).toFixed(2)} each
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Dialog — rendered outside the list so it overlays everything */}
       {pendingRemove && (
         <RemoveDialog
           product={pendingRemove}

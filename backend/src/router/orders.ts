@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { OrderController } from '../controllers/orders';
-import { authenticate } from '../middlewares/auth.middleware';
+import { authenticate, requireAdmin } from '../middlewares/auth.middleware';
 import { validateUrlParams, validateUrlQuery } from '../middlewares/validation';
 import { asyncHandler } from '../utils/asyncHandler';
 import { getOrdersSchema } from '../validations/order';
@@ -10,10 +10,12 @@ const router = Router();
 
 router.use(authenticate);
 
+router.get('/all', requireAdmin, asyncHandler(OrderController.getAllOrders));
+
 router.get(
   '/',
   validateUrlQuery(getOrdersSchema),
-  asyncHandler(OrderController.getOrders)
+  asyncHandler(OrderController.getUserOrders)
 );
 router.get(
   '/session/:sessionId',

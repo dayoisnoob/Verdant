@@ -29,14 +29,16 @@ export interface CategoryMeta {
   img: string;
 }
 
-export interface ProductsApi {
+export interface ProductsResponse {
   products: Product[];
-  pagination: {
-    totalItems: number;
-    currentPage: number;
-    limit: number;
-    totalPages: number;
-  };
+  pagination: Pagination;
+}
+
+export interface Pagination {
+  totalItems: number;
+  currentPage: number;
+  limit: number;
+  totalPages: number;
 }
 
 interface ProductImage {

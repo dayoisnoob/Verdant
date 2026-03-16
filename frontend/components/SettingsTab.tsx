@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { UserData } from "@/types";
-import { changePassword, deleteUserApi, updateProfile } from "@/lib/api";
+import { changePassword, deleteUser, updateProfile } from "@/lib/api";
 import { ApiError } from "@/util";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/store";
@@ -17,30 +17,11 @@ import {
   updateProfileSchema,
 } from "@/validations";
 import { useLogout } from "@/hooks";
-
-// ── Field wrapper ──────────────────────────────────────────────────────────
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold text-verdant-dark uppercase tracking-wider">
-        {label}
-      </label>
-      {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
-    </div>
-  );
-}
+import { AlertTriangle, CheckCircle2, Lock, User } from "lucide-react";
+import { Field, inputCls } from "./AdressesCard";
 
 export default function SettingsTab({ user }: { user: UserData }) {
-  const setUser = useAuthStore((s) => s.setUser);
+  const updateUser = useAuthStore((s) => s.updateUser);
   const logout = useLogout();
 
   const [profileSaved, setProfileSaved] = useState(false);
@@ -66,9 +47,9 @@ export default function SettingsTab({ user }: { user: UserData }) {
 
   const onSaveProfile = async (data: ProfileForm) => {
     try {
-      const user = await updateProfile(data);
-      setUser(user);
-      toast.success("User updated successfully");
+      const updatedUser = await updateProfile(data);
+      updateUser(updatedUser);
+      toast.success("Profile updated successfully");
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2500);
     } catch (err) {
@@ -96,10 +77,11 @@ export default function SettingsTab({ user }: { user: UserData }) {
     try {
       await changePassword(data);
       setPasswordSaving(false);
-      toast.success("Password successfully changed, please sign in again");
+      toast.success("Password successfully changed. Please sign in again.");
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await logout();
     } catch (err) {
+      setPasswordSaving(false);
       handleFormError(err, setPasswordError, {
         401: {
           field: "currentPassword",
@@ -114,79 +96,99 @@ export default function SettingsTab({ user }: { user: UserData }) {
   };
 
   const handleDeleteAccount = async (password: string) => {
-    await deleteUserApi(password);
+    await deleteUser(password);
   };
 
   return (
-    <div className="max-w-xl flex flex-col gap-6">
-      <h2 className="font-playfair font-bold text-verdant-dark text-2xl">
-        Account Settings
-      </h2>
-
-      {/* ── Personal information ── */}
+    <div className="flex flex-col gap-8 w-full max-w-2xl">
+      {/* ── Personal Information ── */}
       <form
         onSubmit={handleProfile(onSaveProfile)}
-        className="bg-white rounded-2xl border border-green/10 overflow-hidden"
+        className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col"
       >
-        <div className="px-6 py-5 border-b border-[#f0f0f0]">
-          <h3 className="font-semibold text-verdant-dark">
-            Personal Information
-          </h3>
-          <p className="text-xs text-verdant-muted mt-0.5">
-            Updates sync to your delivery &amp; order history
-          </p>
+        <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
+          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+            <User size={16} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="font-bold text-verdant-dark text-base leading-tight">
+              Personal Information
+            </h3>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+              Updates sync to your order history
+            </p>
+          </div>
         </div>
 
-        <div className="px-6 py-6 flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="p-6 flex flex-col gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <Field label="First name" error={profileErrors.firstName?.message}>
               <input
                 {...rProfile("firstName")}
                 type="text"
-                className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark"
+                className={inputCls}
+                placeholder="Jane"
               />
             </Field>
             <Field label="Last name" error={profileErrors.lastName?.message}>
               <input
                 {...rProfile("lastName")}
                 type="text"
-                className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark"
+                className={inputCls}
+                placeholder="Doe"
               />
             </Field>
           </div>
-        </div>
 
-        <div className="px-6 pb-6 flex items-center gap-4">
-          <button
-            type="submit"
-            disabled={savingProfile || !profileDirty}
-            className="bg-green text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(45,106,79,0.28)] disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none"
-          >
-            {savingProfile
-              ? "Saving…"
-              : profileSaved
-                ? "✓ Saved"
-                : "Save Changes"}
-          </button>
-          {!profileDirty && !profileSaved && (
-            <p className="text-xs text-verdant-muted">No changes to save</p>
-          )}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2 border-t border-gray-100">
+            <button
+              type="submit"
+              disabled={savingProfile || (!profileDirty && !profileSaved)}
+              className={`flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm disabled:cursor-not-allowed ${
+                profileSaved
+                  ? "bg-green-pale text-green border-2 border-green-light shadow-none"
+                  : "bg-green text-white hover:bg-green-mid disabled:opacity-60 disabled:shadow-none"
+              }`}
+            >
+              {savingProfile ? (
+                "Saving..."
+              ) : profileSaved ? (
+                <>
+                  <CheckCircle2 size={16} strokeWidth={2.5} /> Saved
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </button>
+            {!profileDirty && !profileSaved && (
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                No changes to save
+              </p>
+            )}
+          </div>
         </div>
       </form>
 
       {/* ── Password ── */}
       <form
         onSubmit={handlePassword(onSavePassword)}
-        className="bg-white rounded-2xl border border-green/10 overflow-hidden"
+        className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col"
       >
-        <div className="px-6 py-5 border-b border-[#f0f0f0]">
-          <h3 className="font-semibold text-verdant-dark">Password</h3>
-          <p className="text-xs text-verdant-muted mt-0.5">
-            Leave blank to keep your current password
-          </p>
+        <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
+          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+            <Lock size={16} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="font-bold text-verdant-dark text-base leading-tight">
+              Password
+            </h3>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+              Leave blank to keep current password
+            </p>
+          </div>
         </div>
 
-        <div className="px-6 py-6 flex flex-col gap-4">
+        <div className="p-6 flex flex-col gap-6">
           <Field
             label="Current password"
             error={passwordErrors.currentPassword?.message}
@@ -195,58 +197,73 @@ export default function SettingsTab({ user }: { user: UserData }) {
               {...rPassword("currentPassword")}
               type="password"
               placeholder="••••••••"
-              className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"
+              className={inputCls}
             />
           </Field>
-          <Field
-            label="New password"
-            error={passwordErrors.newPassword?.message}
-          >
-            <input
-              {...rPassword("newPassword")}
-              type="password"
-              placeholder="••••••••"
-              className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"
-            />
-          </Field>
-          <Field
-            label="Confirm new password"
-            error={passwordErrors.confirmNewPassword?.message}
-          >
-            <input
-              {...rPassword("confirmNewPassword")}
-              type="password"
-              placeholder="••••••••"
-              className="border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm outline-none focus:border-green focus:ring-2 focus:ring-green/10 transition-all bg-white text-verdant-dark placeholder:text-[#ccc]"
-            />
-          </Field>
-        </div>
 
-        <div className="px-6 pb-6">
-          <button
-            type="submit"
-            disabled={passwordSaving}
-            className="bg-green text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(45,106,79,0.28)] disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none"
-          >
-            {passwordSaving ? "Updating…" : "Update Password"}
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Field
+              label="New password"
+              error={passwordErrors.newPassword?.message}
+            >
+              <input
+                {...rPassword("newPassword")}
+                type="password"
+                placeholder="••••••••"
+                className={inputCls}
+              />
+            </Field>
+            <Field
+              label="Confirm new password"
+              error={passwordErrors.confirmNewPassword?.message}
+            >
+              <input
+                {...rPassword("confirmNewPassword")}
+                type="password"
+                placeholder="••••••••"
+                className={inputCls}
+              />
+            </Field>
+          </div>
+
+          <div className="pt-2 border-t border-gray-100">
+            <button
+              type="submit"
+              disabled={passwordSaving}
+              className="bg-green text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-green-mid transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto"
+            >
+              {passwordSaving ? "Updating Password..." : "Update Password"}
+            </button>
+          </div>
         </div>
       </form>
 
-      {/* ── Danger zone ── */}
-      <div className="bg-white rounded-2xl border border-red-100 overflow-hidden">
-        <div className="px-6 py-5 border-b border-red-50">
-          <h3 className="font-semibold text-verdant-dark">Danger Zone</h3>
-          <p className="text-xs text-verdant-muted mt-0.5">
-            These actions are permanent and cannot be undone
-          </p>
+      {/* ── Danger Zone ── */}
+      <div className="bg-white rounded-3xl border border-red-100 shadow-sm overflow-hidden flex flex-col mt-4">
+        <div className="px-6 py-5 border-b border-red-50 flex items-center gap-3 bg-red-50/50">
+          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+            <AlertTriangle size={16} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="font-bold text-red-600 text-base leading-tight">
+              Danger Zone
+            </h3>
+            <p className="text-[11px] font-bold text-red-400 uppercase tracking-widest mt-0.5">
+              These actions are permanent
+            </p>
+          </div>
         </div>
-        <div className="px-6 py-5">
+
+        <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-sm font-medium text-gray-600 max-w-sm">
+            Once you delete your account, there is no going back. Please be
+            certain.
+          </p>
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="text-sm text-red-400 border border-red-200 px-5 py-2.5 rounded-full hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition-all"
+            className="text-xs font-bold text-red-500 uppercase tracking-widest border-2 border-red-100 bg-red-50 px-6 py-3.5 rounded-xl hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors whitespace-nowrap"
           >
-            Delete my account
+            Delete Account
           </button>
         </div>
       </div>

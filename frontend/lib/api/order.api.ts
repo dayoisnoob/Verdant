@@ -1,38 +1,29 @@
 import { ordersApi, SingleOrder } from "@/types";
 import { apiFetch } from "../apiFetch";
 
-export const createCheckoutSession = async ({
-  items,
-  shippingFee,
-  addressId,
-  discount,
-  couponCode,
-  deliveryNotes,
-}: {
-  items: {
-    name: string;
-    price: number;
-    quantity: number;
-    image: string;
-    productId: string;
-  }[];
+interface CheckoutItem {
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+  productId: string;
+}
 
+interface CreateCheckoutSessionInput {
+  items: CheckoutItem[];
   shippingFee: number;
   addressId: string;
   discount?: number;
   couponCode?: string;
   deliveryNotes?: string;
-}) => {
+}
+
+export const createCheckoutSession = async (
+  data: CreateCheckoutSessionInput,
+) => {
   return apiFetch<{ url: string }>("/api/payments/create-checkout-session", {
     method: "POST",
-    body: JSON.stringify({
-      items,
-      shippingFee,
-      addressId,
-      discount,
-      couponCode,
-      deliveryNotes,
-    }),
+    body: JSON.stringify(data),
   });
 };
 
@@ -54,7 +45,7 @@ export const getOrderById = async (id: string) => {
   return res.order;
 };
 
-export const getuserOrders = async (
+export const getUserOrders = async (
   page = 1,
   limit = 10,
 ): Promise<ordersApi> => {
@@ -62,7 +53,9 @@ export const getuserOrders = async (
   params.set("page", String(page));
   params.set("limit", String(limit));
 
-  return apiFetch(`/api/orders?${params}`, {
+  const res = apiFetch<ordersApi>(`/api/orders?${params}`, {
     method: "GET",
   });
+
+  return res;
 };

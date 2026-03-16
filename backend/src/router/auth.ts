@@ -24,7 +24,6 @@ import {
   signupSchema,
   updateUserSchema,
 } from '../validations/auth.validations.ts';
-import { urlParamsSchema } from '../validations/urlParams.ts';
 
 const router = Router();
 
@@ -79,7 +78,7 @@ router.use(authenticate);
 router.post('/logout', asyncHandler(AuthController.logout));
 router.post('/logout-all', asyncHandler(AuthController.logoutAll));
 
-router.post(
+router.patch(
   '/change-password',
   changePasswordLimiter,
   validateInput(changePasswordSchema),

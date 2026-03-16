@@ -1,6 +1,6 @@
 "use client";
 
-import { loginApi, resendVerificationEmail } from "@/lib/api";
+import { login, resendVerificationEmail } from "@/lib/api";
 import { ApiError } from "@/util";
 import { LoginForm, loginSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +36,7 @@ export default function LoginPage() {
     try {
       console.log("try logged in");
 
-      await loginApi(data);
+      await login(data);
       console.log("logged in");
       const redirect = searchParams.get("redirect") || "/";
       router.replace(redirect);

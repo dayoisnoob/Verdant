@@ -1,17 +1,28 @@
 "use client";
 
+import Container from "@/components/Container";
 import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
-import { useWishlistToggle } from "@/hooks";
+import { useCart, useWishlistToggle } from "@/hooks";
 import { getProductBySlug } from "@/lib/api";
 import { getRelated } from "@/lib/api/product.api";
 import { useCartStore } from "@/store/store";
 import { Product } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { Heart } from "lucide-react";
+import {
+  ChevronRight,
+  Clock,
+  Heart,
+  Loader2,
+  MapPin,
+  Minus,
+  Plus,
+  Snowflake,
+  Sprout,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -24,11 +35,10 @@ export default function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
+  const { addItem } = useCart();
 
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
-
-  const addItem = useCartStore((s) => s.addItem);
 
   const {
     data: product,
@@ -42,25 +52,47 @@ export default function ProductPage({
   });
 
   const { data: relatedProducts } = useQuery({
-    queryKey: ["related-products"],
+    queryKey: ["related-products", slug],
     queryFn: () => getRelated(slug),
   });
 
-  const { toggle, wishlisted } = useWishlistToggle(product?.id as string);
+  const { toggle, wishlisted } = useWishlistToggle(product?.id ?? "");
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <>
+      <div className="bg-cream min-h-screen flex flex-col">
         <Navbar />
-        <main className="pt-24 bg-cream min-h-screen flex items-center justify-center">
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-[3px] border-green-pale" />
-            <div className="absolute inset-0 rounded-full border-[3px] border-t-green border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 text-green animate-spin" />
+            <p className="text-sm font-bold text-gray-500 tracking-widest uppercase">
+              Loading product...
+            </p>
           </div>
         </main>
         <Footer />
-      </>
+      </div>
     );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-cream min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <ErrorState
+            message={
+              error instanceof Error
+                ? error.message
+                : "Check your connection and try again."
+            }
+            onRetry={refetch}
+          />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) notFound();
 
@@ -74,359 +106,326 @@ export default function ProductPage({
   const handleAddToCart = (p: Product) => {
     addItem(p, qty);
     toast.success(`${p.name} added to basket`);
+    setQty(1);
   };
 
-  if (isError) {
-    return (
-      <>
-        <Navbar />
-        <ErrorState
-          message={
-            error instanceof Error
-              ? error.message
-              : "Check your connection and try again."
-          }
-          onRetry={refetch}
-        />
-        <Footer />
-      </>
-    );
-  }
-
   return (
-    <>
-      <Navbar />
+    <Container>
+      <div className="bg-cream min-h-screen flex flex-col">
+        <Navbar />
 
-      <main className="bg-cream min-h-screen">
-        {/* ── Breadcrumb ── */}
-        <div className="pt-24 px-4 sm:px-8 md:px-16 lg:px-20">
-          <nav className="flex items-center gap-2 text-[0.7rem] text-[#bbb] py-4">
-            {[
-              { label: "Home", href: "/" },
-              { label: "Shop", href: "/shop" },
-              {
-                label: product.category,
-                href: `/shop?category=${encodeURIComponent(product.category)}`,
-              },
-            ].map((crumb, i) => (
-              <span key={crumb.href} className="flex items-center gap-2">
-                {i > 0 && <span>/</span>}
+        <main className="flex-1 pt-24 pb-20">
+          <div className="max-w-[1600px] mx-auto">
+            <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-6">
+              <nav className="flex items-center flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 py-4">
+                <Link href="/" className="hover:text-green transition-colors">
+                  Home
+                </Link>
+                <ChevronRight size={12} />
                 <Link
-                  href={crumb.href}
+                  href="/shop"
                   className="hover:text-green transition-colors"
                 >
-                  {crumb.label}
+                  Shop
                 </Link>
-              </span>
-            ))}
-            <span>/</span>
-            <span className="text-verdant-muted">{product.name}</span>
-          </nav>
-        </div>
-
-        {/* ── Hero product grid ── */}
-        <div className="px-4 sm:px-8 md:px-16 lg:px-20 pb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-8 xl:gap-16 items-start">
-            {/* ── Left — Image gallery ── */}
-            <div className="flex flex-col gap-4 lg:sticky lg:top-28">
-              {/* Main image */}
-              <div className="relative rounded-2xl overflow-hidden aspect-square bg-[#f0ede6]">
-                <Image
-                  src={product.images[activeImg]?.url}
-                  alt={product.images[activeImg]?.alt}
-                  fill
-                  priority
-                  className="object-cover transition-opacity duration-300"
-                />
-
-                {/* Out of stock overlay */}
-                {!product.inStock && (
-                  <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center">
-                    <span className="bg-white text-red-500 font-semibold text-sm px-6 py-3 rounded-full shadow-sm border border-red-100">
-                      Out of Stock
-                    </span>
-                  </div>
-                )}
-
-                {/* Floating badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  {product.isOrganic && (
-                    <span className="text-[0.6rem] font-bold uppercase tracking-wider bg-green text-white px-2.5 py-1 rounded-full shadow-sm">
-                      Organic
-                    </span>
-                  )}
-                  {discountPct && (
-                    <span className="text-[0.6rem] font-bold uppercase tracking-wider bg-orange text-white px-2.5 py-1 rounded-full shadow-sm">
-                      {discountPct}% off
-                    </span>
-                  )}
-                  {product.harvestDaysAgo === 0 && (
-                    <span className="text-[0.6rem] font-bold uppercase tracking-wider bg-white text-green px-2.5 py-1 rounded-full shadow-sm">
-                      Harvested today
-                    </span>
-                  )}
-                </div>
-
-                {/* Harvest freshness indicator — bottom left */}
-                {product.harvestDaysAgo !== undefined &&
-                  product.harvestDaysAgo <= 3 && (
-                    <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3.5 py-2.5 shadow-sm">
-                      <p className="text-[0.6rem] text-verdant-muted uppercase tracking-wider">
-                        Harvested
-                      </p>
-                      <p className="text-xs font-bold text-verdant-dark">
-                        {product.harvestDaysAgo === 0
-                          ? "Today"
-                          : `${product.harvestDaysAgo}d ago`}
-                      </p>
-                    </div>
-                  )}
-              </div>
-
-              {/* Thumbnail strip */}
-              {product.images.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto pb-1">
-                  {product.images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImg(i)}
-                      className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200 ${
-                        activeImg === i
-                          ? "border-green shadow-sm"
-                          : "border-transparent opacity-60 hover:opacity-100"
-                      }`}
-                    >
-                      <Image
-                        src={img.url}
-                        alt={img.alt}
-                        fill
-                        className="object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
+                <ChevronRight size={12} />
+                <Link
+                  href={`/shop?category=${encodeURIComponent(product.category)}`}
+                  className="hover:text-green transition-colors"
+                >
+                  {product.category}
+                </Link>
+                <ChevronRight size={12} />
+                <span className="text-verdant-dark">{product.name}</span>
+              </nav>
             </div>
 
-            {/* ── Right — Product info ── */}
-            <div className="flex flex-col gap-6 py-2">
-              {/* Farm + category */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-verdant-muted">
-                    {product.farm}
-                  </span>
-                  <span className="text-[#ddd]">·</span>
+            <div className="px-6 sm:px-10 lg:px-16 xl:px-20 pb-16">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16 items-start">
+                <div className="lg:col-span-6 xl:col-span-5 flex flex-col gap-4 lg:sticky lg:top-28">
+                  <div className="relative rounded-2xl overflow-hidden aspect-square bg-gray-50 border border-gray-100">
+                    <Image
+                      src={product.images[activeImg]?.url}
+                      alt={product.images[activeImg]?.alt}
+                      fill
+                      priority
+                      className="object-cover"
+                    />
+
+                    {!product.inStock && (
+                      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                        <span className="bg-white text-gray-600 font-bold uppercase tracking-widest text-sm px-6 py-3 rounded-xl border-2 border-gray-200 shadow-sm">
+                          Out of Stock
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      {product.isOrganic && (
+                        <span className="text-xs font-bold uppercase tracking-wider bg-green text-white px-4 py-2 rounded-xl shadow-sm">
+                          Organic
+                        </span>
+                      )}
+                      {discountPct && (
+                        <span className="text-xs font-bold uppercase tracking-wider bg-orange text-white px-4 py-2 rounded-xl shadow-sm">
+                          {discountPct}% off
+                        </span>
+                      )}
+                      {product.harvestDaysAgo === 0 && (
+                        <span className="text-xs font-bold uppercase tracking-wider bg-white text-green border border-gray-100 px-4 py-2 rounded-xl shadow-sm">
+                          Harvested today
+                        </span>
+                      )}
+                    </div>
+
+                    {product.harvestDaysAgo !== undefined &&
+                      product.harvestDaysAgo <= 3 && (
+                        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md rounded-xl p-4 shadow-sm border border-gray-100">
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                            Harvested
+                          </p>
+                          <p className="text-sm font-bold text-verdant-dark">
+                            {product.harvestDaysAgo === 0
+                              ? "Today"
+                              : `${product.harvestDaysAgo} days ago`}
+                          </p>
+                        </div>
+                      )}
+                  </div>
+
+                  {product.images.length > 1 && (
+                    <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+                      {product.images.map((img, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveImg(i)}
+                          className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200 ${
+                            activeImg === i
+                              ? "border-green shadow-sm ring-4 ring-green/10"
+                              : "border-gray-200 opacity-60 hover:opacity-100 hover:border-gray-300"
+                          }`}
+                        >
+                          <Image
+                            src={img.url}
+                            alt={img.alt}
+                            fill
+                            className="object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="lg:col-span-6 xl:col-span-7 flex flex-col gap-8 py-2">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-verdant-dark bg-gray-100 px-3 py-1.5 rounded-md">
+                        {product.farm}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 flex items-center gap-1.5">
+                        <MapPin size={14} />
+                        {product.origin}
+                      </span>
+                    </div>
+
+                    <h1 className="font-playfair font-black text-verdant-dark text-4xl sm:text-5xl lg:text-6xl leading-none mb-4 tracking-tight">
+                      {product.name}
+                    </h1>
+
+                    <div className="flex items-center gap-3">
+                      <StarRating rating={product.rating} />
+                      <span className="text-sm font-bold text-verdant-dark">
+                        {product.rating}
+                      </span>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        ({product.reviewCount.toLocaleString()} reviews)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-end gap-4">
+                    <span className="font-playfair font-black text-verdant-dark text-5xl sm:text-6xl leading-none">
+                      £{product.price}
+                    </span>
+                    {product.originalPrice && (
+                      <span className="text-2xl font-bold text-gray-300 line-through mb-1">
+                        £{product.originalPrice}
+                      </span>
+                    )}
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">
+                      {product.unit}
+                    </span>
+                  </div>
+
+                  <p className="text-base font-medium text-gray-600 leading-relaxed max-w-2xl">
+                    {product.description}
+                  </p>
+
+                  {product.nutritionHighlights?.length > 0 && (
+                    <div className="flex gap-2 flex-wrap">
+                      {product.nutritionHighlights.map((n) => (
+                        <span
+                          key={n}
+                          className="text-[11px] font-bold bg-green/10 text-green uppercase tracking-widest px-4 py-2 rounded-lg"
+                        >
+                          {n}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="h-px bg-gray-200" />
+
+                  <div className="flex flex-col sm:flex-row gap-4 items-stretch">
+                    <div className="flex items-center justify-between border-2 border-gray-200 bg-white rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0">
+                      <button
+                        onClick={() => setQty(Math.max(1, qty - 1))}
+                        className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                      >
+                        <Minus size={18} strokeWidth={2.5} />
+                      </button>
+                      <span className="text-lg font-bold text-verdant-dark w-12 text-center">
+                        {qty}
+                      </span>
+                      <button
+                        onClick={() => setQty(qty + 1)}
+                        className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                      >
+                        <Plus size={18} strokeWidth={2.5} />
+                      </button>
+                    </div>
+
+                    <button
+                      disabled={!product.inStock}
+                      onClick={() => handleAddToCart(product)}
+                      className="flex-1 bg-green text-white rounded-xl py-4 font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm"
+                    >
+                      {product.inStock ? "Add to Basket" : "Out of Stock"}
+                    </button>
+
+                    <button
+                      onClick={toggle}
+                      className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 border-2 transition-colors ${
+                        wishlisted
+                          ? "border-orange bg-orange/10 text-orange"
+                          : "border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-600"
+                      }`}
+                    >
+                      <Heart
+                        size={24}
+                        fill={wishlisted ? "currentColor" : "none"}
+                        strokeWidth={2.5}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="h-px bg-gray-200" />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[
+                      {
+                        icon: Sprout,
+                        label: "Grown by",
+                        value: product.farm,
+                      },
+                      {
+                        icon: MapPin,
+                        label: "Origin",
+                        value: product.origin,
+                      },
+                      {
+                        icon: Clock,
+                        label: "Harvested",
+                        value:
+                          product.harvestDaysAgo === 0
+                            ? "Today"
+                            : `${product.harvestDaysAgo} days ago`,
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col gap-3"
+                      >
+                        <item.icon
+                          className="w-6 h-6 text-green"
+                          strokeWidth={2}
+                        />
+                        <div>
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                            {item.label}
+                          </div>
+                          <div className="text-sm font-bold text-verdant-dark leading-snug break-words">
+                            {item.value}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6 flex gap-4 items-start shadow-sm">
+                    <Snowflake
+                      className="w-8 h-8 text-blue-400 flex-shrink-0"
+                      strokeWidth={2}
+                    />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                        Storage Instructions
+                      </p>
+                      <p className="text-sm font-medium text-gray-600 leading-relaxed">
+                        {product.storageInstructions}
+                      </p>
+                    </div>
+                  </div>
+
+                  {product.tags?.length > 0 && (
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {product.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[11px] font-bold text-gray-500 uppercase tracking-widest border-2 border-gray-200 bg-white px-4 py-2 rounded-lg hover:border-green hover:text-green transition-colors cursor-pointer"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {(relatedProducts?.length ?? 0) > 0 && (
+              <div className="border-t border-gray-200 px-6 sm:px-10 lg:px-16 xl:px-20 py-20">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-3">
+                      You might also like
+                    </p>
+                    <h2 className="font-playfair font-black text-verdant-dark text-3xl md:text-4xl">
+                      More {product.category}
+                    </h2>
+                  </div>
                   <Link
                     href={`/shop?category=${encodeURIComponent(product.category)}`}
-                    className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-green hover:underline"
+                    className="text-sm font-bold uppercase tracking-widest text-green hover:text-green-mid transition-colors flex items-center gap-2"
                   >
-                    {product.category}
+                    View all <ChevronRight size={16} />
                   </Link>
                 </div>
 
-                <h1 className="font-playfair font-black text-verdant-dark text-3xl md:text-4xl xl:text-5xl leading-tight">
-                  {product.name}
-                </h1>
-
-                <div className="flex items-center gap-1.5 mt-2 text-xs text-verdant-muted">
-                  <span>📍</span>
-                  <span>{product.origin}</span>
-                </div>
-              </div>
-
-              {/* Rating */}
-              <div className="flex items-center gap-3">
-                <StarRating rating={product.rating} />
-                <span className="text-sm font-semibold text-verdant-dark">
-                  {product.rating}
-                </span>
-                <span className="text-xs text-verdant-muted">
-                  {product.reviewCount.toLocaleString()} reviews
-                </span>
-              </div>
-
-              {/* Description */}
-              <p className="text-[0.92rem] text-verdant-muted leading-[1.9]">
-                {product.description}
-              </p>
-
-              {/* Nutrition chips */}
-              {product.nutritionHighlights?.length > 0 && (
-                <div className="flex gap-2 flex-wrap">
-                  {product.nutritionHighlights.map((n) => (
-                    <span
-                      key={n}
-                      className="text-xs bg-green-pale text-green font-medium px-3 py-1.5 rounded-full"
-                    >
-                      {n}
-                    </span>
+                <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 sm:overflow-visible sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0">
+                  {relatedProducts?.map((p) => (
+                    <div key={p.slug} className="min-w-[280px] sm:min-w-0">
+                      <ProductCard product={p} />
+                    </div>
                   ))}
                 </div>
-              )}
-
-              {/* Divider */}
-              <div className="h-px bg-[#ebebeb]" />
-
-              {/* Price block */}
-              <div className="flex items-baseline gap-3">
-                <span className="font-playfair font-black text-black text-4xl md:text-5xl">
-                  £{product.price}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-xl text-[#ccc] line-through font-medium">
-                    £{product.originalPrice}
-                  </span>
-                )}
-                <span className="text-sm text-verdant-muted ml-1">
-                  {product.unit}
-                </span>
               </div>
-
-              {/* Add to basket */}
-              <div className="flex gap-3 items-stretch">
-                {/* Quantity stepper */}
-                <div className="flex items-center border-2 border-[#e5e5e5] rounded-full overflow-hidden hover:border-green transition-colors">
-                  <button
-                    onClick={() => setQty(Math.max(1, qty - 1))}
-                    className="w-11 h-11 flex items-center justify-center text-verdant-muted hover:text-green hover:bg-green-pale transition-colors text-lg"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center text-base font-bold text-verdant-dark">
-                    {qty}
-                  </span>
-                  <button
-                    onClick={() => setQty(qty + 1)}
-                    className="w-11 h-11 flex items-center justify-center text-verdant-muted hover:text-green hover:bg-green-pale transition-colors text-lg"
-                  >
-                    +
-                  </button>
-                </div>
-
-                {/* Add button */}
-                <button
-                  disabled={!product.inStock}
-                  onClick={() => handleAddToCart(product)}
-                  className="flex-1 bg-green text-white rounded-full py-3 font-semibold text-sm tracking-wide hover:bg-green-mid hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,106,79,0.3)] transition-all duration-200 disabled:bg-[#e5e5e5] disabled:text-[#aaa] disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none"
-                >
-                  {product.inStock ? "Add to Basket" : "Out of Stock"}
-                </button>
-
-                {/* Wishlist */}
-                <button
-                  onClick={toggle}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
-                    wishlisted
-                      ? "  text-orange "
-                      : " text-[#c0c0c0] hover:text-orange"
-                  }`}
-                >
-                  <Heart
-                    size={32}
-                    fill={wishlisted ? "currentColor" : "none"}
-                  />
-                </button>
-              </div>
-
-              {/* Divider */}
-              <div className="h-px bg-[#ebebeb]" />
-
-              {/* Provenance row */}
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  {
-                    icon: "🌱",
-                    label: "Grown by",
-                    value: product.farm.split(" ").slice(0, 2).join(" "),
-                  },
-                  { icon: "📍", label: "Origin", value: product.origin },
-                  {
-                    icon: "⏱",
-                    label: "Harvested",
-                    value:
-                      product.harvestDaysAgo === 0
-                        ? "Today"
-                        : `${product.harvestDaysAgo}d ago`,
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="bg-white rounded-xl p-3.5 border border-green/8"
-                  >
-                    <div className="text-lg mb-1.5">{item.icon}</div>
-                    <div className="text-[0.6rem] text-verdant-muted uppercase tracking-wider mb-0.5">
-                      {item.label}
-                    </div>
-                    <div className="text-xs font-semibold text-verdant-dark truncate">
-                      {item.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Storage */}
-              <div className="bg-white border border-green/10 rounded-xl p-4 flex gap-3 items-start">
-                <span className="text-xl flex-shrink-0 mt-0.5">🧊</span>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-verdant-dark mb-1">
-                    Storage
-                  </p>
-                  <p className="text-sm text-verdant-muted leading-relaxed">
-                    {product.storageInstructions}
-                  </p>
-                </div>
-              </div>
-
-              {/* Tags */}
-              {product.tags?.length > 0 && (
-                <div className="flex gap-2 flex-wrap">
-                  {product.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[0.7rem] text-[#aaa] border border-[#ebebeb] px-3 py-1 rounded-full hover:border-green hover:text-green transition-colors cursor-pointer"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
-        </div>
-
-        {/* ── Related products ── */}
-        {(relatedProducts?.length ?? 0) > 0 && (
-          <div className="border-t border-green/10 px-4 sm:px-8 md:px-16 lg:px-20 py-14">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="text-xs tracking-[0.15em] uppercase text-green mb-1">
-                  You might also like
-                </p>
-                <h2 className="font-playfair font-black text-verdant-dark text-2xl md:text-3xl">
-                  More {product.category}
-                </h2>
-              </div>
-              <Link
-                href={`/shop?category=${encodeURIComponent(product.category)}`}
-                className="text-sm text-green font-medium hover:underline hidden sm:block"
-              >
-                View all →
-              </Link>
-            </div>
-
-            {/* Horizontal scroll on mobile, grid on desktop */}
-            <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 md:grid-cols-4 sm:overflow-visible sm:pb-0">
-              {relatedProducts?.map((p) => (
-                <div key={p.slug} className="min-w-[220px] sm:min-w-0">
-                  <ProductCard product={p} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
-      <Footer />
-    </>
+        </main>
+        <Footer />
+      </div>
+    </Container>
   );
 }

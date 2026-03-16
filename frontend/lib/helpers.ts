@@ -5,21 +5,6 @@ import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
 import { getCart, mergeGuestCart } from "./api";
 
-// lib/shipping.ts
-export function calculateOrderTotal(subtotalPence: number): {
-  shippingFee: number;
-  totalAmount: number;
-} {
-  const subtotal = parseFloat((subtotalPence / 100).toFixed(2));
-
-  const shippingFee = subtotal >= 100.0 ? 0 : 4.99;
-  const totalAmount = subtotal + shippingFee;
-
-  return { shippingFee, totalAmount };
-}
-
-export const FREE_SHIPPING_THRESHOLD = 100;
-
 export const convertDate = (date: Date) => {
   const result = new Date(date);
   return result.toLocaleString("en-US", {
@@ -60,11 +45,11 @@ export const initiateLogin = async (res: UserApi) => {
     if (guestItems.length > 0) {
       await mergeGuestCart(guestItems);
       useGuestCartStore.getState().clearCart();
+      useGuestCartStore.persist.clearStorage();
     }
 
-    const cart = await getCart();
-    useCartStore.getState().setCart(cart);
-    useCartStore.getState().setLoading(false);
+    const { cart, totals } = await getCart();
+    useCartStore.getState().setCart(cart, totals);
   } catch (err) {
     console.error("Cart sync failed after login", err);
   }

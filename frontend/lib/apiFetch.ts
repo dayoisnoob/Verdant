@@ -1,8 +1,8 @@
 import { handleApiError } from "@/util";
-import { refreshAccessToken } from "./api/auth.api";
 import { useAuthStore } from "@/store/store";
+import { refreshAccessToken } from "./api/index";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "${BASE_URL}";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 let refreshPromise: Promise<void> | null = null;
 
 async function attemptFetch(path: string, options?: RequestInit) {

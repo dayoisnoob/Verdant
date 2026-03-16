@@ -5,7 +5,7 @@ export interface GuestCart {
   quantity: number;
 }
 
-export interface CartItems {
+export interface StoreCartItem {
   id: string;
   productId: string;
   name: string;
@@ -18,7 +18,7 @@ export interface CartItems {
   quantity: number;
 }
 
-export interface CartApi {
+export interface CartResponse {
   id: string;
   userId: string;
   couponCode: string;
@@ -39,14 +39,15 @@ export interface CartApi {
   }[];
 }
 
-export interface Totals {
+export interface TotalsResponse {
   subtotalPence: number;
   discountPence: number;
   deliveryPence: number;
   totalPence: number;
-  subtotal: string;
-  discount: string;
-  delivery: string;
-  total: string;
-  itemCount: number;
+}
+
+export interface CartItemApi extends StoreCartItem {
+  cartId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -1,64 +1,69 @@
+import { Product } from "@/types";
+import { ArrowRight, Clock, MapPin, Sprout } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Product } from "@/types";
 
 interface HeroProps {
-  hero: Product;
+  featuredProducts: Product[];
 }
 
-export default function Hero({ hero }: HeroProps) {
-  return (
-    <section className="relative min-h-screen flex flex-col lg:flex-row overflow-hidden bg-cream">
-      {/* ── Left — Copy ── */}
-      <div className="relative z-10 flex flex-col justify-center w-full lg:w-1/2 px-6 pt-28 pb-14 sm:px-12 lg:px-20 lg:py-0">
-        {/* Live badge */}
-        <span className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.14em] uppercase text-green bg-green/8 border border-green/25 px-4 py-1.5 rounded-full w-fit mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse flex-shrink-0" />
-          Harvested this morning
-        </span>
+const heroProduct = (products: Product[]) => {
+  if (!products?.length) return null;
+  return products[Math.floor(Math.random() * products.length)];
+};
 
-        {/* Headline */}
-        <h1 className="font-playfair font-black text-verdant-dark leading-[1.02] text-[clamp(2.8rem,6vw,5.5rem)] animate-fade-up">
+export default function Hero({ featuredProducts }: HeroProps) {
+  const hero = heroProduct(featuredProducts);
+  if (!hero) return null;
+
+  console.log(hero);
+  return (
+    <section className="relative w-full flex flex-col lg:flex-row bg-cream border-b border-gray-200 min-h-[calc(100vh-96px)]">
+      <div className="flex-1 flex flex-col justify-center px-6 py-16 sm:px-12 lg:px-20 lg:py-24 z-10">
+        <div className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.15em] uppercase text-green bg-green/10 px-4 py-2 rounded-lg w-fit mb-8">
+          <Clock size={14} />
+          Harvested this morning
+        </div>
+
+        <h1 className="font-playfair font-black text-verdant-dark leading-[1.05] text-[clamp(2.5rem,5vw,5rem)] tracking-tight">
           Farm&#8209;Fresh
           <br />
-          <em className="not-italic text-green font-black">Goodness,</em>
+          <span className="text-green">Goodness,</span>
           <br />
           Delivered.
         </h1>
 
-        <p className="mt-6 text-[0.92rem] leading-[1.9] text-verdant-muted max-w-[360px] animate-fade-up">
+        <p className="mt-6 text-gray-600 font-medium text-base leading-relaxed max-w-md">
           Seasonal produce picked at peak ripeness — traced to the exact field
           it came from, at your door within 24 hours.
         </p>
 
-        {/* CTAs */}
-        <div className="flex flex-wrap gap-3 mt-9 animate-fade-up">
+        <div className="flex flex-col sm:flex-row gap-4 mt-10">
           <Link
             href="/shop"
-            className="bg-green text-white px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(45,106,79,0.3)]"
+            className="bg-green text-white px-8 py-4 rounded-xl text-sm font-bold hover:bg-green-mid transition-all shadow-sm flex items-center justify-center gap-2"
           >
-            Shop Now ↗
+            Shop Now <ArrowRight size={18} />
           </Link>
           <Link
             href="/farms"
-            className="border border-[#ccc] text-verdant-text px-8 py-3.5 rounded-full text-sm font-medium hover:border-green hover:text-green transition-all"
+            className="bg-white border-2 border-gray-200 text-verdant-dark px-8 py-4 rounded-xl text-sm font-bold hover:border-gray-300 transition-all flex items-center justify-center"
           >
             Our Farms
           </Link>
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-8 mt-12 pt-10 border-t border-black/8">
+        <div className="grid grid-cols-3 gap-6 mt-16 pt-10 border-t border-gray-200 max-w-lg">
           {[
             { num: "120+", label: "Local Farms" },
             { num: "24h", label: "Field to Door" },
             { num: "100%", label: "Traceable" },
           ].map((s) => (
             <div key={s.label}>
-              <div className="font-playfair text-[1.85rem] font-bold text-green leading-none">
+              <div className="font-playfair text-3xl lg:text-4xl font-black text-verdant-dark mb-2">
                 {s.num}
               </div>
-              <div className="text-[0.6rem] text-verdant-muted mt-1.5 uppercase tracking-[0.12em]">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                 {s.label}
               </div>
             </div>
@@ -66,8 +71,7 @@ export default function Hero({ hero }: HeroProps) {
         </div>
       </div>
 
-      {/* ── Right — Full-bleed image ── */}
-      <div className="relative w-full lg:w-1/2 h-72 sm:h-96 lg:h-auto lg:absolute lg:right-0 lg:top-0 lg:bottom-0">
+      <div className="flex-1 relative w-full min-h-[500px] lg:min-h-full border-t lg:border-t-0 lg:border-l border-gray-200 bg-gray-50">
         <Image
           src={hero.images[0].url}
           alt={hero.images[0].alt}
@@ -77,61 +81,55 @@ export default function Hero({ hero }: HeroProps) {
           sizes="(max-width: 1024px) 100vw, 50vw"
         />
 
-        {/* Gradient — fades into cream on desktop (left edge), dark at bottom on mobile */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent lg:bg-gradient-to-r lg:from-cream lg:via-cream/20 lg:to-transparent" />
+        <div className="absolute top-6 right-6 lg:top-8 lg:right-8 bg-white px-4 py-3 rounded-xl border border-gray-100 shadow-sm flex items-center gap-2">
+          <MapPin size={16} className="text-green" />
+          <span className="text-xs font-bold text-verdant-dark uppercase tracking-wider">
+            {hero.origin}
+          </span>
+        </div>
 
-        {/* Product card — floats bottom-left on desktop, bottom-center on mobile */}
-        <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-auto sm:w-72 lg:bottom-12 lg:left-8 bg-white/92 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
-          <div className="flex items-start justify-between gap-3">
+        <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-auto sm:w-80 lg:bottom-12 lg:left-12 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="text-[0.58rem] uppercase tracking-[0.12em] text-verdant-muted mb-1">
+              <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-1.5 truncate">
                 {hero.farm}
               </div>
-              <div className="font-playfair font-bold text-verdant-dark text-[0.95rem] leading-snug">
+              <div className="font-playfair font-bold text-verdant-dark text-lg leading-snug truncate">
                 {hero.name}
               </div>
             </div>
             <div className="flex-shrink-0 text-right">
-              <div className="font-semibold text-green text-base leading-none">
+              <div className="font-playfair font-black text-green text-xl leading-none">
                 £{hero.price}
               </div>
-              <div className="text-[0.6rem] text-verdant-muted mt-1">
+              <div className="text-[11px] font-bold text-gray-400 mt-1.5 uppercase tracking-wider">
                 {hero.unit}
               </div>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-black/6 my-3" />
+          <div className="h-px bg-gray-100 my-4" />
 
           <div className="flex items-center justify-between">
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {hero.isOrganic && (
-                <span className="text-[0.58rem] font-bold uppercase tracking-wider bg-green text-white px-2.5 py-1 rounded-full">
-                  Organic
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-green/10 text-green px-2.5 py-1 rounded-md flex items-center gap-1">
+                  <Sprout size={12} /> Organic
                 </span>
               )}
               {hero.harvestDaysAgo === 0 && (
-                <span className="text-[0.58rem] font-bold uppercase tracking-wider bg-green-pale text-green px-2.5 py-1 rounded-full">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-verdant-dark px-2.5 py-1 rounded-md">
                   Today&apos;s Pick
                 </span>
               )}
             </div>
             <Link
               href={`/product/${hero.slug}`}
-              className="text-[0.65rem] text-green font-semibold hover:opacity-65 transition-opacity"
+              className="text-[11px] font-bold uppercase tracking-wider text-green hover:text-green-mid transition-colors flex items-center gap-1 flex-shrink-0 ml-4"
             >
-              View →
+              View <ArrowRight size={14} />
             </Link>
           </div>
-        </div>
-
-        {/* Harvest origin tag — top right corner, desktop only */}
-        <div className="hidden lg:flex absolute top-10 right-8 items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm">
-          <span className="text-base">📍</span>
-          <span className="text-[0.65rem] font-medium text-verdant-dark">
-            {hero.origin}
-          </span>
         </div>
       </div>
     </section>

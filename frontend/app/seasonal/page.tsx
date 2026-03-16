@@ -1,117 +1,158 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { PRODUCTS } from "@/data/products";
-import { Product } from "@/types";
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import Footer from "@/components/Footer";
-import Toast from "@/components/Toast";
+import { PRODUCTS } from "@/data/products";
+import {
+  ArrowRight,
+  CalendarDays,
+  CloudSnow,
+  Flower2,
+  Leaf,
+  Search,
+  Sprout,
+  Sun,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 const SEASONS = [
-  { label: "Spring", tags: ["spring"], emoji: "🌸", color: "bg-pink-50 border-pink-200 text-pink-700" },
-  { label: "Summer", tags: ["summer", "bbq"], emoji: "☀️", color: "bg-yellow-50 border-yellow-200 text-yellow-700" },
-  { label: "Autumn", tags: ["autumn"], emoji: "🍂", color: "bg-orange-50 border-orange-200 text-orange-700" },
-  { label: "Winter", tags: ["winter"], emoji: "❄️", color: "bg-blue-50 border-blue-200 text-blue-700" },
-  { label: "Year Round", tags: ["year-round", "everyday"], emoji: "🌿", color: "bg-green-50 border-green-200 text-green-700" },
+  { label: "Spring", tags: ["spring"], icon: Flower2 },
+  { label: "Summer", tags: ["summer", "bbq"], icon: Sun },
+  { label: "Autumn", tags: ["autumn"], icon: Leaf },
+  { label: "Winter", tags: ["winter"], icon: CloudSnow },
+  { label: "Year Round", tags: ["year-round", "everyday"], icon: Sprout },
 ];
 
 export default function SeasonalPage() {
   const [activeSeason, setActiveSeason] = useState("Summer");
-  const [cartCount, setCartCount] = useState(0);
-  const [toast, setToast] = useState({ visible: false, message: "" });
-
-  const handleAddToCart = useCallback((product: Product) => {
-    setCartCount((c) => c + 1);
-    setToast({ visible: true, message: `🛒 Added "${product.name}" to basket` });
-  }, []);
-
-  const hideToast = useCallback(() => setToast((t) => ({ ...t, visible: false })), []);
 
   const season = SEASONS.find((s) => s.label === activeSeason)!;
-  const seasonalProducts = PRODUCTS.filter((p) =>
-    p.isSeasonal && p.tags.some((t) => season.tags.includes(t))
+
+  const seasonalProducts = PRODUCTS.filter(
+    (p) => p.isSeasonal && p.tags.some((t) => season.tags.includes(t)),
   );
 
   const allSeasonal = PRODUCTS.filter((p) => p.isSeasonal);
 
   return (
-    <>
-      <Navbar cartCount={cartCount} />
-      <main className="pt-24 bg-cream min-h-screen">
-        {/* Header */}
-        <div className="px-20 py-16 bg-green-pale">
-          <p className="text-xs tracking-[0.15em] uppercase text-green mb-3">Seasonal Guide</p>
-          <h1 className="font-playfair font-black text-verdant-dark text-5xl mb-4">
-            What&apos;s in Season
-          </h1>
-          <p className="text-verdant-muted max-w-xl text-base leading-relaxed">
-            Seasonal produce tastes better, costs less, and supports the environment.
-            Here&apos;s what our farmers are growing right now.
-          </p>
-        </div>
+    <div className="bg-cream min-h-screen flex flex-col">
+      <Navbar />
 
-        {/* Season Tabs */}
-        <div className="px-20 py-8 flex gap-4 border-b border-green/10">
-          {SEASONS.map((s) => (
-            <button
-              key={s.label}
-              onClick={() => setActiveSeason(s.label)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full border text-sm font-medium transition-all duration-200 ${
-                activeSeason === s.label
-                  ? "bg-green text-white border-green"
-                  : "bg-white border-[#ddd] text-verdant-text hover:border-green hover:text-green"
-              }`}
-            >
-              {s.emoji} {s.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Products */}
-        <div className="px-20 py-14">
-          <div className="flex items-end justify-between mb-8">
-            <h2 className="font-playfair font-bold text-verdant-dark text-3xl">
-              {season.emoji} {activeSeason} Picks
-            </h2>
-            <span className="text-verdant-muted text-sm">
-              {seasonalProducts.length} products available
-            </span>
+      <main className="flex-1 pt-24 pb-20">
+        <div className="max-w-[1600px] mx-auto">
+          {/* ── Page Header ── */}
+          <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-8">
+            <div className="py-8 md:py-12 border-b border-gray-200">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarDays
+                  size={16}
+                  className="text-green"
+                  strokeWidth={2.5}
+                />
+                <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-green">
+                  Seasonal Guide
+                </p>
+              </div>
+              <h1 className="font-playfair font-black text-verdant-dark text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-4">
+                What&apos;s in Season
+              </h1>
+              <p className="text-gray-500 font-medium text-base md:text-lg max-w-2xl leading-relaxed">
+                Seasonal produce tastes better, costs less, and supports the
+                environment. Here&apos;s what our farmers are harvesting right
+                now.
+              </p>
+            </div>
           </div>
 
-          {seasonalProducts.length > 0 ? (
-            <div className="grid grid-cols-4 gap-6">
-              {seasonalProducts.map((p) => (
-                <ProductCard key={p.slug} product={p} onAddToCart={handleAddToCart} />
+          {/* ── Season Tabs ── */}
+          <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-10">
+            <div className="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-4 -mx-6 px-6 sm:mx-0 sm:px-0">
+              {SEASONS.map((s) => (
+                <button
+                  key={s.label}
+                  onClick={() => setActiveSeason(s.label)}
+                  className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest border-2 whitespace-nowrap transition-colors duration-200 flex-shrink-0 ${
+                    activeSeason === s.label
+                      ? "bg-green border-green text-white shadow-sm"
+                      : "bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:text-verdant-dark"
+                  }`}
+                >
+                  <s.icon size={16} strokeWidth={2.5} />
+                  {s.label}
+                </button>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">{season.emoji}</div>
-              <p className="font-playfair text-xl text-verdant-dark">Nothing tagged for {activeSeason} yet</p>
-              <p className="text-verdant-muted mt-2 text-sm">Check back soon or browse all seasonal produce below</p>
-            </div>
-          )}
+          </div>
 
-          {/* All seasonal banner */}
-          <div className="mt-20 bg-green rounded-3xl p-12 text-center relative overflow-hidden">
-            <span className="absolute top-4 left-8 text-7xl opacity-10">🌱</span>
-            <span className="absolute bottom-4 right-8 text-7xl opacity-10">🌾</span>
-            <h3 className="font-playfair font-black text-white text-3xl mb-3">
-              All {allSeasonal.length} Seasonal Products
-            </h3>
-            <p className="text-white/75 mb-6">Discover everything that&apos;s currently in season across all our farms.</p>
-            <a
-              href="/shop?filter=seasonal"
-              className="inline-flex items-center gap-2 bg-white text-green px-8 py-3.5 rounded-full font-medium hover:bg-green-pale transition-colors"
-            >
-              Browse All Seasonal →
-            </a>
+          {/* ── Products Grid ── */}
+          <div className="px-6 sm:px-10 lg:px-16 xl:px-20">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-green shadow-sm">
+                  <season.icon size={24} strokeWidth={2} />
+                </div>
+                <h2 className="font-playfair font-black text-verdant-dark text-3xl">
+                  {activeSeason} Picks
+                </h2>
+              </div>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                {seasonalProducts.length} Product
+                {seasonalProducts.length !== 1 ? "s" : ""} Available
+              </span>
+            </div>
+
+            {seasonalProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+                {seasonalProducts.map((p) => (
+                  <ProductCard key={p.slug} product={p} />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
+                  <Search
+                    className="w-10 h-10 text-gray-400"
+                    strokeWidth={1.5}
+                  />
+                </div>
+                <p className="font-playfair font-bold text-verdant-dark text-3xl mb-3">
+                  Nothing for {activeSeason} yet
+                </p>
+                <p className="text-gray-500 font-medium text-sm max-w-sm">
+                  Check back soon as our farmers update their harvests, or
+                  browse all seasonal produce below.
+                </p>
+              </div>
+            )}
+
+            {/* ── All Seasonal Banner ── */}
+            <div className="mt-20 bg-verdant-dark rounded-3xl p-10 md:p-16 text-center flex flex-col items-center justify-center relative overflow-hidden shadow-sm border border-gray-800">
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-green-light mb-6 backdrop-blur-md border border-white/20">
+                  <Sprout size={32} strokeWidth={2} />
+                </div>
+                <h3 className="font-playfair font-black text-white text-3xl md:text-5xl mb-4 tracking-tight">
+                  All {allSeasonal.length} Seasonal Products
+                </h3>
+                <p className="text-gray-400 font-medium text-sm md:text-base max-w-lg mb-10 leading-relaxed">
+                  Discover everything that&apos;s currently in season across all
+                  our partner farms, picked at peak freshness.
+                </p>
+                <Link
+                  href="/shop?filter=seasonal"
+                  className="bg-green text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-green-mid transition-colors shadow-sm flex items-center gap-2"
+                >
+                  Shop All Seasonal <ArrowRight size={18} strokeWidth={2.5} />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </main>
+
       <Footer />
-      <Toast message={toast.message} visible={toast.visible} onHide={hideToast} />
-    </>
+    </div>
   );
 }

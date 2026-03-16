@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import QueryProvider from "@/components/QueryProvider";
-import { CartProvider } from "@/components/CartProvider";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import AppProviders from "@/components/AppProviders";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -35,11 +33,8 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${dmSans.variable} font-sans bg-cream`}
       >
-        <ErrorBoundary>
-          <CartProvider>
-            <QueryProvider>{children}</QueryProvider>
-          </CartProvider>
-        </ErrorBoundary>
+        <AppProviders>{children}</AppProviders>
+
         <Toaster richColors />
       </body>
     </html>

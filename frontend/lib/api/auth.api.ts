@@ -1,10 +1,9 @@
+import { UserApi, UserData } from "@/types";
 import { RegistrationForm } from "@/validations";
 import { apiFetch } from "../apiFetch";
 import { initiateLogin } from "../helpers";
-import { UserApi, UserData } from "@/types";
-import { useAuthStore } from "@/store/store";
 
-export const loginApi = async (data: { email: string; password: string }) => {
+export const login = async (data: { email: string; password: string }) => {
   const res = await apiFetch<UserApi>(`/api/auth/login`, {
     method: "POST",
     body: JSON.stringify(data),
@@ -13,7 +12,7 @@ export const loginApi = async (data: { email: string; password: string }) => {
   await initiateLogin(res);
 };
 
-export const registerApi = async (data: RegistrationForm) => {
+export const register = async (data: RegistrationForm) => {
   await apiFetch(`/api/auth/register`, {
     method: "POST",
     body: JSON.stringify(data),
@@ -26,7 +25,7 @@ export const verifyEmail = async (token: string) => {
   await initiateLogin(res);
 };
 
-export const logoutApi = async () => {
+export const logout = async () => {
   await apiFetch("/api/auth/logout", { method: "POST" });
 };
 
@@ -75,26 +74,14 @@ export const changePassword = async (data: {
   confirmNewPassword: string;
 }) => {
   return apiFetch("/api/auth/change-password", {
-    method: "POST",
+    method: "PATCH",
     body: JSON.stringify(data),
   });
 };
 
-export const deleteUserApi = async (password: string) => {
+export const deleteUser = async (password: string) => {
   return apiFetch("/api/auth/delete", {
     method: "DELETE",
     body: JSON.stringify({ password }),
   });
-};
-
-export const refreshAccessToken = async () => {
-  const res = await apiFetch<{ accessToken: string }>(
-    "/api/auth/refresh-token",
-    {
-      method: "POST",
-      credentials: "include",
-    },
-  );
-
-  useAuthStore.getState().setAccessToken(res.accessToken);
 };

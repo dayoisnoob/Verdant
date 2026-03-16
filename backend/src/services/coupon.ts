@@ -185,8 +185,9 @@ export class CouponService {
       throw new ApiError(500, 'Error applying coupon code');
     }
 
-    return discount;
+    return { applied: true, discount };
   }
+
   static async removeCouponFromCart(userId: string) {
     const { cart } = await CartService.getOrCreateCart(userId);
 

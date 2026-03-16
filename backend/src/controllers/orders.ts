@@ -3,11 +3,11 @@ import { ApiResponse } from '../utils/apiResponse';
 import { OrderService } from '../services/orders';
 
 export class OrderController {
-  static async getOrders(req: Request, res: Response) {
+  static async getUserOrders(req: Request, res: Response) {
     const userId = req.user!.id;
     const { page, limit } = req.query;
 
-    const result = await OrderService.getOrders(
+    const result = await OrderService.getUserOrders(
       userId,
       Number(page),
       Number(limit)
@@ -19,6 +19,12 @@ export class OrderController {
         pagination: result.pagination,
       })
     );
+  }
+
+  static async getAllOrders(req: Request, res: Response) {
+    const orders = await OrderService.getAllOrders();
+
+    res.json(new ApiResponse(200, 'Orders retrieved', orders));
   }
 
   static async getOrderBySession(req: Request, res: Response) {

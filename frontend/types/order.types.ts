@@ -1,3 +1,5 @@
+import { Pagination } from "./product.types";
+
 export type FilterStatus =
   | "all"
   | "pending"
@@ -47,12 +49,7 @@ export interface SingleOrder extends CustomerOrder {
 
 export interface ordersApi {
   orders: AllOrders[];
-  pagination: {
-    totalItems: number;
-    currentPage: number;
-    limit: number;
-    totalPages: number;
-  };
+  pagination: Pagination;
 }
 
 export interface AllOrders {
