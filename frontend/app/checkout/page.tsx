@@ -5,12 +5,15 @@ import Container from "@/components/Container";
 import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import UnavailableItemModal, {
+  UnavailableItem,
+} from "@/components/unavailableItemModal";
 import { useCart, useCheckoutTotals } from "@/hooks";
 import {
   addUserAddress,
   createCheckoutSession,
   getUserAddresses,
-  removeCouponApi,
+  removeCoupon,
 } from "@/lib/api";
 import { applyCoupon } from "@/lib/api/coupon.api";
 import { FREE_SHIPPING_THRESHOLD, NIGERIAN_STATES } from "@/lib/constants";
@@ -31,7 +34,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -150,6 +153,17 @@ export default function CheckoutPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const couponSuccess = couponDiscount > 0;
 
+  const [unavailableItems, setUnavailableItems] = useState<UnavailableItem[]>(
+    [],
+  );
+  const [modalMessage, setModalMessage] = useState("");
+
+  useEffect(() => {
+    if (!cartItems.length) {
+      router.push("/basket");
+    }
+  }, [cartItems.length, router]);
+
   const {
     subtotal,
     subtotalFormatted,
@@ -179,11 +193,6 @@ export default function CheckoutPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutForm>({ resolver: zodResolver(checkoutSchema) });
-
-  if (!cartItems.length) {
-    router.push("/basket");
-    return null;
-  }
 
   if (addressesLoading) {
     return (
@@ -226,17 +235,12 @@ export default function CheckoutPage() {
     setIsPaying(true);
     try {
       const items = cartItems.map((i) => ({
-        name: i.name,
-        price: i.pricePence / 100,
         quantity: i.quantity,
-        image: i.imageUrl,
         productId: i.productId,
       }));
       const res = await createCheckoutSession({
         items,
-        shippingFee: delivery,
         addressId,
-        discount: couponDiscount,
         couponCode: coupon,
         deliveryNotes,
       });
@@ -248,12 +252,27 @@ export default function CheckoutPage() {
     }
   };
 
+  function handleCheckoutError(err: unknown) {
+    const error = err as ApiError;
+
+    if (error.statusCode === 409 && error.details) {
+      setUnavailableItems(error.details);
+      setModalMessage(error.message);
+    } else if (error.errors) {
+      for (const { field, message } of error.errors) {
+        setError(field as keyof CheckoutForm, { message });
+      }
+    } else {
+      toast.error(error.message || "Something went wrong");
+    }
+  }
+
   const onContinueWithSaved = async () => {
     if (!selectedAddressId) return;
     try {
       await proceedToPayment(selectedAddressId, getValues("deliveryNotes"));
-    } catch {
-      toast.error("Something went wrong. Please try again later");
+    } catch (err) {
+      handleCheckoutError(err);
     }
   };
 
@@ -269,11 +288,7 @@ export default function CheckoutPage() {
       });
       await proceedToPayment(newAddress.id, data.deliveryNotes);
     } catch (err) {
-      if (err instanceof ApiError && err.errors) {
-        for (const { field, message } of err.errors) {
-          setError(field as keyof CheckoutForm, { message });
-        }
-      }
+      handleCheckoutError(err);
     }
   };
 
@@ -302,7 +317,7 @@ export default function CheckoutPage() {
   };
 
   const handleRemoveCoupon = async (errMsg?: string) => {
-    await removeCouponApi();
+    await removeCoupon();
     setCoupon("");
     setCouponError(errMsg || "");
     setCouponDiscount(0);
@@ -769,6 +784,13 @@ export default function CheckoutPage() {
           }}
         />
       </div>
+
+      <UnavailableItemModal
+        isOpen={unavailableItems.length > 0}
+        onClose={() => setUnavailableItems([])}
+        items={unavailableItems}
+        message={modalMessage}
+      />
 
       <Footer />
     </div>

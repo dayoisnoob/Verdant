@@ -1,64 +1,109 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { db } from '../config/db';
 import { env } from '../config/env';
 import { stripe } from '../lib/stripe';
-import { couponRedemptionsTable } from '../models';
+import { couponRedemptionsTable, productsTable } from '../models';
 import { couponsTable } from '../models/coupons';
 import { OrderService } from './orders';
 import { logger } from '../config/pino';
+import { ApiError } from '../utils/apiResponse';
+import { CartService } from './cart';
 
 export interface LineItems {
-  name: string;
-  price: number;
   quantity: number;
-  image: string;
   productId: string;
+}
+
+interface OutOfStockItems {
+  id: string | undefined;
+  name: string | undefined;
+  image: string | undefined;
+  issue: string;
 }
 
 export class PaymentService {
   static async createCheckoutSession(
     userId: string,
     items: LineItems[],
-    shippingFee: number,
     addressId: string,
-    discount?: number,
     couponCode?: string,
     deliveryNotes?: string
   ) {
+    const productIds = items.map((i) => i.productId);
+    const products = await db
+      .select()
+      .from(productsTable)
+      .where(inArray(productsTable.id, productIds));
+
+    const outOfStockItems: OutOfStockItems[] = [];
+
+    items.forEach((i) => {
+      const product = products.find((p) => p.id === i.productId);
+
+      if (!product || !product.inStock) {
+        outOfStockItems.push({
+          id: product?.id,
+          name: product?.name,
+          image: product?.images?.[0]?.url || '',
+          issue: 'out_of_stock',
+        });
+      }
+    });
+
+    if (outOfStockItems.length > 0) {
+      throw new ApiError(
+        409,
+        'Some items in your basket are no longer available',
+        outOfStockItems
+      );
+    }
+
+    const cartTotals = await CartService.getCartTotal(userId);
+    const discountPence = cartTotals.discountPence;
+    const deliveryPence = cartTotals.deliveryPence;
+
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(
-      (item) => ({
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: item.name,
-            images: item.image ? [item.image] : [],
-            metadata: { productId: item.productId },
+      (item) => {
+        const product = products.find((p) => p.id === item.productId);
+
+        if (!product) {
+          throw new ApiError(404, 'Product not found');
+        }
+
+        return {
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: product.name,
+              images: product.images[0]?.url ? [product.images[0]?.url] : [],
+              metadata: { productId: product.id },
+            },
+            unit_amount: Math.round(+product.price * 100),
           },
-          unit_amount: Math.round(item.price * 100),
-        },
-        quantity: item.quantity,
-      })
+          quantity: item.quantity,
+        };
+      }
     );
 
-    if (shippingFee > 0) {
+    if (deliveryPence > 0) {
       lineItems.push({
         price_data: {
-          currency: 'usd',
+          currency: 'gbp',
           product_data: { name: 'Delivery Fee', images: [], metadata: {} },
-          unit_amount: Math.round(shippingFee * 100),
+          unit_amount: deliveryPence,
         },
         quantity: 1,
       });
     }
 
     const createStripeCoupon = async (
-      discount: number,
+      discountPence: number,
       couponCode?: string
     ) => {
       const coupon = await stripe.coupons.create({
-        amount_off: Math.round(discount * 100),
-        currency: 'usd',
+        amount_off: discountPence,
+        currency: 'gbp',
         duration: 'once',
         name: couponCode ?? 'Discount',
       });
@@ -70,20 +115,20 @@ export class PaymentService {
       line_items: lineItems,
       mode: 'payment',
       discounts:
-        discount && discount > 0
+        discountPence && discountPence > 0
           ? [
               {
-                coupon: await createStripeCoupon(discount, couponCode),
+                coupon: await createStripeCoupon(discountPence, couponCode),
               },
             ]
           : [],
       metadata: {
         userId,
         addressId: addressId ?? '',
-        discount: discount?.toString() ?? '0',
+        discount: discountPence?.toString() ?? '0',
         couponCode: couponCode ?? '',
         deliveryNotes: deliveryNotes ?? '',
-        shippingFee: shippingFee,
+        shippingFee: deliveryPence,
       },
       success_url: `${process.env.FRONTEND_URL}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/checkout`,
@@ -113,7 +158,7 @@ export class PaymentService {
         const userId = session.metadata?.userId;
         const addressId = session.metadata?.addressId;
         const discount = Number(session.metadata?.discount)
-          ? Math.round(Number(session.metadata?.discount) * 100)
+          ? Math.round(Number(session.metadata?.discount))
           : 0;
         const couponCode = session.metadata?.couponCode || null;
         const deliveryNotes = session.metadata?.deliveryNotes;

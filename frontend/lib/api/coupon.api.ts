@@ -10,7 +10,7 @@ export const applyCoupon = async (
   });
 };
 
-export const removeCouponApi = () => {
+export const removeCoupon = () => {
   return apiFetch("/api/coupons", {
     method: "DELETE",
   });

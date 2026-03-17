@@ -4,22 +4,13 @@ import { ApiResponse } from '../utils/apiResponse';
 
 export class PaymentController {
   static async createCheckoutSession(req: Request, res: Response) {
-    const {
-      items,
-      shippingFee,
-      addressId,
-      discount,
-      couponCode,
-      deliveryNotes,
-    } = req.body;
+    const { items, addressId, couponCode, deliveryNotes } = req.body;
     const userId = req.user!.id;
 
     const url = await PaymentService.createCheckoutSession(
       userId,
       items,
-      shippingFee,
       addressId,
-      discount,
       couponCode,
       deliveryNotes
     );

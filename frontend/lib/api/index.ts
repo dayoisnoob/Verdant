@@ -50,6 +50,6 @@ export {
   removeFromWishlist,
 } from "./wishlist.api";
 
-export { applyCoupon, removeCouponApi } from "./coupon.api";
+export { applyCoupon, removeCoupon } from "./coupon.api";
 
 export { refreshAccessToken } from "./token.api";

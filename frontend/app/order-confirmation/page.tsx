@@ -1,9 +1,9 @@
 "use client";
 
-import Footer from "@/components/Footer";
 import { CheckoutSteps } from "@/components/CheckoutSteps";
+import Footer from "@/components/Footer";
 import { useCart } from "@/hooks";
-import { getOrderBySessionId } from "@/lib/api";
+import { getOrderBySessionId, removeCoupon } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -13,7 +13,7 @@ export default function OrderConfirmationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const { clearCart, removeCoupon } = useCart();
+  const { clearCart } = useCart();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function OrderConfirmationPage() {
 
     const timer = setTimeout(() => setReady(true), 2000);
     return () => clearTimeout(timer);
-  }, [clearCart, removeCoupon, sessionId]);
+  }, [clearCart, sessionId]);
 
   const { data: orderNumber, isError } = useQuery({
     queryKey: ["order", sessionId],
@@ -64,10 +64,8 @@ export default function OrderConfirmationPage() {
     );
   }
 
-  // ── Confirmed ─────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Checkout header with step tracker at step 3 */}
       <div className="bg-cream border-b border-green/10">
         <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-4 md:py-5">
           <div className="flex items-center justify-between">
@@ -84,9 +82,7 @@ export default function OrderConfirmationPage() {
 
       <main className="min-h-screen bg-cream py-10 md:py-16 px-4">
         <div className="w-full max-w-md mx-auto flex flex-col gap-4">
-          {/* ── Main card ── */}
           <div className="bg-white rounded-2xl border border-green/10 overflow-hidden">
-            {/* Success header */}
             <div className="px-6 pt-8 pb-7 text-center border-b border-[#f5f5f5]">
               <div className="w-14 h-14 bg-green-pale rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
@@ -111,7 +107,6 @@ export default function OrderConfirmationPage() {
                 Your order is in. A confirmation email is on its way to you now.
               </p>
 
-              {/* Order number */}
               {orderNumber && (
                 <div className="inline-flex items-center gap-2 mt-5 bg-green-pale px-4 py-2 rounded-full">
                   <span className="text-xs text-verdant-muted">Order</span>
@@ -122,7 +117,6 @@ export default function OrderConfirmationPage() {
               )}
             </div>
 
-            {/* What's next timeline */}
             <div className="px-6 py-6">
               <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-verdant-muted mb-5">
                 What happens next
@@ -156,7 +150,6 @@ export default function OrderConfirmationPage() {
                   },
                 ].map((step, i, arr) => (
                   <div key={step.title} className="flex gap-4">
-                    {/* Icon column with connector line */}
                     <div className="flex flex-col items-center flex-shrink-0">
                       <div
                         className={`w-9 h-9 rounded-xl flex items-center justify-center text-base ${
@@ -174,7 +167,6 @@ export default function OrderConfirmationPage() {
                       )}
                     </div>
 
-                    {/* Text */}
                     <div
                       className={`min-w-0 ${i < arr.length - 1 ? "pb-5" : "pb-0"}`}
                     >
@@ -195,7 +187,6 @@ export default function OrderConfirmationPage() {
             </div>
           </div>
 
-          {/* ── Action buttons ── */}
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/account/orders"
@@ -213,7 +204,6 @@ export default function OrderConfirmationPage() {
             </Link>
           </div>
 
-          {/* Support */}
           <p className="text-center text-xs text-verdant-muted">
             Questions?{" "}
             <a

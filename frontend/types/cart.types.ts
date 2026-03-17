@@ -12,6 +12,7 @@ export interface StoreCartItem {
   slug: string;
   imageUrl: string;
   unit: string;
+  stock: number;
   farm: string;
   isOrganic: boolean;
   pricePence: number;
@@ -25,18 +26,7 @@ export interface CartResponse {
   discount: number;
   createdAt: Date;
   updatedAt: Date;
-  items: {
-    id: string;
-    productId: string;
-    name: string;
-    slug: string;
-    imageUrl: string;
-    unit: string;
-    farm: string;
-    isOrganic: boolean;
-    pricePence: number;
-    quantity: number;
-  }[];
+  items: StoreCartItem[];
 }
 
 export interface TotalsResponse {

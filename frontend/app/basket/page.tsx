@@ -23,7 +23,6 @@ export default function CartPage() {
     items: cartItems,
     removeItem,
     updateQuantity,
-    subtotal,
     subtotalFormatted,
   } = useCart();
 
@@ -39,6 +38,10 @@ export default function CartPage() {
     removeItem(id);
     toast.success("Item removed");
   };
+
+  const outOfStock = cartItems.some((i) => !i.inStock);
+
+  console.log(outOfStock);
 
   return (
     <div className="bg-cream min-h-screen flex flex-col">

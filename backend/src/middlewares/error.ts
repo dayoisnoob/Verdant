@@ -38,6 +38,7 @@ export function globalErrorHandler(
   const response: any = {
     success: false,
     message: isOperational ? error.message : 'Internal server error',
+    ...(error.details && { details: error.details }),
   };
 
   if (error.errors) {

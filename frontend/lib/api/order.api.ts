@@ -2,18 +2,13 @@ import { ordersApi, SingleOrder } from "@/types";
 import { apiFetch } from "../apiFetch";
 
 interface CheckoutItem {
-  name: string;
-  price: number;
   quantity: number;
-  image: string;
   productId: string;
 }
 
 interface CreateCheckoutSessionInput {
   items: CheckoutItem[];
-  shippingFee: number;
   addressId: string;
-  discount?: number;
   couponCode?: string;
   deliveryNotes?: string;
 }

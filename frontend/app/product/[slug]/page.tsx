@@ -5,11 +5,10 @@ import Container from "@/components/Container";
 import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import ProductCard from "@/components/ProductCard";
+import RelatedProducts from "@/components/RelatedProducts";
 import { StarRating } from "@/components/StarRating";
 import { useCart, useWishlistToggle } from "@/hooks";
 import { getProductBySlug } from "@/lib/api";
-import { getRelated } from "@/lib/api/product.api";
 import { LOW_PRODUCT_THRESHOLD } from "@/lib/constants";
 import { Product } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -24,19 +23,16 @@ import {
   Snowflake,
   Sprout,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { use, useState } from "react";
+import { notFound, useParams } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 
-export default function ProductPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = use(params);
-  const { addItem } = useCart();
+export default function ProductPage() {
+  const params = useParams();
+  const slug = params.slug as string;
+
+  const { addItem, items } = useCart();
 
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
@@ -50,11 +46,7 @@ export default function ProductPage({
   } = useQuery({
     queryKey: ["single-product", slug],
     queryFn: async () => await getProductBySlug(slug),
-  });
-
-  const { data: relatedProducts } = useQuery({
-    queryKey: ["related-products", slug],
-    queryFn: () => getRelated(slug),
+    staleTime: 1000 * 60 * 5,
   });
 
   const { toggle, wishlisted } = useWishlistToggle(product?.id ?? "");
@@ -104,10 +96,16 @@ export default function ProductPage({
           100,
       )
     : null;
+  const itemInCart = items.find((i) => i.productId === product.id);
+  const itemQuantity = itemInCart?.quantity ?? 0;
+  const remainingStock = product.stock - itemQuantity;
+  const canAdd = qty <= remainingStock;
+
+  const hasReachedCapacity = qty >= remainingStock;
 
   const handleAddToCart = (p: Product) => {
     addItem(p, qty);
-    toast.success(`${p.name} added to basket`);
+    toast.success(`${qty} × ${p.name} added to basket`);
     setQty(1);
   };
 
@@ -118,7 +116,6 @@ export default function ProductPage({
 
         <main className="flex-1 pt-24 pb-20">
           <div className="max-w-[1600px] mx-auto">
-            {/* ── Breadcrumbs ── */}
             <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-6">
               <nav className="flex items-center flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 py-4">
                 <Link href="/" className="hover:text-green transition-colors">
@@ -145,7 +142,6 @@ export default function ProductPage({
 
             <div className="px-6 sm:px-10 lg:px-16 xl:px-20 pb-16">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16 items-start">
-                {/* ── Left Column: Images ── */}
                 <div className="lg:col-span-6 xl:col-span-5 flex flex-col gap-4 lg:sticky lg:top-28">
                   <div className="relative rounded-2xl overflow-hidden aspect-square bg-gray-50 border border-gray-100">
                     <BlurImage
@@ -222,7 +218,6 @@ export default function ProductPage({
                   )}
                 </div>
 
-                {/* ── Right Column: Product Details ── */}
                 <div className="lg:col-span-6 xl:col-span-7 flex flex-col gap-8 py-2">
                   <div>
                     <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -306,7 +301,11 @@ export default function ProductPage({
                           {qty}
                         </span>
                         <button
-                          disabled={qty >= maxQty}
+                          disabled={
+                            !product.inStock ||
+                            hasReachedCapacity ||
+                            qty >= maxQty
+                          }
                           onClick={() =>
                             setQty((prev) => Math.min(prev + 1, maxQty))
                           }
@@ -317,11 +316,19 @@ export default function ProductPage({
                       </div>
 
                       <button
-                        disabled={!product.inStock}
+                        disabled={
+                          canAdd
+                            ? false
+                            : !product.inStock || hasReachedCapacity
+                        }
                         onClick={() => handleAddToCart(product)}
                         className="flex-1 bg-green text-white rounded-xl py-4 font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm"
                       >
-                        {product.inStock ? "Add to Basket" : "Out of Stock"}
+                        {canAdd
+                          ? "Add to Basket"
+                          : hasReachedCapacity
+                            ? "Out of Stock"
+                            : ""}
                       </button>
 
                       <button
@@ -415,34 +422,7 @@ export default function ProductPage({
               </div>
             </div>
 
-            {(relatedProducts?.length ?? 0) > 0 && (
-              <div className="border-t border-gray-200 px-6 sm:px-10 lg:px-16 xl:px-20 py-20">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-                  <div>
-                    <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-3">
-                      You might also like
-                    </p>
-                    <h2 className="font-playfair font-black text-verdant-dark text-3xl md:text-4xl">
-                      More {product.category}
-                    </h2>
-                  </div>
-                  <Link
-                    href={`/shop?category=${encodeURIComponent(product.category)}`}
-                    className="text-sm font-bold uppercase tracking-widest text-green hover:text-green-mid transition-colors flex items-center gap-2"
-                  >
-                    View all <ChevronRight size={16} />
-                  </Link>
-                </div>
-
-                <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 sm:overflow-visible sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0">
-                  {relatedProducts?.map((p) => (
-                    <div key={p.slug} className="min-w-[280px] sm:min-w-0">
-                      <ProductCard product={p} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <RelatedProducts slug={slug} product={product} />
           </div>
         </main>
         <Footer />

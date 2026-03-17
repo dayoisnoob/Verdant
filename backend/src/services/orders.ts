@@ -1,9 +1,10 @@
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { db } from '../config/db';
 import {
   addressesTable,
   orderItemsTable,
   ordersTable,
+  productsTable,
   usersTable,
 } from '../models';
 import { ApiError } from '../utils/apiResponse';
@@ -13,6 +14,7 @@ import { generateOrderNumber } from '../utils/helpers';
 import { sendMail } from './email.service';
 import { env } from '../config/env';
 import type { updateOrderInput } from '../validations/order';
+import { logger } from '../config/pino';
 
 export interface CheckoutItem {
   productId: string;
@@ -52,7 +54,7 @@ export class OrderService {
           status: 'paid',
           subtotalCents: data.subtotal,
           totalCents: data.amount,
-          currency: 'usd',
+          currency: 'gbp',
           discountAmount: data.discountAmount ?? null,
           customerEmail: data.customerEmail ?? null,
           shippingAddressId: data.shippingAddressId ?? null,
@@ -75,6 +77,21 @@ export class OrderService {
         }))
       );
 
+      data.items.forEach(async (item) => {
+        await tx
+          .update(productsTable)
+          .set({
+            stock: sql`${productsTable.stock} - ${item.quantity}`,
+            inStock: sql`${productsTable.stock} - ${item.quantity} > 0`,
+          })
+          .where(
+            and(
+              eq(productsTable.id, item.productId),
+              gte(productsTable.stock, item.quantity)
+            )
+          );
+      });
+
       return orderRecord;
     });
 
@@ -88,8 +105,10 @@ export class OrderService {
       throw new ApiError(404, 'User not found');
     }
 
+    const link = `${env.FRONTEND_URL}/account/orders`;
+
     try {
-      await sendMail(user, env.FRONTEND_URL, 'orderCreation');
+      sendMail(user, link, 'orderCreation');
     } catch (err) {
       throw new ApiError(500, 'Error sending email. Please try again');
     }
@@ -114,6 +133,8 @@ export class OrderService {
         id: ordersTable.id,
         orderNumber: ordersTable.orderNumber,
         status: ordersTable.status,
+        discount: ordersTable.discountAmount,
+        shippingFee: ordersTable.shippingFee,
         subtotalCents: ordersTable.subtotalCents,
         totalCents: ordersTable.totalCents,
         createdAt: ordersTable.createdAt,

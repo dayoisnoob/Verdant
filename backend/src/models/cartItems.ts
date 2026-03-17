@@ -24,6 +24,10 @@ export const cartItemsTable = pgTable('cart_items', {
   imageUrl: text('image_url').notNull(),
   unit: text('unit').notNull(),
   farm: text('farm').notNull(),
+  stock: integer('stock'),
+
+  inStock: boolean('in_stock').default(true).notNull(),
+
   isOrganic: boolean('is_organic').notNull().default(false),
 
   pricePence: integer('price_pence').notNull(),

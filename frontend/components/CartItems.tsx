@@ -38,6 +38,7 @@ export default function CartItems({
     setPendingRemove(null);
   }
 
+  console.log(items);
   function handleSaveToWishlist(e: React.MouseEvent) {
     if (!pendingRemove) return;
 
@@ -109,9 +110,10 @@ export default function CartItems({
                     <Minus size={16} strokeWidth={2.5} />
                   </button>
                   <span className="w-8 text-center text-sm font-bold text-verdant-dark">
-                    {p.quantity}
+                    {Math.min(p.quantity, p.stock)}
                   </span>
                   <button
+                    disabled={p.quantity >= p.stock}
                     onClick={() =>
                       handleUpdateQuantity(p.productId, 1, p.quantity)
                     }
