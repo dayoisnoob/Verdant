@@ -52,7 +52,7 @@ export default function CartItems({
         {items.map((p) => (
           <div
             key={p.slug}
-            className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-gray-200 transition-all duration-200 p-4 sm:p-5 flex gap-4 sm:gap-6 relative group"
+            className="w-full bg-white/80 rounded-2xl border border-gray-100 shadow-sm hover:border-gray-200 transition-all duration-200 p-4 sm:p-5 flex gap-4 sm:gap-6 relative group"
           >
             <Link
               href={`/product/${p.slug}`}

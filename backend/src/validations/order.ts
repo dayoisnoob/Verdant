@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const getOrdersSchema = z.object({
+export const getOrdersQuery = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(50).default(10),
 });
@@ -29,7 +29,6 @@ const addressSchema = z.object({
 
 export const updateOrderSchema = z.object({
   status: z.enum([
-    'pending',
     'paid',
     'processing',
     'shipped',
@@ -37,7 +36,6 @@ export const updateOrderSchema = z.object({
     'cancelled',
     'refunded',
   ]),
-  trackingNumber: z.string().optional(),
 });
 
 // export type createOrderInput = z.infer<typeof createOrderSchema>;

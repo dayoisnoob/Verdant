@@ -1,12 +1,12 @@
 "use client";
 
-import { registerApi } from "@/lib/api";
+import { register as registerApi } from "@/lib/api";
 import { handleFormError } from "@/lib/helpers";
-import { useAuthStore } from "@/store/store";
+import { useEmailStore } from "@/store/store";
 import { ApiError } from "@/util";
 import { RegistrationForm, registrationSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +15,7 @@ import PasswordStrengthBar from "react-password-strength-bar";
 
 export default function SignupPage() {
   const router = useRouter();
-  const setEmail = useAuthStore((s) => s.setEmail);
+  const setEmail = useEmailStore((s) => s.setEmail);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -42,96 +42,93 @@ export default function SignupPage() {
 
   const password = useWatch({ control, name: "password", defaultValue: "" });
 
-  return (
-    <div className="min-h-screen bg-[#0f1c13] flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      <div className="relative w-full max-w-[440px]">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link
-            href="/"
-            className="inline-block font-playfair text-3xl font-black text-white tracking-tight"
-          >
-            Ver<em className="not-italic text-green-light">dant</em>
-          </Link>
-          <p className="text-white/70 text-[0.65rem] mt-1.5 uppercase tracking-[0.2em]">
-            Farm fresh · Delivered
-          </p>
-        </div>
+  const inputCls = (hasError: boolean) =>
+    `w-full border-2 bg-gray-50/50 rounded-xl px-4 py-3.5 text-sm outline-none transition-all font-bold text-verdant-dark placeholder:text-gray-400 ${
+      hasError
+        ? "border-red-200 focus:border-red-400 focus:bg-white"
+        : "border-gray-200 focus:border-green hover:bg-white"
+    }`;
 
-        {/* Card */}
-        <div className="bg-[#FAF7F0] rounded-[1.75rem] shadow-[0_40px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden">
-          <div className="px-8 pt-7 pb-9">
-            {/* Heading */}
-            <div className="mb-6">
-              <h1 className="font-playfair font-black text-verdant-dark text-[1.85rem] leading-tight">
-                Create account
+  return (
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[460px] flex flex-col items-center">
+        {/* ── Logo ── */}
+        <Link
+          href="/"
+          className="font-playfair text-3xl sm:text-4xl font-black text-verdant-dark tracking-tight hover:text-green transition-colors mb-8"
+        >
+          Ver<em className="not-italic text-green">dant</em>
+        </Link>
+
+        {/* ── Card ── */}
+        <div className="w-full bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 overflow-hidden">
+          <div className="px-6 py-8 sm:p-10">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="font-playfair font-black text-verdant-dark text-3xl mb-2">
+                Create Account
               </h1>
-              <p className="text-verdant-muted text-sm mt-1.5">
+              <p className="text-gray-500 font-medium text-sm">
                 Already a member?{" "}
                 <Link
                   href="/login"
-                  className="text-green font-semibold hover:underline"
+                  className="text-green font-bold hover:text-green-mid transition-colors"
                 >
                   Sign in
                 </Link>
               </p>
             </div>
 
+            {/* ── Form ── */}
             <form
               onSubmit={handleSubmit(onSubmit)}
               noValidate
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-5"
             >
-              {/* Name */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Name Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {(["firstName", "lastName"] as const).map((field) => (
                   <div key={field} className="flex flex-col gap-1.5">
-                    <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
-                      {field === "firstName" ? "First name" : "Last name"}
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      {field === "firstName" ? "First Name" : "Last Name"}
                     </label>
                     <input
                       {...register(field)}
                       type="text"
-                      placeholder={
-                        field === "firstName" ? "first name" : "last name"
-                      }
-                      className={`border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] focus:ring-2 focus:ring-green/10 ${
-                        errors[field]
-                          ? "border-red-300 focus:border-red-400"
-                          : "border-[#e0ddd5] focus:border-green"
-                      }`}
+                      placeholder={field === "firstName" ? "Jane" : "Doe"}
+                      className={inputCls(!!errors[field])}
                     />
-                    <p className="text-[0.68rem] text-red-500 min-h-[14px] leading-none">
-                      {errors[field]?.message}
-                    </p>
+                    {errors[field] && (
+                      <p className="text-xs font-bold text-red-500 mt-0.5">
+                        {errors[field]?.message}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
 
               {/* Email */}
-              <div className="flex flex-col gap-1.5 -mt-1">
-                <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
-                  Email address
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  Email Address
                 </label>
                 <input
                   {...register("email")}
                   type="email"
                   autoComplete="email"
-                  placeholder="example@email.com"
-                  className={`border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] focus:ring-2 focus:ring-green/10 ${
-                    errors.email
-                      ? "border-red-300 focus:border-red-400"
-                      : "border-[#e0ddd5] focus:border-green"
-                  }`}
+                  placeholder="you@email.com"
+                  className={inputCls(!!errors.email)}
                 />
-                <p className="text-[0.68rem] text-red-500 min-h-[14px] leading-none">
-                  {errors.email?.message}
-                </p>
+                {errors.email && (
+                  <p className="text-xs font-bold text-red-500 mt-0.5">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
 
-              {/* Password + strength */}
-              <div className="flex flex-col gap-1.5 -mt-1">
-                <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
+              {/* Password */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                   Password
                 </label>
                 <div className="relative">
@@ -139,77 +136,87 @@ export default function SignupPage() {
                     {...register("password")}
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
-                    placeholder="password"
-                    className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] focus:ring-2 focus:ring-green/10 pr-11 ${
-                      errors.password
-                        ? "border-red-300 focus:border-red-400"
-                        : "border-[#e0ddd5] focus:border-green"
-                    }`}
+                    placeholder="••••••••"
+                    className={`${inputCls(!!errors.password)} pr-12`}
                   />
                   <button
                     type="button"
                     tabIndex={-1}
                     onClick={() => setShowPassword((p) => !p)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#bbb] hover:text-green transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-verdant-dark transition-colors"
                   >
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showPassword ? (
+                      <EyeOff size={18} strokeWidth={2.5} />
+                    ) : (
+                      <Eye size={18} strokeWidth={2.5} />
+                    )}
                   </button>
                 </div>
 
-                {/* Strength bar — only shows when typing */}
-                {password && <PasswordStrengthBar password={password} />}
+                {password && (
+                  <div className="mt-1">
+                    <PasswordStrengthBar
+                      password={password}
+                      className="!mb-0"
+                    />
+                  </div>
+                )}
 
-                <p className="text-[0.68rem] text-red-500 min-h-[14px] leading-none">
-                  {errors.password?.message}
-                </p>
+                {errors.password && (
+                  <p className="text-xs font-bold text-red-500 mt-0.5">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
-              {/* Confirm password */}
-              <div className="flex flex-col gap-1.5 -mt-1">
-                <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
-                  Confirm password
+              {/* Confirm Password */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  Confirm Password
                 </label>
                 <div className="relative">
                   <input
                     {...register("confirmPassword")}
                     type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password"
-                    placeholder="Repeat your password"
-                    className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] focus:ring-2 focus:ring-green/10 pr-11 ${
-                      errors.confirmPassword
-                        ? "border-red-300 focus:border-red-400"
-                        : "border-[#e0ddd5] focus:border-green"
-                    }`}
+                    placeholder="••••••••"
+                    className={`${inputCls(!!errors.confirmPassword)} pr-12`}
                   />
                   <button
                     type="button"
                     tabIndex={-1}
                     onClick={() => setShowConfirmPassword((p) => !p)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#bbb] hover:text-green transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-verdant-dark transition-colors"
                   >
                     {showConfirmPassword ? (
-                      <EyeOff size={15} />
+                      <EyeOff size={18} strokeWidth={2.5} />
                     ) : (
-                      <Eye size={15} />
+                      <Eye size={18} strokeWidth={2.5} />
                     )}
                   </button>
                 </div>
-                <p className="text-[0.68rem] text-red-500 min-h-[14px] leading-none">
-                  {errors.confirmPassword?.message}
-                </p>
+                {errors.confirmPassword && (
+                  <p className="text-xs font-bold text-red-500 mt-0.5">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
 
-              {/* Submit */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-green text-white py-3.5 rounded-xl font-semibold text-sm tracking-wide hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,106,79,0.3)] disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none mt-1"
+                className="w-full bg-green text-white py-4 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-green-mid transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed mt-2 flex justify-center items-center gap-2"
               >
                 {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
-                    Creating your account…
-                  </span>
+                  <>
+                    <Loader2
+                      size={18}
+                      strokeWidth={2.5}
+                      className="animate-spin"
+                    />
+                    Creating Account...
+                  </>
                 ) : (
                   "Create Account"
                 )}
@@ -218,20 +225,21 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-white/70 mt-3">
+        {/* ── Footer Links ── */}
+        <p className="text-center text-xs font-bold text-gray-400 mt-8 uppercase tracking-widest">
           By signing up you agree to our{" "}
           <Link
             href="/terms"
-            className="hover:text-white/40 underline transition-colors"
+            className="text-gray-500 hover:text-green transition-colors"
           >
             Terms
           </Link>
           {" & "}
           <Link
             href="/privacy"
-            className="hover:text-white/40 underline transition-colors"
+            className="text-gray-500 hover:text-green transition-colors"
           >
-            Privacy Policy
+            Privacy
           </Link>
         </p>
       </div>

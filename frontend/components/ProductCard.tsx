@@ -2,11 +2,12 @@
 
 import { useCart, useWishlistToggle } from "@/hooks";
 import { ProductCard as ProductCardType } from "@/types";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Clock, Heart, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { StarRating } from "./StarRating";
+import { LOW_PRODUCT_THRESHOLD } from "@/lib/constants";
 
 function discountPct(price: string, original: string) {
   return Math.round((1 - parseFloat(price) / parseFloat(original)) * 100);
@@ -56,7 +57,7 @@ export default function ProductCard({
 
         <div className="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
           {p.isOnSale && p.originalPrice && (
-            <span className="text-[10px] font-bold uppercase tracking-wider bg-orange text-white px-2.5 py-1.5 rounded-md shadow-sm">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-orange-500 text-white px-2.5 py-1.5 rounded-md shadow-sm">
               {discountPct(p.price, p.originalPrice)}% off
             </span>
           )}
@@ -86,7 +87,7 @@ export default function ProductCard({
         </button>
       </div>
 
-      <div className="flex flex-col flex-1 p-5 gap-4">
+      <div className="flex flex-col flex-1 p-5 gap-2">
         <div className="flex flex-col gap-1.5 mb-1">
           <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest line-clamp-2 leading-relaxed">
             {p.farm}
@@ -109,6 +110,15 @@ export default function ProductCard({
             </span>
           </span>
         </div>
+
+        {p.inStock && p.stock <= LOW_PRODUCT_THRESHOLD && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <Clock size={12} className="text-orange-500" strokeWidth={2.5} />
+            <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">
+              Almost gone
+            </span>
+          </div>
+        )}
 
         <div className="flex-1" />
 

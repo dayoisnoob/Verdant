@@ -37,8 +37,6 @@ export const ordersTable = pgTable(
 
     customerEmail: text('customer_email'),
 
-    // couponId: uuid('coupon_id').references(() => couponsTable.id),
-
     shippingAddressId: uuid('shipping_address_id').references(
       () => addressesTable.id,
       { onDelete: 'set null' }

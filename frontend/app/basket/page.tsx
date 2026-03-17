@@ -2,17 +2,15 @@
 
 import CartItems from "@/components/CartItems";
 import Container from "@/components/Container";
-import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import MightLike from "@/components/MightLike";
 import Navbar from "@/components/Navbar";
 import { useCart } from "@/hooks";
-import { getAllProducts, getSuggested } from "@/lib/api";
+import { getSuggested } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   Leaf,
-  Loader2,
   RefreshCcw,
   ShieldCheck,
   ShoppingBag,
@@ -86,7 +84,7 @@ export default function CartPage() {
           ) : (
             <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
               <div className="w-full lg:col-span-7 xl:col-span-8">
-                <div className="bg-white/80 rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
+                <div className="bg-white/50 rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
                   <CartItems
                     items={cartItems}
                     handleRemoveItem={handleRemoveItem}

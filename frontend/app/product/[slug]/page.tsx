@@ -1,5 +1,6 @@
 "use client";
 
+import BlurImage from "@/components/BlurImage";
 import Container from "@/components/Container";
 import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
@@ -9,7 +10,7 @@ import { StarRating } from "@/components/StarRating";
 import { useCart, useWishlistToggle } from "@/hooks";
 import { getProductBySlug } from "@/lib/api";
 import { getRelated } from "@/lib/api/product.api";
-import { useCartStore } from "@/store/store";
+import { LOW_PRODUCT_THRESHOLD } from "@/lib/constants";
 import { Product } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -96,6 +97,7 @@ export default function ProductPage({
 
   if (!product) notFound();
 
+  const maxQty = Math.min(product.stock, 10);
   const discountPct = product.originalPrice
     ? Math.round(
         (1 - parseFloat(product.price) / parseFloat(product.originalPrice)) *
@@ -116,6 +118,7 @@ export default function ProductPage({
 
         <main className="flex-1 pt-24 pb-20">
           <div className="max-w-[1600px] mx-auto">
+            {/* ── Breadcrumbs ── */}
             <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-6">
               <nav className="flex items-center flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 py-4">
                 <Link href="/" className="hover:text-green transition-colors">
@@ -142,11 +145,12 @@ export default function ProductPage({
 
             <div className="px-6 sm:px-10 lg:px-16 xl:px-20 pb-16">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16 items-start">
+                {/* ── Left Column: Images ── */}
                 <div className="lg:col-span-6 xl:col-span-5 flex flex-col gap-4 lg:sticky lg:top-28">
                   <div className="relative rounded-2xl overflow-hidden aspect-square bg-gray-50 border border-gray-100">
-                    <Image
+                    <BlurImage
                       src={product.images[activeImg]?.url}
-                      alt={product.images[activeImg]?.alt}
+                      alt={product.images[activeImg]?.alt || "Product image"}
                       fill
                       priority
                       className="object-cover"
@@ -167,7 +171,7 @@ export default function ProductPage({
                         </span>
                       )}
                       {discountPct && (
-                        <span className="text-xs font-bold uppercase tracking-wider bg-orange text-white px-4 py-2 rounded-xl shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-wider bg-orange-500 text-white px-4 py-2 rounded-xl shadow-sm">
                           {discountPct}% off
                         </span>
                       )}
@@ -205,11 +209,12 @@ export default function ProductPage({
                               : "border-gray-200 opacity-60 hover:opacity-100 hover:border-gray-300"
                           }`}
                         >
-                          <Image
+                          <BlurImage
                             src={img.url}
-                            alt={img.alt}
+                            alt={img.alt || "Thumbnail"}
                             fill
                             className="object-cover"
+                            sizes="100px"
                           />
                         </button>
                       ))}
@@ -217,6 +222,7 @@ export default function ProductPage({
                   )}
                 </div>
 
+                {/* ── Right Column: Product Details ── */}
                 <div className="lg:col-span-6 xl:col-span-7 flex flex-col gap-8 py-2">
                   <div>
                     <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -277,47 +283,62 @@ export default function ProductPage({
 
                   <div className="h-px bg-gray-200" />
 
-                  <div className="flex flex-col sm:flex-row gap-4 items-stretch">
-                    <div className="flex items-center justify-between border-2 border-gray-200 bg-white rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0">
+                  <div className="flex flex-col gap-4">
+                    {product.inStock &&
+                      product.stock <= LOW_PRODUCT_THRESHOLD && (
+                        <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 w-fit px-4 py-2 rounded-xl text-orange-600">
+                          <Clock size={16} strokeWidth={2.5} />
+                          <span className="text-xs font-bold uppercase tracking-widest">
+                            Almost gone
+                          </span>
+                        </div>
+                      )}
+
+                    <div className="flex flex-col sm:flex-row gap-4 items-stretch">
+                      <div className="flex items-center justify-between border-2 border-gray-200 bg-white rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0">
+                        <button
+                          onClick={() => setQty(Math.max(1, qty - 1))}
+                          className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                        >
+                          <Minus size={18} strokeWidth={2.5} />
+                        </button>
+                        <span className="text-lg font-bold text-verdant-dark w-12 text-center">
+                          {qty}
+                        </span>
+                        <button
+                          disabled={qty >= maxQty}
+                          onClick={() =>
+                            setQty((prev) => Math.min(prev + 1, maxQty))
+                          }
+                          className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Plus size={18} strokeWidth={2.5} />
+                        </button>
+                      </div>
+
                       <button
-                        onClick={() => setQty(Math.max(1, qty - 1))}
-                        className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                        disabled={!product.inStock}
+                        onClick={() => handleAddToCart(product)}
+                        className="flex-1 bg-green text-white rounded-xl py-4 font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm"
                       >
-                        <Minus size={18} strokeWidth={2.5} />
+                        {product.inStock ? "Add to Basket" : "Out of Stock"}
                       </button>
-                      <span className="text-lg font-bold text-verdant-dark w-12 text-center">
-                        {qty}
-                      </span>
+
                       <button
-                        onClick={() => setQty(qty + 1)}
-                        className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                        onClick={toggle}
+                        className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 border-2 transition-colors ${
+                          wishlisted
+                            ? "border-orange-500 bg-orange-50 text-orange-500"
+                            : "border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-600"
+                        }`}
                       >
-                        <Plus size={18} strokeWidth={2.5} />
+                        <Heart
+                          size={24}
+                          fill={wishlisted ? "currentColor" : "none"}
+                          strokeWidth={2.5}
+                        />
                       </button>
                     </div>
-
-                    <button
-                      disabled={!product.inStock}
-                      onClick={() => handleAddToCart(product)}
-                      className="flex-1 bg-green text-white rounded-xl py-4 font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm"
-                    >
-                      {product.inStock ? "Add to Basket" : "Out of Stock"}
-                    </button>
-
-                    <button
-                      onClick={toggle}
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 border-2 transition-colors ${
-                        wishlisted
-                          ? "border-orange bg-orange/10 text-orange"
-                          : "border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-600"
-                      }`}
-                    >
-                      <Heart
-                        size={24}
-                        fill={wishlisted ? "currentColor" : "none"}
-                        strokeWidth={2.5}
-                      />
-                    </button>
                   </div>
 
                   <div className="h-px bg-gray-200" />

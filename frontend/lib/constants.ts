@@ -40,6 +40,7 @@ export const ORDER_PREVIEW_LIMIT = 4;
 
 export const FREE_SHIPPING_THRESHOLD = 4000;
 export const DELIVERY_FEE = 499;
+export const LOW_PRODUCT_THRESHOLD = 10;
 
 export const MAX_ADDRESSES = 5;
 

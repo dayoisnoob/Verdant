@@ -14,17 +14,20 @@ type EmailType =
   | 'orderCreation';
 
 interface EmailConfig {
-  intro: string;
-  instructions: string;
-  buttonText?: string;
   subject: string;
+  intro: string | string[];
+  instructions?: string;
+  buttonText?: string;
+  buttonColor?: string;
+  outro?: string;
 }
 
 const mailGenerator = new Mailgen({
-  theme: 'default',
+  theme: 'cerberus',
   product: {
     name: 'Verdant',
-    link: process.env.FRONTEND_URL!,
+    link: env.FRONTEND_URL!,
+    copyright: `© ${new Date().getFullYear()} Verdant Ltd.`,
   },
 });
 
@@ -35,36 +38,55 @@ export const sendMail = async (
 ): Promise<void> => {
   const emailConfig: Record<EmailType, EmailConfig> = {
     verification: {
-      intro: 'Welcome to Verdant! One last step before you can start shopping.',
+      subject: 'Welcome to Verdant! 🌱 Verify your email',
+      intro:
+        'Welcome to Verdant! We are thrilled to have you on board. Just one last step before you can start shopping for farm-fresh produce.',
       instructions:
-        'Click the button below to verify your email address. This link expires in 1 hour.',
-      buttonText: 'Verify My Email',
-      subject: 'Verify your Verdant account',
+        'Click the secure button below to verify your email address. This link will expire in 1 hour.',
+      buttonText: 'Verify Email Address',
+      buttonColor: '#2D6A4F',
     },
     forgotPassword: {
+      subject: 'Reset your Verdant password',
       intro:
         'We received a request to reset the password for your Verdant account.',
       instructions:
-        'Click the button below to choose a new password. This link expires in 1 hour and can only be used once.',
+        'Click the button below to safely choose a new password. This link expires in 1 hour and can only be used once.',
       buttonText: 'Reset My Password',
-      subject: 'Reset your Verdant password',
+      buttonColor: '#2D6A4F',
+      outro:
+        'If you did not request a password reset, you can safely ignore this email. Your account remains secure.',
     },
     changePassword: {
-      intro: 'Your Verdant account password was successfully changed.',
-      instructions: 'If this was not you, please contact support',
-      subject: 'Your password has been changed',
+      subject: 'Security Alert: Your password was changed',
+      intro: [
+        'Your Verdant account password was successfully updated.',
+        'You can now use your new password to log in to your account.',
+      ],
+      instructions:
+        'If you did not make this change, please secure your account immediately.',
+      buttonText: 'Contact Support',
+      buttonColor: '#EF4444',
     },
     accountDeletion: {
-      intro: 'Your Verdant account has been permanently deleted.',
-      instructions:
-        "All your personal data has been removed. Your order history has been retained for legal and accounting purposes. If you didn't request this, please contact our support team immediately.",
-      subject: 'Your account has been deleted',
+      subject: 'Your account has been securely deleted',
+      intro: [
+        'Your Verdant account has been permanently deleted.',
+        'All your personal data has been securely wiped from our active systems. Note: Your past order history has been retained strictly for legal and accounting purposes.',
+      ],
+      outro:
+        "We're sorry to see you go. If you change your mind, we'd love to welcome you back anytime.",
     },
     orderCreation: {
-      intro: 'Your order has been confirmed and is being prepared.',
+      subject: "Order confirmed — we're on it 🚜",
+      intro: [
+        'Your order has been confirmed and is currently being prepared!',
+        'Our partner farmers are getting your produce ready. We will ensure everything is packed securely and picked at peak freshness.',
+      ],
       instructions:
-        "Our farmers are already picking your produce. You'll receive another email once your order is on its way.",
-      subject: "Order confirmed — we're on it",
+        'You will receive another update as soon as your order leaves the farm.',
+      buttonText: 'Track Order',
+      buttonColor: '#2D6A4F',
     },
   };
 
@@ -75,11 +97,14 @@ export const sendMail = async (
     return;
   }
 
-  const button = config.buttonText
+  const action = config.buttonText
     ? {
-        color: '#22BC66',
-        text: config.buttonText ?? '',
-        link,
+        instructions: config.instructions ?? '',
+        button: {
+          color: config.buttonColor || '#2D6A4F',
+          text: config.buttonText,
+          link,
+        },
       }
     : undefined;
 
@@ -87,14 +112,10 @@ export const sendMail = async (
     body: {
       name: user.firstName,
       intro: config.intro,
-      ...(button && {
-        action: {
-          instructions: config.instructions,
-          button,
-        },
-      }),
+      ...(action && { action }),
       outro:
-        "Need help, or have questions? Just reply to this email, we'd love to help.",
+        config.outro ||
+        'Have questions about your harvest? Just reply to this email—our support team is always here to help.',
     },
   };
 
@@ -102,7 +123,7 @@ export const sendMail = async (
   const emailText = mailGenerator.generatePlaintext(email);
 
   await resend.emails.send({
-    from: 'Verdant <onboarding@resend.dev>',
+    from: 'Verdant <onboarding@resend.dev>', // Update to your verified domain when going to production (e.g., 'Verdant <hello@verdant.com>')
     to: [user.email],
     subject: config.subject,
     html: emailBody,

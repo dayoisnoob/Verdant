@@ -4,13 +4,12 @@ import { login, resendVerificationEmail } from "@/lib/api";
 import { ApiError } from "@/util";
 import { LoginForm, loginSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleAlert, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-// ── Page ───────────────────────────────────────────────────────────────────
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,10 +33,7 @@ export default function LoginPage() {
     setBannerError("");
     setNotVerified(false);
     try {
-      console.log("try logged in");
-
       await login(data);
-      console.log("logged in");
       const redirect = searchParams.get("redirect") || "/";
       router.replace(redirect);
     } catch (err) {
@@ -46,10 +42,10 @@ export default function LoginPage() {
           setError("password", { message: err.message });
         } else if (err.statusCode === 403 && err.message.includes("verify")) {
           setNotVerified(true);
-        } else if (err.statusCode === 403) {
+        } else if (err.statusCode === 429) {
           setBannerError(err.message);
         } else {
-          setBannerError("Something went wrong, please try again");
+          setBannerError(err.message);
         }
       } else {
         setBannerError("Something went wrong, please try again");
@@ -73,187 +69,182 @@ export default function LoginPage() {
     }
   };
 
+  const inputCls = (hasError: boolean) =>
+    `w-full border-2 bg-gray-50/50 rounded-xl px-4 py-3.5 text-sm outline-none transition-all font-bold text-verdant-dark placeholder:text-gray-400 ${
+      hasError
+        ? "border-red-200 focus:border-red-400 focus:bg-white"
+        : "border-gray-200 focus:border-green hover:bg-white"
+    }`;
+
   return (
-    <div className="min-h-screen bg-[#0f1c13] flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      <div className="relative w-full max-w-[400px]">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link
-            href="/"
-            className="inline-block font-playfair text-3xl font-black text-white tracking-tight"
-          >
-            Ver<em className="not-italic text-green-light">dant</em>
-          </Link>
-          <p className="text-white/70 text-[0.65rem] mt-1.5 uppercase tracking-[0.2em]">
-            Farm fresh · Delivered
-          </p>
-        </div>
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[420px] flex flex-col items-center">
+        <Link
+          href="/"
+          className="font-playfair text-3xl sm:text-4xl font-black text-verdant-dark tracking-tight hover:text-green transition-colors mb-8"
+        >
+          Ver<em className="not-italic text-green">dant</em>
+        </Link>
 
-        {/* Card */}
-        <div className="bg-[#FAF7F0] rounded-[1.75rem] shadow-[0_40px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden">
-          {/* Top accent */}
-
-          <div className="px-8 pt-7 pb-9">
-            {/* Heading */}
-            <div className="mb-6">
-              <h1 className="font-playfair font-black text-verdant-dark text-[1.85rem] leading-tight">
-                Welcome back
+        <div className="w-full bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 overflow-hidden">
+          <div className="px-6 py-8 sm:p-10">
+            <div className="text-center mb-8">
+              <h1 className="font-playfair font-black text-verdant-dark text-3xl mb-2">
+                Welcome Back
               </h1>
-              <p className="text-verdant-muted text-sm mt-1.5">
+              <p className="text-gray-500 font-medium text-sm">
                 No account?{" "}
                 <Link
                   href="/signup"
-                  className="text-green font-semibold hover:underline"
+                  className="text-green font-bold hover:text-green-mid transition-colors"
                 >
                   Sign up free
                 </Link>
               </p>
             </div>
 
-            {/* ── Banner — reserved height prevents layout shift ── */}
-            <div className="mb-5 min-h-[44px]">
+            <div className="mb-6 empty:hidden">
               {notVerified ? (
-                <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 text-base">
-                    ✉️
+                <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 flex gap-4 items-start">
+                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-500">
+                    <Mail size={20} strokeWidth={2.5} />
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-amber-900 leading-snug">
-                      Verify your email to continue
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-orange-900 leading-tight mb-1">
+                      Verify your email
                     </p>
-                    <p className="text-xs text-amber-700/80 mt-0.5 leading-relaxed">
-                      We sent a link to your inbox. Check spam if you can&apos;t
-                      find it.
+                    <p className="text-xs font-medium text-orange-700/80 leading-relaxed mb-3">
+                      We sent a link to your inbox. Check your spam folder if
+                      you can&apos;t find it.
                     </p>
                     <button
                       onClick={handleResend}
                       disabled={resendStatus !== "idle"}
-                      className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold bg-white border border-green/25 text-green px-3 py-1.5 rounded-full hover:bg-green hover:text-white hover:border-green transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-white border-2 border-orange-200 text-orange-600 px-4 py-2.5 rounded-xl hover:bg-orange-100 hover:border-orange-300 transition-colors disabled:opacity-60 disabled:cursor-not-allowed w-full"
                     >
                       {resendStatus === "sending" && (
-                        <span className="w-3 h-3 border border-green/30 border-t-green rounded-full animate-spin" />
+                        <Loader2 size={14} className="animate-spin" />
                       )}
-                      {resendStatus === "idle" && "Resend verification email"}
-                      {resendStatus === "sending" && "Sending…"}
-                      {resendStatus === "sent" && "✓ Sent — check your inbox"}
+                      {resendStatus === "idle" && "Resend Verification"}
+                      {resendStatus === "sending" && "Sending..."}
+                      {resendStatus === "sent" && "Sent — Check Inbox"}
                     </button>
                   </div>
                 </div>
               ) : bannerError ? (
-                <div className="rounded-2xl overflow-hidden border border-red-200/60">
-                  <div className="bg-red-500 px-4 py-2 flex items-center gap-2">
-                    <CircleAlert size={14} color="white" />
-                    <p className="text-white text-[0.7rem] font-bold uppercase tracking-wider">
-                      Sign in failed
-                    </p>
-                  </div>
-                  <div className="bg-red-50 px-4 py-3">
-                    <p className="text-red-700 text-sm leading-snug">
-                      {bannerError}
-                    </p>
-                  </div>
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center gap-3">
+                  <AlertCircle
+                    size={18}
+                    strokeWidth={2.5}
+                    className="text-red-500 flex-shrink-0"
+                  />
+                  <p className="text-sm font-bold text-red-600 leading-snug">
+                    {bannerError}
+                  </p>
                 </div>
               ) : null}
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
-              <div className="flex flex-col gap-4">
-                {/* Email */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
-                    Email address
-                  </label>
-                  <input
-                    {...register("email")}
-                    type="email"
-                    autoFocus
-                    autoComplete="email"
-                    placeholder="you@email.com"
-                    className={`border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] focus:ring-2 focus:ring-green/10 ${
-                      errors.email
-                        ? "border-red-300 focus:border-red-400"
-                        : "border-[#e0ddd5] focus:border-green"
-                    }`}
-                  />
-                  <p className="text-[0.68rem] text-red-500 min-h-[14px] leading-none">
-                    {errors.email?.message}
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+              className="flex flex-col gap-5"
+            >
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  Email Address
+                </label>
+                <input
+                  {...register("email")}
+                  type="email"
+                  autoFocus
+                  autoComplete="email"
+                  placeholder="you@email.com"
+                  className={inputCls(!!errors.email)}
+                />
+                {errors.email && (
+                  <p className="text-xs font-bold text-red-500 mt-1">
+                    {errors.email.message}
                   </p>
-                </div>
-
-                {/* Password */}
-                <div className="flex flex-col gap-1.5 -mt-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
-                      Password
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-[0.65rem] text-green font-medium hover:underline"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <input
-                      {...register("password")}
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-verdant-dark placeholder:text-[#ccc] focus:ring-2 focus:ring-green/10 pr-11 ${
-                        errors.password
-                          ? "border-red-300 focus:border-red-400"
-                          : "border-[#e0ddd5] focus:border-green"
-                      }`}
-                    />
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      onClick={() => setShowPassword((p) => !p)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#bbb] hover:text-green transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                    </button>
-                  </div>
-                  <p className="text-[0.68rem] text-red-500 min-h-[14px] leading-none">
-                    {errors.password?.message}
-                  </p>
-                </div>
-
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-green text-white py-3.5 rounded-xl font-semibold text-sm tracking-wide hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,106,79,0.3)] disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none mt-1"
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
-                      Signing you in…
-                    </span>
-                  ) : (
-                    "Sign In"
-                  )}
-                </button>
+                )}
               </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                    Password
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-[11px] font-bold text-green hover:text-green-mid transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <input
+                    {...register("password")}
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    className={`${inputCls(!!errors.password)} pr-12`}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-verdant-dark transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff size={18} strokeWidth={2.5} />
+                    ) : (
+                      <Eye size={18} strokeWidth={2.5} />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs font-bold text-red-500 mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-green text-white py-4 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-green-mid transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed mt-2 flex justify-center items-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2
+                      size={18}
+                      strokeWidth={2.5}
+                      className="animate-spin"
+                    />
+                    Signing In...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
             </form>
           </div>
         </div>
 
-        <p className="text-center text-sm text-white/70 mt-3">
+        <p className="text-center text-xs font-bold text-gray-400 mt-8 uppercase tracking-widest">
           By signing in you agree to our{" "}
           <Link
             href="/terms"
-            className="hover:text-white/40 underline transition-colors"
+            className="text-gray-500 hover:text-green transition-colors"
           >
             Terms
           </Link>
           {" & "}
           <Link
             href="/privacy"
-            className="hover:text-white/40 underline transition-colors"
+            className="text-gray-500 hover:text-green transition-colors"
           >
-            Privacy Policy
+            Privacy
           </Link>
         </p>
       </div>

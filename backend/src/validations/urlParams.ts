@@ -24,6 +24,9 @@ export const sessionIdParamsSchema = z.object({
     .uuid('Invalid ID format')
     .min(1, 'Session Id is required'),
 });
+export const orderIdParamsSchema = z.object({
+  orderId: z.string().uuid('Invalid ID format').min(1, 'Order Id is required'),
+});
 export const addressIdParamsSchema = z.object({
   addressId: z
     .string()

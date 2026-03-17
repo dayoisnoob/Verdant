@@ -1,10 +1,18 @@
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../config/db';
-import { addressesTable, orderItemsTable, ordersTable } from '../models';
+import {
+  addressesTable,
+  orderItemsTable,
+  ordersTable,
+  usersTable,
+} from '../models';
 import { ApiError } from '../utils/apiResponse';
 import { CartService } from './cart';
 import { CouponService } from './coupon';
 import { generateOrderNumber } from '../utils/helpers';
+import { sendMail } from './email.service';
+import { env } from '../config/env';
+import type { updateOrderInput } from '../validations/order';
 
 export interface CheckoutItem {
   productId: string;
@@ -69,6 +77,22 @@ export class OrderService {
 
       return orderRecord;
     });
+
+    const [user] = await db
+      .select({ firstName: usersTable.firstName, email: usersTable.email })
+      .from(usersTable)
+      .where(eq(usersTable.id, data.userId))
+      .limit(1);
+
+    if (!user) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    try {
+      await sendMail(user, env.FRONTEND_URL, 'orderCreation');
+    } catch (err) {
+      throw new ApiError(500, 'Error sending email. Please try again');
+    }
 
     await CartService.clearCart(data.userId);
     await CouponService.removeCouponFromCart(data.userId);
@@ -260,29 +284,27 @@ export class OrderService {
     return { total, orders: allOrders };
   }
 
-  // static async updateOrderStatus(
-  //   orderId: string,
-  //   updateData: updateOrderInput
-  // ) {
-  //   const [order] = await db
-  //     .select()
-  //     .from(ordersTable)
-  //     .where(eq(ordersTable.id, orderId));
+  static async updateOrderStatus(
+    userId: string,
+    orderId: string,
+    updateData: updateOrderInput
+  ) {
+    const [order] = await db
+      .select()
+      .from(ordersTable)
+      .where(and(eq(ordersTable.id, orderId), eq(ordersTable.userId, userId)))
+      .limit(1);
 
-  //   if (!order) {
-  //     throw new ApiError(404, 'Order not found');
-  //   }
+    if (!order) {
+      throw new ApiError(404, 'Order not found');
+    }
 
-  //   const [updated] = await db
-  //     .update(ordersTable)
-  //     .set({
-  //       ...updateData,
-  //       shippedAt: updateData.status === 'shipped' ? new Date() : undefined,
-  //       deliveredAt: updateData.status === 'delivered' ? new Date() : undefined,
-  //     })
-  //     .where(eq(ordersTable.id, orderId))
-  //     .returning();
+    const [updated] = await db
+      .update(ordersTable)
+      .set(updateData)
+      .where(eq(ordersTable.id, orderId))
+      .returning();
 
-  //   return { message: 'Order status updated successfully.', data: updated };
-  // }
+    return updated;
+  }
 }

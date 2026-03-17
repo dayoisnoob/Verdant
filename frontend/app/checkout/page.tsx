@@ -217,6 +217,7 @@ export default function CheckoutPage() {
 
   const progressPct = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
   const amountLeft = ((FREE_SHIPPING_THRESHOLD - subtotal) / 100).toFixed(2);
+  const hasFreeDelivery = delivery === 0;
 
   const proceedToPayment = async (
     addressId: string,
@@ -572,18 +573,20 @@ export default function CheckoutPage() {
                 <div className="px-6 py-5 border-b border-gray-50 bg-gray-50/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-bold text-verdant-dark">
-                      {delivery <= 0
+                      {hasFreeDelivery
                         ? "Free delivery unlocked! 🎉"
                         : "Almost there..."}
                     </span>
-                    <span
-                      className={`text-sm font-bold ${
-                        delivery <= 0 ? "text-green" : "text-gray-500"
-                      }`}
-                    >
-                      £{(subtotal / 100).toFixed(2)} / £
-                      {(FREE_SHIPPING_THRESHOLD / 100).toFixed(2)}
-                    </span>
+                    {!hasFreeDelivery && (
+                      <span
+                        className={`text-sm font-bold ${
+                          hasFreeDelivery ? "text-green" : "text-gray-500"
+                        }`}
+                      >
+                        £{(subtotal / 100).toFixed(2)} / £
+                        {(FREE_SHIPPING_THRESHOLD / 100).toFixed(2)}
+                      </span>
+                    )}
                   </div>
                   <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div

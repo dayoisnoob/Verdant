@@ -9,6 +9,7 @@ export interface Product {
   unit: string;
   weight: string;
   farm: string;
+  stock: number;
   origin: string;
   isOrganic: boolean;
   isSeasonal: boolean;
@@ -55,6 +56,7 @@ export type ProductCard = Pick<
   | "images"
   | "farm"
   | "unit"
+  | "stock"
   | "isOrganic"
   | "inStock"
   | "originalPrice"

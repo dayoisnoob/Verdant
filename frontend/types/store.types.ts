@@ -25,9 +25,9 @@ export interface GuestCartStore {
   itemCount: () => number;
 }
 
-export interface AddressStore {
-  selectedAddressId: string | null;
-  setAddressId: (id: string) => void;
+export interface EmailStore {
+  email: string | null;
+  setEmail: (email: string) => void;
 }
 
 export interface AuthStore {

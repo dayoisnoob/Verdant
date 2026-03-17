@@ -1,12 +1,8 @@
 import { addItemToCart, removeItemFromCart, updateItem } from "@/lib/api";
 import { toPence } from "@/lib/utils";
-import {
-  AddressStore,
-  AuthCartStore,
-  AuthStore,
-  GuestCartStore,
-} from "@/types";
+import { AuthCartStore, AuthStore, GuestCartStore } from "@/types";
 import { StoreCartItem } from "@/types/cart.types";
+import { EmailStore } from "@/types/store.types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -196,3 +192,9 @@ export const useAuthStore = create<AuthStore>()(
     },
   ),
 );
+
+export const useEmailStore = create<EmailStore>()((set) => ({
+  email: null,
+
+  setEmail: (email) => set({ email }),
+}));

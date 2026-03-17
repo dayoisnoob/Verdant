@@ -48,17 +48,19 @@ export class OrderController {
     res.json(new ApiResponse(200, 'Order fetched', order));
   }
 
-  //   static async updateOrder(req: Request, res: Response) {
-  //     const userId = req.user!.id;
-  //     const orderId = req.params.orderId as string;
-  //     const updateData = req.body;
+  static async updateOrder(req: Request, res: Response) {
+    const userId = req.user!.id;
+    const orderId = req.params.orderId as string;
+    const updateData = req.body;
 
-  //     const result = await OrderService.updateOrderStatus(
-  //       userId,
-  //       orderId,
-  //       updateData
-  //     );
+    const updatedOrder = await OrderService.updateOrderStatus(
+      userId,
+      orderId,
+      updateData
+    );
 
-  //     res.json(new ApiResponse(200, result.message, result.data));
-  //   }
+    res.json(
+      new ApiResponse(200, 'Order status updated successfully', updatedOrder)
+    );
+  }
 }
