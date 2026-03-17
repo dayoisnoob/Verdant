@@ -43,6 +43,7 @@ export const DELIVERY_FEE = 499;
 export const LOW_PRODUCT_THRESHOLD = 10;
 
 export const MAX_ADDRESSES = 5;
+export const MAX_CART_LIMIT = 10;
 
 export const NIGERIAN_STATES = [
   "Abia",

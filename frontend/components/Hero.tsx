@@ -16,7 +16,6 @@ export default function Hero({ featuredProducts }: HeroProps) {
   const hero = heroProduct(featuredProducts);
   if (!hero) return null;
 
-  console.log(hero);
   return (
     <section className="relative w-full flex flex-col lg:flex-row bg-cream border-b border-gray-200 min-h-[calc(100vh-96px)]">
       <div className="flex-1 flex flex-col justify-center px-6 py-16 sm:px-12 lg:px-20 lg:py-24 z-10">

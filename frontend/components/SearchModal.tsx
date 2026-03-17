@@ -52,7 +52,6 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   if (!products) return null;
 
-  // Filter products based on query
   const results = query.trim()
     ? products?.filter(
         (p) =>
@@ -65,30 +64,25 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     e.preventDefault();
     if (!query.trim()) return;
     router.push(`/shop?q=${encodeURIComponent(query.trim())}`);
-    console.log("Search for:", query);
     onClose();
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     setQuery(suggestion);
     inputRef.current?.focus();
-    // TODO: You could also immediately navigate to search results
   };
 
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
-          {/* Header */}
           <div className="flex items-center justify-between px-6 pt-5 pb-3">
             <h2 className="font-serif text-lg font-semibold text-stone-900">
               Product Search
@@ -101,7 +95,6 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             </button>
           </div>
 
-          {/* Search Input */}
           <form onSubmit={handleSearch} className="px-6 pb-4">
             <div className="flex items-center border border-stone-200 rounded-md overflow-hidden focus-within:border-stone-900 transition-colors">
               <input
@@ -121,10 +114,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             </div>
           </form>
 
-          {/* Results or Suggestions */}
           <div className="border-t border-stone-100 max-h-80 overflow-y-auto">
             {query.trim() === "" ? (
-              /* Default Suggestions */
               <div>
                 <p className="flex items-center gap-2 px-6 py-3 text-sm text-stone-500 bg-stone-50">
                   Search and explore your products from{" "}
@@ -145,7 +136,6 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 </ul>
               </div>
             ) : results.length > 0 ? (
-              /* Search Results */
               <ul>
                 {results?.map((product) => (
                   <li key={product.id}>
@@ -184,7 +174,6 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 ))}
               </ul>
             ) : (
-              /* No Results */
               <div className="px-6 py-8 text-center">
                 <p className="text-stone-400 text-sm">
                   No products found for &quot;{query}&quot;

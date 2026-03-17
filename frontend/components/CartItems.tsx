@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { RemoveDialog } from "./RemoveDialog";
 import { StoreCartItem } from "@/types/cart.types";
+import { MAX_CART_LIMIT } from "@/lib/constants";
 
 export default function CartItems({
   items,
@@ -38,7 +39,6 @@ export default function CartItems({
     setPendingRemove(null);
   }
 
-  console.log(items);
   function handleSaveToWishlist(e: React.MouseEvent) {
     if (!pendingRemove) return;
 
@@ -102,6 +102,7 @@ export default function CartItems({
               <div className="flex items-end justify-between mt-4">
                 <div className="flex items-center border-2 border-gray-100 rounded-xl overflow-hidden bg-white">
                   <button
+                    disabled={p.quantity <= 1}
                     onClick={() =>
                       handleUpdateQuantity(p.productId, -1, p.quantity)
                     }
@@ -113,7 +114,9 @@ export default function CartItems({
                     {Math.min(p.quantity, p.stock)}
                   </span>
                   <button
-                    disabled={p.quantity >= p.stock}
+                    disabled={
+                      p.quantity >= p.stock || p.quantity >= MAX_CART_LIMIT
+                    }
                     onClick={() =>
                       handleUpdateQuantity(p.productId, 1, p.quantity)
                     }

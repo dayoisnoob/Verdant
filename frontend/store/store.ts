@@ -76,7 +76,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
 
     const newQuantity = item.quantity + quantity;
 
-    if (newQuantity < 1) return {};
+    // if (newQuantity < 1) return {};
 
     set((state) => {
       return {
@@ -87,7 +87,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
     });
 
     try {
-      await updateItem({ productId: id, quantity: item.quantity });
+      await updateItem({ productId: id, quantity: newQuantity });
     } catch {
       set({ items: previousItems });
     }

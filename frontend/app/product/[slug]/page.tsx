@@ -5,11 +5,12 @@ import Container from "@/components/Container";
 import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import QuantityStepper from "@/components/QuantityStepper";
 import RelatedProducts from "@/components/RelatedProducts";
 import { StarRating } from "@/components/StarRating";
 import { useCart, useWishlistToggle } from "@/hooks";
 import { getProductBySlug } from "@/lib/api";
-import { LOW_PRODUCT_THRESHOLD } from "@/lib/constants";
+import { LOW_PRODUCT_THRESHOLD, MAX_CART_LIMIT } from "@/lib/constants";
 import { Product } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -32,9 +33,8 @@ export default function ProductPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const { addItem, items } = useCart();
+  const { addItem, updateQuantity, removeItem, items } = useCart();
 
-  const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
 
   const {
@@ -89,7 +89,6 @@ export default function ProductPage() {
 
   if (!product) notFound();
 
-  const maxQty = Math.min(product.stock, 10);
   const discountPct = product.originalPrice
     ? Math.round(
         (1 - parseFloat(product.price) / parseFloat(product.originalPrice)) *
@@ -97,16 +96,26 @@ export default function ProductPage() {
       )
     : null;
   const itemInCart = items.find((i) => i.productId === product.id);
-  const itemQuantity = itemInCart?.quantity ?? 0;
-  const remainingStock = product.stock - itemQuantity;
-  const canAdd = qty <= remainingStock;
-
-  const hasReachedCapacity = qty >= remainingStock;
+  const qtyInCart = itemInCart?.quantity ?? 0;
+  const isStockLimitReached = qtyInCart === product.stock;
+  const isCartLimitReached = qtyInCart >= MAX_CART_LIMIT;
 
   const handleAddToCart = (p: Product) => {
-    addItem(p, qty);
-    toast.success(`${qty} × ${p.name} added to basket`);
-    setQty(1);
+    addItem(p);
+    toast.success(`${p.name} added to basket`);
+  };
+
+  const handleIncrement = () => {
+    updateQuantity(product.id, 1);
+    toast.success("Item updated successfully");
+  };
+  const handleDecrement = () => {
+    if (qtyInCart <= 1) {
+      removeItem(product.id);
+    } else {
+      updateQuantity(product.id, -1);
+      toast.success("Item updated successfully");
+    }
   };
 
   return (
@@ -290,46 +299,36 @@ export default function ProductPage() {
                       )}
 
                     <div className="flex flex-col sm:flex-row gap-4 items-stretch">
-                      <div className="flex items-center justify-between border-2 border-gray-200 bg-white rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0">
-                        <button
-                          onClick={() => setQty(Math.max(1, qty - 1))}
-                          className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
-                        >
-                          <Minus size={18} strokeWidth={2.5} />
-                        </button>
-                        <span className="text-lg font-bold text-verdant-dark w-12 text-center">
-                          {qty}
-                        </span>
-                        <button
-                          disabled={
-                            !product.inStock ||
-                            hasReachedCapacity ||
-                            qty >= maxQty
-                          }
-                          onClick={() =>
-                            setQty((prev) => Math.min(prev + 1, maxQty))
-                          }
-                          className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Plus size={18} strokeWidth={2.5} />
-                        </button>
-                      </div>
+                      {qtyInCart >= 1 && (
+                        <div className="flex items-center justify-between border-2 border-gray-200 bg-white rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0">
+                          <button
+                            onClick={handleDecrement}
+                            className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                          >
+                            <Minus size={18} strokeWidth={2.5} />
+                          </button>
+                          <span className="text-lg font-bold text-verdant-dark w-12 text-center">
+                            {qtyInCart}
+                          </span>
+                          <button
+                            disabled={isStockLimitReached || isCartLimitReached}
+                            onClick={handleIncrement}
+                            className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Plus size={18} strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      )}
 
-                      <button
-                        disabled={
-                          canAdd
-                            ? false
-                            : !product.inStock || hasReachedCapacity
-                        }
-                        onClick={() => handleAddToCart(product)}
-                        className="flex-1 bg-green text-white rounded-xl py-4 font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm"
-                      >
-                        {canAdd
-                          ? "Add to Basket"
-                          : hasReachedCapacity
-                            ? "Out of Stock"
-                            : ""}
-                      </button>
+                      {qtyInCart === 0 && (
+                        <button
+                          disabled={!product.inStock}
+                          onClick={() => handleAddToCart(product)}
+                          className="flex-1 bg-green text-white rounded-xl py-4 font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm"
+                        >
+                          Add to Basket
+                        </button>
+                      )}
 
                       <button
                         onClick={toggle}

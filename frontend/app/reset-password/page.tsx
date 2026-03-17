@@ -21,8 +21,6 @@ export default function ResetPasswordPage() {
   const [bannerError, setBannerError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  console.log(token);
-
   const {
     register,
     handleSubmit,

@@ -39,10 +39,6 @@ export default function CartPage() {
     toast.success("Item removed");
   };
 
-  const outOfStock = cartItems.some((i) => !i.inStock);
-
-  console.log(outOfStock);
-
   return (
     <div className="bg-cream min-h-screen flex flex-col">
       <Navbar />
