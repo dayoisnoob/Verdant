@@ -17,6 +17,7 @@ import { orderItemsTable, ordersTable, productsTable } from '../models';
 import type { Product } from '../types/types';
 import { ApiError } from '../utils/apiResponse';
 import type { UpdateProductInput } from '../validations/products';
+import { cache } from '../config/redis';
 
 export class ProductService {
   static async createProduct(data: Product | Product[]) {
@@ -46,6 +47,8 @@ export class ProductService {
         throw new ApiError(500, 'Failed to create products. Please try again.');
       }
 
+      await cache.delPattern('cache:/api/products*');
+
       return { count: newProducts.length, products: newProducts };
     }
 
@@ -70,6 +73,8 @@ export class ProductService {
     if (!newProduct) {
       throw new ApiError(500, 'Failed to create product. Please try again.');
     }
+
+    await cache.delPattern('cache:/api/products*');
 
     return { count: 1, product: newProduct };
   }
@@ -142,24 +147,7 @@ export class ProductService {
 
     const [products, countResult] = await Promise.all([
       db
-        .select({
-          id: productsTable.id,
-          name: productsTable.name,
-          slug: productsTable.slug,
-          price: productsTable.price,
-          originalPrice: productsTable.originalPrice,
-          images: productsTable.images,
-          farm: productsTable.farm,
-          unit: productsTable.unit,
-          stock: productsTable.stock,
-          isOrganic: productsTable.isOrganic,
-          reviewCount: productsTable.reviewCount,
-          rating: productsTable.rating,
-          isSeasonal: productsTable.isSeasonal,
-          isOnSale: productsTable.isOnSale,
-          origin: productsTable.origin,
-          inStock: productsTable.inStock,
-        })
+        .select({ ...productCardSelect })
         .from(productsTable)
         .where(where)
         .orderBy(orderBy)
@@ -183,52 +171,16 @@ export class ProductService {
   }
 
   static async getAllProducts() {
-    const products = db
-      .select({
-        id: productsTable.id,
-        name: productsTable.name,
-        slug: productsTable.slug,
-        category: productsTable.category,
-        price: productsTable.price,
-        originalPrice: productsTable.originalPrice,
-        images: productsTable.images,
-        farm: productsTable.farm,
-        unit: productsTable.unit,
-        stock: productsTable.stock,
-        isOrganic: productsTable.isOrganic,
-        reviewCount: productsTable.reviewCount,
-        rating: productsTable.rating,
-        isSeasonal: productsTable.isSeasonal,
-        isOnSale: productsTable.isOnSale,
-        origin: productsTable.origin,
-        inStock: productsTable.inStock,
-      })
+    const products = await db
+      .select({ ...productCardSelect })
       .from(productsTable);
 
     return products;
   }
 
   static async getSuggestedProducts(productIds: string[]) {
-    console.log(productIds);
-    const products = db
-      .select({
-        id: productsTable.id,
-        name: productsTable.name,
-        slug: productsTable.slug,
-        category: productsTable.category,
-        price: productsTable.price,
-        originalPrice: productsTable.originalPrice,
-        images: productsTable.images,
-        farm: productsTable.farm,
-        unit: productsTable.unit,
-        isOrganic: productsTable.isOrganic,
-        reviewCount: productsTable.reviewCount,
-        rating: productsTable.rating,
-        isSeasonal: productsTable.isSeasonal,
-        isOnSale: productsTable.isOnSale,
-        origin: productsTable.origin,
-        inStock: productsTable.inStock,
-      })
+    const products = await db
+      .select({ ...productCardSelect })
       .from(productsTable)
       .where(notInArray(productsTable.id, productIds))
       .orderBy(sql`RANDOM()`)
@@ -238,25 +190,8 @@ export class ProductService {
   }
 
   static async getRelatedProducts(slug: string) {
-    const products = db
-      .select({
-        id: productsTable.id,
-        name: productsTable.name,
-        slug: productsTable.slug,
-        category: productsTable.category,
-        price: productsTable.price,
-        originalPrice: productsTable.originalPrice,
-        images: productsTable.images,
-        farm: productsTable.farm,
-        unit: productsTable.unit,
-        isOrganic: productsTable.isOrganic,
-        reviewCount: productsTable.reviewCount,
-        rating: productsTable.rating,
-        isSeasonal: productsTable.isSeasonal,
-        isOnSale: productsTable.isOnSale,
-        origin: productsTable.origin,
-        inStock: productsTable.inStock,
-      })
+    const products = await db
+      .select({ ...productCardSelect })
       .from(productsTable)
       .where(
         and(
@@ -310,29 +245,16 @@ export class ProductService {
       throw new ApiError(404, 'Product not found');
     }
 
+    await cache.delPattern('cache:/api/products*');
+
     return updatedProduct;
   }
 
   static async bestSelling() {
     const bestSelling = await db
       .select({
-        id: orderItemsTable.productId,
+        ...productCardSelect,
         totalSold: sql<number>`sum(${orderItemsTable.quantity})`,
-        name: productsTable.name,
-        slug: productsTable.slug,
-        category: productsTable.category,
-        price: productsTable.price,
-        originalPrice: productsTable.originalPrice,
-        images: productsTable.images,
-        farm: productsTable.farm,
-        unit: productsTable.unit,
-        isOrganic: productsTable.isOrganic,
-        reviewCount: productsTable.reviewCount,
-        rating: productsTable.rating,
-        isSeasonal: productsTable.isSeasonal,
-        isOnSale: productsTable.isOnSale,
-        origin: productsTable.origin,
-        inStock: productsTable.inStock,
       })
       .from(orderItemsTable)
       .innerJoin(ordersTable, eq(ordersTable.id, orderItemsTable.orderId))
@@ -350,23 +272,8 @@ export class ProductService {
 
     const trendingProducts = await db
       .select({
-        id: orderItemsTable.productId,
+        ...productCardSelect,
         totalSold: sql<number>`sum(${orderItemsTable.quantity})`,
-        name: productsTable.name,
-        slug: productsTable.slug,
-        category: productsTable.category,
-        price: productsTable.price,
-        originalPrice: productsTable.originalPrice,
-        images: productsTable.images,
-        farm: productsTable.farm,
-        unit: productsTable.unit,
-        isOrganic: productsTable.isOrganic,
-        reviewCount: productsTable.reviewCount,
-        rating: productsTable.rating,
-        isSeasonal: productsTable.isSeasonal,
-        isOnSale: productsTable.isOnSale,
-        origin: productsTable.origin,
-        inStock: productsTable.inStock,
       })
       .from(orderItemsTable)
       .innerJoin(ordersTable, eq(ordersTable.id, orderItemsTable.orderId))
@@ -393,6 +300,27 @@ export class ProductService {
       throw new ApiError(404, 'Product not found');
     }
 
+    await cache.delPattern('cache:/api/products*');
+
     return deletedProduct;
   }
 }
+
+const productCardSelect = {
+  id: productsTable.id,
+  name: productsTable.name,
+  slug: productsTable.slug,
+  price: productsTable.price,
+  originalPrice: productsTable.originalPrice,
+  images: productsTable.images,
+  farm: productsTable.farm,
+  unit: productsTable.unit,
+  stock: productsTable.stock,
+  isOrganic: productsTable.isOrganic,
+  reviewCount: productsTable.reviewCount,
+  rating: productsTable.rating,
+  isSeasonal: productsTable.isSeasonal,
+  isOnSale: productsTable.isOnSale,
+  origin: productsTable.origin,
+  inStock: productsTable.inStock,
+} as const;

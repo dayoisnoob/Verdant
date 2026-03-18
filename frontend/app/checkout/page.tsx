@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import UnavailableItemModal, {
   UnavailableItem,
 } from "@/components/unavailableItemModal";
-import { useCart, useCheckoutTotals } from "@/hooks";
+import { useCart } from "@/hooks";
 import {
   addUserAddress,
   createCheckoutSession,
@@ -142,7 +142,6 @@ function PayButton({
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items: cartItems } = useCart();
 
   const [isPaying, setIsPaying] = useState(false);
   const [showNewForm, setShowNewForm] = useState(false);
@@ -158,19 +157,20 @@ export default function CheckoutPage() {
   );
   const [modalMessage, setModalMessage] = useState("");
 
-  useEffect(() => {
-    if (!cartItems.length) {
-      router.push("/basket");
-    }
-  }, [cartItems.length, router]);
-
   const {
+    items: cartItems,
     subtotal,
     subtotalFormatted,
     delivery,
     deliveryFormatted,
     totalFormatted,
-  } = useCheckoutTotals(couponDiscount);
+  } = useCart(couponDiscount);
+
+  useEffect(() => {
+    if (!cartItems.length) {
+      router.push("/basket");
+    }
+  }, [cartItems.length, router]);
 
   const {
     data: addresses = [],

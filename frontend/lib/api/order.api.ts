@@ -1,4 +1,4 @@
-import { ordersApi, SingleOrder } from "@/types";
+import { OrdersResponse, SingleOrder } from "@/types";
 import { apiFetch } from "../apiFetch";
 
 interface CheckoutItem {
@@ -43,12 +43,12 @@ export const getOrderById = async (id: string) => {
 export const getUserOrders = async (
   page = 1,
   limit = 10,
-): Promise<ordersApi> => {
+): Promise<OrdersResponse> => {
   const params = new URLSearchParams();
   params.set("page", String(page));
   params.set("limit", String(limit));
 
-  const res = apiFetch<ordersApi>(`/api/orders?${params}`, {
+  const res = await apiFetch<OrdersResponse>(`/api/orders?${params}`, {
     method: "GET",
   });
 

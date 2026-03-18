@@ -25,9 +25,6 @@ export const usersTable = pgTable(
 
     passwordChangedAt: timestamp('password_changed_at'),
 
-    refreshToken: text('refresh_token'),
-    passwordResetToken: text('password_reset_token'),
-    passwordResetTokenExpiry: timestamp('password_reset_token_expiry'),
     emailVerifyToken: text('email_verify_token').unique(),
     emailVerifyTokenExpiry: timestamp('email_verify_token_expiry'),
     emailVerifyTokenSentAt: timestamp('email_verify_token_sent_at'),

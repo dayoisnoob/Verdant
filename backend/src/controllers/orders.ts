@@ -5,7 +5,7 @@ import { OrderService } from '../services/orders';
 export class OrderController {
   static async getUserOrders(req: Request, res: Response) {
     const userId = req.user!.id;
-    const { page, limit } = req.query;
+    const { page, limit } = req.parsedQuery as { page: number; limit: number };
 
     const result = await OrderService.getUserOrders(
       userId,
@@ -49,12 +49,10 @@ export class OrderController {
   }
 
   static async updateOrder(req: Request, res: Response) {
-    const userId = req.user!.id;
     const orderId = req.params.orderId as string;
     const updateData = req.body;
 
     const updatedOrder = await OrderService.updateOrderStatus(
-      userId,
       orderId,
       updateData
     );

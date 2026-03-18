@@ -1,8 +1,7 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('role', ['customer', 'admin']);
-// export const productTypeEnum = pgEnum('product_type', ['physical', 'digital']);
-// export const badgeEnum = pgEnum('badge', ['new', 'sale', 'hot', 'popular']);
+
 export const orderStatusEnum = pgEnum('order_status', [
   'paid',
   'processing',
@@ -12,12 +11,13 @@ export const orderStatusEnum = pgEnum('order_status', [
   'refunded',
 ]);
 
-// export const paymentStatusEnum = pgEnum('payment_status', [
-//   'pending',
-//   'succeeded',
-//   'failed',
-//   'refunded',
-// ]);
+export const paymentStatusEnum = pgEnum('payment_status', [
+  'paid',
+  'processing',
+  'delivered',
+  'cancelled',
+  'refunded',
+]);
 
 export const discountTypeEnum = pgEnum('discount_type', [
   'percentage',

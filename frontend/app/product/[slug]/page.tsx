@@ -5,7 +5,6 @@ import Container from "@/components/Container";
 import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import QuantityStepper from "@/components/QuantityStepper";
 import RelatedProducts from "@/components/RelatedProducts";
 import { StarRating } from "@/components/StarRating";
 import { useCart, useWishlistToggle } from "@/hooks";
@@ -36,6 +35,7 @@ export default function ProductPage() {
   const { addItem, updateQuantity, removeItem, items } = useCart();
 
   const [activeImg, setActiveImg] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const {
     data: product,
@@ -90,31 +90,43 @@ export default function ProductPage() {
   if (!product) notFound();
 
   const discountPct = product.originalPrice
-    ? Math.round(
-        (1 - parseFloat(product.price) / parseFloat(product.originalPrice)) *
-          100,
-      )
+    ? Math.round((1 - product.price / product.originalPrice) * 100)
     : null;
   const itemInCart = items.find((i) => i.productId === product.id);
   const qtyInCart = itemInCart?.quantity ?? 0;
   const isStockLimitReached = qtyInCart === product.stock;
   const isCartLimitReached = qtyInCart >= MAX_CART_LIMIT;
 
-  const handleAddToCart = (p: Product) => {
-    addItem(p);
-    toast.success(`${p.name} added to basket`);
+  const handleAddToCart = async (p: Product) => {
+    setIsUpdating(true);
+    try {
+      await addItem(p);
+      toast.success(`${p.name} added to basket`);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const handleIncrement = () => {
-    updateQuantity(product.id, 1);
-    toast.success("Item updated successfully");
+  const handleIncrement = async () => {
+    setIsUpdating(true);
+    try {
+      await updateQuantity(product.id, 1);
+    } finally {
+      setIsUpdating(false);
+    }
   };
-  const handleDecrement = () => {
-    if (qtyInCart <= 1) {
-      removeItem(product.id);
-    } else {
-      updateQuantity(product.id, -1);
-      toast.success("Item updated successfully");
+
+  const handleDecrement = async () => {
+    setIsUpdating(true);
+    try {
+      if (qtyInCart <= 1) {
+        await removeItem(product.id);
+        toast.info("Item removed from basket");
+      } else {
+        await updateQuantity(product.id, -1);
+      }
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -256,11 +268,11 @@ export default function ProductPage() {
 
                   <div className="flex items-end gap-4">
                     <span className="font-playfair font-black text-verdant-dark text-5xl sm:text-6xl leading-none">
-                      £{product.price}
+                      £{(product.price / 100).toFixed(2)}
                     </span>
                     {product.originalPrice && (
                       <span className="text-2xl font-bold text-gray-300 line-through mb-1">
-                        £{product.originalPrice}
+                        £{(product.originalPrice / 100).toFixed(2)}
                       </span>
                     )}
                     <span className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">
@@ -298,41 +310,65 @@ export default function ProductPage() {
                         </div>
                       )}
 
-                    <div className="flex flex-col sm:flex-row gap-4 items-stretch">
-                      {qtyInCart >= 1 && (
-                        <div className="flex items-center justify-between border-2 border-gray-200 bg-white rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0">
+                    {/* ── Add to Cart / Quantity Selector ── */}
+                    <div className="flex flex-col sm:flex-row gap-4 items-stretch h-14">
+                      {qtyInCart >= 1 ? (
+                        <div className="flex items-center justify-between border-2 border-green bg-green/5 rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0 animate-in fade-in zoom-in-95 duration-200">
                           <button
+                            disabled={isUpdating}
                             onClick={handleDecrement}
-                            className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors"
+                            className="w-12 h-full flex items-center justify-center text-green hover:bg-green/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Minus size={18} strokeWidth={2.5} />
                           </button>
-                          <span className="text-lg font-bold text-verdant-dark w-12 text-center">
-                            {qtyInCart}
-                          </span>
+
+                          <div className="text-lg font-bold text-verdant-dark w-12 flex justify-center items-center">
+                            {isUpdating ? (
+                              <Loader2
+                                size={18}
+                                strokeWidth={3}
+                                className="animate-spin text-green"
+                              />
+                            ) : (
+                              qtyInCart
+                            )}
+                          </div>
+
                           <button
-                            disabled={isStockLimitReached || isCartLimitReached}
+                            disabled={
+                              isStockLimitReached ||
+                              isCartLimitReached ||
+                              isUpdating
+                            }
                             onClick={handleIncrement}
-                            className="w-12 h-14 flex items-center justify-center text-gray-500 hover:text-verdant-dark hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-12 h-full flex items-center justify-center text-green hover:bg-green/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Plus size={18} strokeWidth={2.5} />
                           </button>
                         </div>
-                      )}
-
-                      {qtyInCart === 0 && (
+                      ) : (
                         <button
-                          disabled={!product.inStock}
+                          disabled={!product.inStock || isUpdating}
                           onClick={() => handleAddToCart(product)}
-                          className="flex-1 bg-green text-white rounded-xl py-4 font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm"
+                          className="flex-1 sm:w-40 bg-green text-white rounded-xl h-full font-bold text-sm tracking-widest uppercase hover:bg-green-mid transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm flex items-center justify-center gap-2 animate-in fade-in duration-200"
                         >
-                          Add to Basket
+                          {isUpdating ? (
+                            <Loader2
+                              size={18}
+                              strokeWidth={2.5}
+                              className="animate-spin"
+                            />
+                          ) : product.inStock ? (
+                            "Add to Basket"
+                          ) : (
+                            "Out of Stock"
+                          )}
                         </button>
                       )}
 
                       <button
                         onClick={toggle}
-                        className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 border-2 transition-colors ${
+                        className={`w-14 h-full rounded-xl flex items-center justify-center flex-shrink-0 border-2 transition-colors ${
                           wishlisted
                             ? "border-orange-500 bg-orange-50 text-orange-500"
                             : "border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-600"

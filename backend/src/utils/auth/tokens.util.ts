@@ -48,7 +48,7 @@ export class Tokens {
     const hashedRefreshToken = cryptoHash(refreshToken);
     const tokenFamilyId = storedFamilyId ?? crypto.randomUUID();
 
-    await db.insert(refreshTokensTable).values({
+    await tx.insert(refreshTokensTable).values({
       userId: userData.id,
       tokenHash: hashedRefreshToken,
       tokenFamilyId,

@@ -24,7 +24,10 @@ export default function CartPage() {
     removeItem,
     updateQuantity,
     subtotalFormatted,
+    isLoading,
   } = useCart();
+
+  console.log(cartItems);
 
   const productIds = cartItems.map((i) => i.productId);
 
@@ -38,6 +41,84 @@ export default function CartPage() {
     removeItem(id);
     toast.success("Item removed");
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-cream min-h-screen flex flex-col">
+        <Navbar />
+
+        <main className="flex-1 pt-24 pb-20">
+          <Container>
+            <div className="mb-8 md:mb-12 border-b border-gray-200 pb-6">
+              <div className="w-32 h-4 bg-gray-200 rounded-md mb-4 animate-pulse" />
+              <div className="w-48 h-10 md:h-12 bg-gray-200 rounded-xl animate-pulse" />
+              <div className="w-24 h-4 bg-gray-200 rounded-md mt-4 animate-pulse" />
+            </div>
+
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+              <div className="w-full lg:col-span-7 xl:col-span-8">
+                <div className="bg-white/50 rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 flex flex-col gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="flex gap-4 items-center border-b border-gray-100 pb-6 last:border-0 last:pb-0"
+                    >
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gray-200 animate-pulse flex-shrink-0" />
+                      <div className="flex-1 flex flex-col gap-3">
+                        <div className="w-2/3 h-5 bg-gray-200 rounded-md animate-pulse" />
+                        <div className="w-1/3 h-4 bg-gray-200 rounded-md animate-pulse" />
+                      </div>
+                      <div className="hidden sm:block w-24 h-12 bg-gray-200 rounded-xl animate-pulse flex-shrink-0" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full lg:col-span-5 xl:col-span-4 lg:sticky lg:top-28">
+                <div className="bg-white/50 rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                  <div className="px-6 py-6 border-b border-gray-50">
+                    <div className="w-32 h-6 bg-gray-200 rounded-md animate-pulse" />
+                  </div>
+
+                  <div className="px-6 py-6 flex flex-col gap-4 bg-gray-50/30 border-b border-gray-100">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between items-center"
+                      >
+                        <div className="w-1/2 h-4 bg-gray-200 rounded-md animate-pulse" />
+                        <div className="w-12 h-4 bg-gray-200 rounded-md animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="px-6 py-6 bg-white/80">
+                    <div className="flex justify-between items-end mb-6">
+                      <div className="w-20 h-6 bg-gray-200 rounded-md animate-pulse" />
+                      <div className="w-24 h-8 bg-gray-200 rounded-md animate-pulse" />
+                    </div>
+
+                    <div className="w-full h-14 bg-gray-200 rounded-xl animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="bg-white/80 rounded-xl h-24 border border-gray-100 shadow-sm animate-pulse"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Container>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-cream min-h-screen flex flex-col">

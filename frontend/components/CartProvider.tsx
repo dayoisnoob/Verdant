@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const user = useAuthStore((state) => state.user);
-  const [isLoading, setIsLoading] = useState(true);
+  const setIsLoading = useCartStore((state) => state.setIsLoading);
 
   useEffect(() => {
     if (!user) {
@@ -29,9 +29,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     rehydrate();
-  }, [user]);
-
-  if (isLoading) return null;
+  }, [setIsLoading, user]);
 
   return <>{children}</>;
 };

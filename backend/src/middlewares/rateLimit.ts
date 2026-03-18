@@ -1,4 +1,4 @@
-import express, { type Request } from 'express';
+import { type Request } from 'express';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 interface createLimiterInterface {
@@ -7,9 +7,6 @@ interface createLimiterInterface {
   windowMinutes: number;
   message?: string;
 }
-
-const app = express();
-app.use(express.json());
 
 const createLimiter = ({
   keyGenerator,

@@ -12,7 +12,8 @@ export interface AuthCartStore {
   setCart: (cart: CartResponse, totals: TotalsResponse) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (id: string, delta: number) => void;
+  setIsLoading: (state: boolean) => void;
 }
 
 export interface GuestCartStore {
@@ -20,7 +21,7 @@ export interface GuestCartStore {
 
   addItem: (product: ProductCard, quantity?: number) => void;
   removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
   itemCount: () => number;
 }

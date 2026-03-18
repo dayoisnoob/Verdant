@@ -77,20 +77,22 @@ export class OrderService {
         }))
       );
 
-      data.items.forEach(async (item) => {
-        await tx
-          .update(productsTable)
-          .set({
-            stock: sql`${productsTable.stock} - ${item.quantity}`,
-            inStock: sql`${productsTable.stock} - ${item.quantity} > 0`,
-          })
-          .where(
-            and(
-              eq(productsTable.id, item.productId),
-              gte(productsTable.stock, item.quantity)
+      await Promise.all(
+        data.items.map(async (item) =>
+          tx
+            .update(productsTable)
+            .set({
+              stock: sql`${productsTable.stock} - ${item.quantity}`,
+              inStock: sql`${productsTable.stock} - ${item.quantity} > 0`,
+            })
+            .where(
+              and(
+                eq(productsTable.id, item.productId),
+                gte(productsTable.stock, item.quantity)
+              )
             )
-          );
-      });
+        )
+      );
 
       return orderRecord;
     });
@@ -107,11 +109,12 @@ export class OrderService {
 
     const link = `${env.FRONTEND_URL}/account/orders`;
 
-    try {
-      sendMail(user, link, 'orderCreation');
-    } catch (err) {
-      throw new ApiError(500, 'Error sending email. Please try again');
-    }
+    sendMail(user, link, 'orderCreation').catch((err) =>
+      logger.error(
+        { userId: data.userId, err },
+        'Order confirmation email failed'
+      )
+    );
 
     await CartService.clearCart(data.userId);
     await CouponService.removeCouponFromCart(data.userId);
@@ -306,14 +309,13 @@ export class OrderService {
   }
 
   static async updateOrderStatus(
-    userId: string,
     orderId: string,
     updateData: updateOrderInput
   ) {
     const [order] = await db
       .select()
       .from(ordersTable)
-      .where(and(eq(ordersTable.id, orderId), eq(ordersTable.userId, userId)))
+      .where(eq(ordersTable.id, orderId))
       .limit(1);
 
     if (!order) {

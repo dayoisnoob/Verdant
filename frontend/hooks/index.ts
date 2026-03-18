@@ -1,11 +1,18 @@
-import { addToWishlist, getUserWishlist, refreshAccessToken } from "@/lib/api";
+import {
+  addToWishlist,
+  getUserOrders,
+  getUserWishlist,
+  logout as logoutApi,
+  refreshAccessToken,
+} from "@/lib/api";
 import { DELIVERY_FEE, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
+import { FilterStatus } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export const useCart = () => {
+export const useCart = (discount: number = 0) => {
   const user = useAuthStore((state) => state.user);
 
   const authUserCart = useCartStore();
@@ -16,19 +23,22 @@ export const useCart = () => {
     (sum, item) => sum + item.quantity,
     0,
   );
+  const isLoading = user ? authUserCart.isLoading : false;
 
   const subtotal = cart.items.reduce(
     (sum, i) => sum + i.pricePence * i.quantity,
     0,
   );
-  const delivery = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
-  const total = subtotal + delivery;
+  const discounted = subtotal - discount;
+  const delivery = discounted >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
+  const total = discounted + delivery;
 
   return {
     items: cart.items,
     subtotal,
     delivery,
     total,
+    isLoading,
     subtotalFormatted: (subtotal / 100).toFixed(2),
     deliveryFormatted: (delivery / 100).toFixed(2),
     totalFormatted: (total / 100).toFixed(2),
@@ -40,29 +50,11 @@ export const useCart = () => {
   };
 };
 
-export const useCheckoutTotals = (discount: number = 0) => {
-  const items = useCartStore((state) => state.items);
-
-  const subtotal = items.reduce((sum, i) => sum + i.pricePence * i.quantity, 0);
-  const discounted = subtotal - discount;
-  const delivery = discounted >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
-  const total = discounted + delivery;
-
-  return {
-    subtotal,
-    delivery,
-    total,
-    subtotalFormatted: (subtotal / 100).toFixed(2),
-    deliveryFormatted: (delivery / 100).toFixed(2),
-    totalFormatted: (total / 100).toFixed(2),
-  };
-};
-
 export const useLogout = () => {
   const queryClient = useQueryClient();
-  const logout = useAuthStore((state) => state.logout);
   return async () => {
-    logout();
+    await logoutApi();
+    useAuthStore.getState().logout();
     queryClient.clear();
     window.location.replace("/login");
   };
@@ -126,4 +118,29 @@ export const useAppReady = () => {
   }, [isHydrated, user]);
 
   return isHydrated && tokenReady;
+};
+
+export const useOrders = () => {
+  const [filter, setFilter] = useState<FilterStatus>("all");
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["orders"],
+    queryFn: () => getUserOrders(),
+  });
+  const orders = data?.orders ?? [];
+  const filtered =
+    filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const counts = orders.reduce<Record<string, number>>((acc, o) => {
+    acc[o.status] = (acc[o.status] ?? 0) + 1;
+    return acc;
+  }, {});
+  return {
+    orders,
+    filtered,
+    counts,
+    filter,
+    setFilter,
+    isLoading,
+    isError,
+    refetch,
+  };
 };

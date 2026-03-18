@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "./ProductCard";
-import { getRelated } from "@/lib/api/product.api";
+import { getRelated } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/types";
 

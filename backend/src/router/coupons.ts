@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { CouponController } from '../controllers/coupon';
-import { authenticate } from '../middlewares/auth.middleware';
+import { authenticate, requireAdmin } from '../middlewares/auth.middleware';
 import { validateInput, validateUrlParams } from '../middlewares/validation';
 import { asyncHandler } from '../utils/asyncHandler';
 import { applyCouponSchema, createCouponSchema } from '../validations/coupon';
@@ -10,22 +10,26 @@ const router = Router();
 
 router.use(authenticate);
 
+router.post(
+  '/apply',
+  validateInput(applyCouponSchema),
+  asyncHandler(CouponController.applyCoupon)
+);
+router.delete('/', asyncHandler(CouponController.removeCouponFromCart));
+
+router.use(requireAdmin);
+
+router.post(
+  '/',
+  validateInput(createCouponSchema),
+  asyncHandler(CouponController.addCoupon)
+);
+
 router.get('/', asyncHandler(CouponController.getCoupons));
 router.get(
   '/:code',
   validateUrlParams(codeParamsSchema),
   asyncHandler(CouponController.getCouponByCode)
 );
-router.post(
-  '/apply',
-  validateInput(applyCouponSchema),
-  asyncHandler(CouponController.applyCoupon)
-);
-router.post(
-  '/',
-  validateInput(createCouponSchema),
-  asyncHandler(CouponController.addCoupon)
-);
-router.delete('/', asyncHandler(CouponController.removeCouponFromCart));
 
 export default router;

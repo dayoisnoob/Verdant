@@ -42,6 +42,7 @@ export {
   getBestSelling,
   getTrending,
   getSuggested,
+  getRelated,
 } from "./product.api";
 
 export {

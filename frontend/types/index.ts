@@ -1,11 +1,11 @@
 export type { AddressApi } from "./address.types";
 export type { RefreshTokenApi, User, UserApi, UserData } from "./auth.types";
-export type { CartResponse, GuestCart, TotalsRsponse } from "./cart.types";
+export type { CartResponse, GuestCart, TotalsResponse } from "./cart.types";
 export type {
-  AllOrders,
   CustomerOrder,
   OrderItems,
-  ordersApi,
+  Order,
+  OrdersResponse,
   FilterStatus,
   SingleOrder,
 } from "./order.types";
@@ -15,10 +15,5 @@ export type {
   ProductCard,
   ProductSectionProps,
 } from "./product.types";
-export type {
-  AddressStore,
-  AuthCartStore,
-  AuthStore,
-  GuestCartStore,
-} from "./store.types";
+export type { AuthCartStore, AuthStore, GuestCartStore } from "./store.types";
 export type { WishlistApi } from "./wishlist.types";

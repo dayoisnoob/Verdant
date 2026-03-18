@@ -8,18 +8,14 @@ export class WishlistController {
     const { productId } = req.params;
 
     const result = await WishlistService.addItem(userId, productId as string);
+    const status = result.added ? 201 : 200;
+    const message = result.added
+      ? 'Item added to wishlist'
+      : 'Item removed from wishlist';
 
     res
-      .status(201)
-      .json(
-        new ApiResponse(
-          result.added ? 201 : 200,
-          result.added
-            ? 'Item added to wishlist'
-            : 'Item removed from wishlist',
-          { item: result.item }
-        )
-      );
+      .status(status)
+      .json(new ApiResponse(status, message, { item: result.item }));
   }
 
   static async getItems(req: Request, res: Response) {

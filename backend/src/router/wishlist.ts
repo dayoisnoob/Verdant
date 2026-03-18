@@ -12,11 +12,11 @@ router.use(authenticate);
 router.get('/', asyncHandler(WishlistController.getItems));
 router.post(
   '/:productId',
-  // validateUrlParams(productIdParamsSchema),
+  validateUrlParams(productIdParamsSchema),
   asyncHandler(WishlistController.addItem)
 );
 router.delete(
-  '/productId',
+  '/:productId',
   validateUrlParams(productIdParamsSchema),
   asyncHandler(WishlistController.removeItem)
 );

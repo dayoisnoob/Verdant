@@ -45,5 +45,6 @@ export const refreshTokensTable = pgTable(
   (table) => [
     index('idx_refresh_tokens_user_id').on(table.userId),
     index('idx_refresh_tokens_family_id').on(table.tokenFamilyId),
+    index('idx_refresh_tokens_token_hash').on(table.tokenHash),
   ]
 );

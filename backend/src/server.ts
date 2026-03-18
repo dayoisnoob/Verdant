@@ -1,9 +1,10 @@
 import 'dotenv/config';
 import { app } from './app';
 import { logger } from './config/pino';
+import { env } from './config/env';
 
-const PORT = process.env.PORT || 7000;
-const NODE_ENV = process.env.NODE_ENV;
+const PORT = env.PORT || 7000;
+const NODE_ENV = env.NODE_ENV;
 
 const server = app.listen(PORT, () => {
   logger.info(`Server listening on port ${PORT}`);

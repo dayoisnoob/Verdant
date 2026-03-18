@@ -49,6 +49,7 @@ export const initiateLogin = async (res: UserApi) => {
     }
 
     const { cart, totals } = await getCart();
+
     useCartStore.getState().setCart(cart, totals);
   } catch (err) {
     console.error("Cart sync failed after login", err);

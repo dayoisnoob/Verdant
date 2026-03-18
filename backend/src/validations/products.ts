@@ -81,7 +81,7 @@ export const updateProductSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().min(1).optional(),
   longDescription: z.string().optional().nullable(),
-  price: z.string().optional(),
+  price: z.number().optional(),
   compareAtPrice: z.string().optional().nullable(),
   category: z.string().min(1).optional(),
   brand: z.string().optional().nullable(),

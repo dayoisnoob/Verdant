@@ -35,7 +35,7 @@ router.patch(
   validateUrlParams(orderIdParamsSchema),
   requireAdmin,
   validateInput(updateOrderSchema),
-  OrderController.updateOrder
+  asyncHandler(OrderController.updateOrder)
 );
 
 export default router;

@@ -48,14 +48,18 @@ export class CartService {
       stock: product.stock,
       inStock: product.inStock,
       isOrganic: product.isOrganic,
-      pricePence: Math.round(parseFloat(product.price) * 100),
+      pricePence: product.price,
       quantity,
     };
 
     const existing = cart.items.find((i) => i.productId === payload.productId);
 
     if (existing) {
-      const newQty = existing.quantity + (payload.quantity ?? 1);
+      const MAX_QTY = 10;
+      const newQty = Math.min(
+        existing.quantity + (payload.quantity ?? 1),
+        MAX_QTY
+      );
       return CartService.updateQuantity(
         userId,
         existing.productId,

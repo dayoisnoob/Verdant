@@ -4,16 +4,6 @@ import { addressesTable } from '../models/addresses';
 import { ApiError } from '../utils/apiResponse';
 import type { AddressForm } from '../validations/address';
 
-interface Address {
-  firstName: string;
-  lastName: string;
-  streetAddress: string;
-  phone1: string;
-  phone2?: string;
-  state: string;
-  city: string;
-}
-
 const formatNigerianPhoneNumber = (phoneNumber: string | undefined): string => {
   if (!phoneNumber) return '';
 
@@ -164,11 +154,12 @@ export class AddressService {
       const newDefault =
         addresses && addresses.filter((a) => a.isDefault === false)[0];
 
-      await db
-        .update(addressesTable)
-        .set({ isDefault: true })
-        .where(eq(addressesTable.id, newDefault?.id as string))
-        .returning();
+      if (newDefault) {
+        await db
+          .update(addressesTable)
+          .set({ isDefault: true })
+          .where(eq(addressesTable.id, newDefault.id));
+      }
     }
 
     const [removedAddress] = await db

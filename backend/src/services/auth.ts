@@ -75,7 +75,7 @@ export class AuthService {
       'User registered'
     );
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+    const verificationLink = `${env.FRONTEND_URL}/verify-email?token=${token}`;
 
     try {
       await sendMail(newUser, verificationLink, 'verification');
@@ -411,6 +411,7 @@ export class AuthService {
     await db
       .update(refreshTokensTable)
       .set({ isRevoked: true, revokedAt: new Date() })
+      .where(eq(refreshTokensTable.userId, userId))
       .returning({ userId: refreshTokensTable.userId });
 
     logger.info(
@@ -460,11 +461,9 @@ export class AuthService {
       throw new ApiError(500, 'Error sending email. Please try again');
     }
 
-    await Promise.all([
-      await db
-        .delete(passwordResetTokensTable)
-        .where(eq(passwordResetTokensTable.userId, user.id)),
-
+    (await db
+      .delete(passwordResetTokensTable)
+      .where(eq(passwordResetTokensTable.userId, user.id)),
       await db.insert(passwordResetTokensTable).values({
         userId: user.id,
         tokenHash,
@@ -472,18 +471,16 @@ export class AuthService {
         ipAddress: deviceInfo.ip,
         attempts: 0,
       }),
-    ]);
-
-    logger.info(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        ip: deviceInfo.ip,
-        timestamp: new Date(),
-      },
-      'Forgot password audit:'
-    );
+      logger.info(
+        {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          ip: deviceInfo.ip,
+          timestamp: new Date(),
+        },
+        'Forgot password audit:'
+      ));
 
     return {
       message: `If email exists, We'll send a reset link`,
@@ -767,7 +764,7 @@ export class AuthService {
     if (!deletedUser) {
       throw new ApiError(500, 'Error deleting user');
     }
-    const link = `${process.env.FRONTEND_URL}/`;
+    const link = `${env.FRONTEND_URL}/`;
 
     try {
       await sendMail(existing, link, 'accountDeletion');

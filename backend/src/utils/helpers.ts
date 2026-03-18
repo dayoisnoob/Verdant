@@ -1,9 +1,3 @@
-import { nanoid } from 'nanoid';
-
-export const skuGenerator = (name: string, category: string) => {
-  return `NOVA-${name.slice(0, 2).toUpperCase()}-${category.slice(0, 3).toUpperCase()}-${nanoid(6)}`;
-};
-
 export const generateOrderNumber = () => {
   return `ORD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 };

@@ -54,5 +54,7 @@ export const ordersTable = pgTable(
   },
   (table) => ({
     orderNumberIdx: index('order_number_idx').on(table.orderNumber),
+    userIdIdx: index('user_id_idx').on(table.userId),
+    sessionIdIdx: index('session_id_idx').on(table.stripeSessionId),
   })
 );

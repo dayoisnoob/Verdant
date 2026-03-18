@@ -2,8 +2,7 @@
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { useWishlistToggle } from "@/hooks";
-import { useCartStore } from "@/store/store";
+import { useCart, useWishlistToggle } from "@/hooks";
 import { WishlistApi } from "@/types";
 import { ArrowRight, ChevronRight, Heart, ShoppingBag } from "lucide-react";
 import Image from "next/image";
@@ -12,8 +11,7 @@ import { toast } from "sonner";
 
 const WishlistCard = ({ p }: { p: WishlistApi }) => {
   const { wishlisted, toggle } = useWishlistToggle(p.id);
-  const addItem = useCartStore((s) => s.addItem);
-
+  const { addItem } = useCart();
   const handleAddToCart = () => {
     if (!p) return;
     addItem(p);

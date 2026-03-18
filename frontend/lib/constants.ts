@@ -1,32 +1,34 @@
+import { FilterStatus } from "@/types";
+
 export const ORDER_STATUS_CONFIG: Record<
   string,
   { label: string; dot: string; bg: string; text: string; pulse?: boolean }
 > = {
-  pending: {
-    label: "Pending",
-    dot: "bg-yellow-400",
-    bg: "bg-yellow-50",
-    text: "text-yellow-600",
-  },
-  paid: {
-    label: "paid",
-    dot: "bg-blue-400",
-    bg: "bg-blue-50",
-    text: "text-blue-600",
-    pulse: true,
-  },
-  shipped: {
-    label: "On the way",
-    dot: "bg-orange",
-    bg: "bg-orange-pale",
-    text: "text-orange",
-    pulse: true,
-  },
   delivered: {
     label: "Delivered",
     dot: "bg-green",
-    bg: "bg-green-pale",
+    bg: "bg-green/10",
     text: "text-green",
+  },
+  shipped: {
+    label: "On the way",
+    dot: "bg-orange-500",
+    bg: "bg-orange-50",
+    text: "text-orange-600",
+    pulse: true,
+  },
+  paid: {
+    label: "Paid",
+    dot: "bg-blue-500",
+    bg: "bg-blue-50",
+    text: "text-blue-600",
+  },
+  processing: {
+    label: "Processing",
+    dot: "bg-yellow-500",
+    bg: "bg-yellow-50",
+    text: "text-yellow-600",
+    pulse: true,
   },
   cancelled: {
     label: "Cancelled",
@@ -91,6 +93,14 @@ export const FILTERS = [
   { label: "Seasonal", value: "seasonal" },
   { label: "On Sale", value: "on-sale" },
   { label: "In Stock", value: "in-stock" },
+];
+
+export const ORDER_FILTERS: { id: FilterStatus; label: string }[] = [
+  { id: "all", label: "All Orders" },
+  { id: "processing", label: "Processing" },
+  { id: "shipped", label: "On the Way" },
+  { id: "delivered", label: "Delivered" },
+  { id: "cancelled", label: "Cancelled" },
 ];
 
 export const NAV_LINKS = [

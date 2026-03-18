@@ -27,11 +27,7 @@ export class CouponController {
     const id = req.user!.id as string;
     const { code, subtotal } = req.body;
 
-    const result = await CouponService.applyCoupon(
-      id,
-      code,
-      parseFloat(subtotal)
-    );
+    const result = await CouponService.applyCoupon(id, code, subtotal);
 
     res.json(new ApiResponse(200, 'Coupon applied successfully', result));
   }

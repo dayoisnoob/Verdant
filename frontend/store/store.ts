@@ -1,5 +1,4 @@
 import { addItemToCart, removeItemFromCart, updateItem } from "@/lib/api";
-import { toPence } from "@/lib/utils";
 import { AuthCartStore, AuthStore, GuestCartStore } from "@/types";
 import { StoreCartItem } from "@/types/cart.types";
 import { EmailStore } from "@/types/store.types";
@@ -32,7 +31,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
             unit: product.unit,
             farm: product.farm,
             isOrganic: product.isOrganic,
-            pricePence: toPence(product.price),
+            pricePence: product.price,
             quantity,
           },
         ],
@@ -68,15 +67,13 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
 
   clearCart: () => set({ items: [] }),
 
-  updateQuantity: async (id: string, quantity: number) => {
+  updateQuantity: async (id: string, delta: number) => {
     const previousItems = get().items;
 
     const item = previousItems.find((i) => i.productId === id);
     if (!item) return {};
 
-    const newQuantity = item.quantity + quantity;
-
-    // if (newQuantity < 1) return {};
+    const newQuantity = item.quantity + delta;
 
     set((state) => {
       return {
@@ -92,6 +89,8 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
       set({ items: previousItems });
     }
   },
+
+  setIsLoading: (loading: boolean) => set({ isLoading: loading }),
 }));
 
 export const useGuestCartStore = create(
@@ -123,7 +122,7 @@ export const useGuestCartStore = create(
             unit: product.unit,
             farm: product.farm,
             isOrganic: product.isOrganic,
-            pricePence: toPence(product.price),
+            pricePence: product.price,
             quantity,
           };
 
@@ -139,12 +138,12 @@ export const useGuestCartStore = create(
 
       clearCart: () => set({ items: [] }),
 
-      updateQuantity: (id: string, quantity: number) => {
+      updateQuantity: (id: string, delta: number) => {
         set((state) => {
           const item = state.items.find((i) => i.productId === id);
           if (!item) return {};
 
-          const newQuantity = item.quantity + quantity;
+          const newQuantity = item.quantity + delta;
 
           if (newQuantity < 1) return {};
 

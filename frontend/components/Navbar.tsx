@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/store";
 import {
   ChevronDown,
   Heart,
+  Loader2,
   LogOut,
   Menu,
   Package,
@@ -29,7 +30,7 @@ export default function Navbar() {
 
   const logout = useLogout();
   const user = useAuthStore((s) => s.user);
-  const { itemsQuantity } = useCart();
+  const { itemsQuantity, isLoading } = useCart();
 
   const firstName = user?.firstName?.split(" ")[0] ?? "";
 
@@ -221,11 +222,16 @@ export default function Navbar() {
             >
               <ShoppingBag size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Basket</span>
-              {itemsQuantity > 0 && (
+              {/* ── Loading Skeleton / Badge ── */}
+              {isLoading ? (
+                <span className="w-5 h-5 rounded-md bg-white/20 text-white flex items-center justify-center flex-shrink-0 ml-1">
+                  <Loader2 size={12} strokeWidth={3} className="animate-spin" />
+                </span>
+              ) : itemsQuantity > 0 ? (
                 <span className="w-5 h-5 rounded-md bg-white text-green text-[10px] font-black flex items-center justify-center flex-shrink-0 ml-1">
                   {itemsQuantity > 9 ? "9+" : itemsQuantity}
                 </span>
-              )}
+              ) : null}
             </Link>
 
             <button
@@ -370,11 +376,15 @@ export default function Navbar() {
           >
             <ShoppingBag size={18} strokeWidth={2.5} />
             View Basket
-            {itemsQuantity > 0 && (
+            {isLoading ? (
+              <span className="w-5 h-5 rounded-md bg-white/20 text-white flex items-center justify-center ml-1">
+                <Loader2 size={12} strokeWidth={3} className="animate-spin" />
+              </span>
+            ) : itemsQuantity > 0 ? (
               <span className="w-5 h-5 rounded-md bg-white text-green text-[10px] font-black flex items-center justify-center ml-1">
                 {itemsQuantity > 9 ? "9+" : itemsQuantity}
               </span>
-            )}
+            ) : null}
           </Link>
 
           {user && (

@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ApiError } from '../utils/apiResponse';
-import { success } from 'zod';
 import { logger } from '../config/pino';
 
 export function notFoundError(req: Request, res: Response) {

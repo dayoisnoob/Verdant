@@ -3,39 +3,17 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { OrderCard } from "@/components/OrderCard";
-import { getUserOrders } from "@/lib/api";
-import { ORDER_STATUS_CONFIG } from "@/lib/constants";
+import { useOrders } from "@/hooks";
+import { ORDER_FILTERS, ORDER_STATUS_CONFIG } from "@/lib/constants";
 import { FilterStatus } from "@/types";
-import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Loader2, Package, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-const FILTERS: { id: FilterStatus; label: string }[] = [
-  { id: "all", label: "All Orders" },
-  { id: "processing", label: "Processing" },
-  { id: "shipped", label: "On the Way" },
-  { id: "delivered", label: "Delivered" },
-  { id: "cancelled", label: "Cancelled" },
-];
-
 export default function OrdersPage() {
   const [filter, setFilter] = useState<FilterStatus>("all");
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["orders"],
-    queryFn: async () => getUserOrders(),
-  });
-
-  const ORDERS = data?.orders || [];
-
-  const filtered =
-    filter === "all" ? ORDERS : ORDERS.filter((o) => o.status === filter);
-
-  const counts = ORDERS.reduce<Record<string, number>>((acc, o) => {
-    acc[o.status] = (acc[o.status] ?? 0) + 1;
-    return acc;
-  }, {});
+  const { orders, filtered, counts, isLoading } = useOrders();
 
   return (
     <div className="bg-cream min-h-screen flex flex-col">
@@ -55,11 +33,11 @@ export default function OrdersPage() {
                 <p className="text-gray-500 font-medium text-sm">
                   {isLoading
                     ? "Loading your orders..."
-                    : `${ORDERS.length} order${ORDERS.length !== 1 ? "s" : ""} placed`}
+                    : `${orders.length} order${orders.length !== 1 ? "s" : ""} placed`}
                 </p>
               </div>
 
-              {!isLoading && ORDERS.length > 0 && (
+              {!isLoading && orders.length > 0 && (
                 <div className="flex items-center gap-3 flex-wrap">
                   {(["shipped", "delivered"] as const).map((s) => {
                     if (!counts[s]) return null;
@@ -86,11 +64,11 @@ export default function OrdersPage() {
               )}
             </div>
 
-            {!isLoading && ORDERS.length > 0 && (
+            {!isLoading && orders.length > 0 && (
               <div className="flex items-center gap-2 mt-8 overflow-x-auto custom-scrollbar pb-2 -mx-6 px-6 sm:mx-0 sm:px-0">
-                {FILTERS.map((f) => {
+                {ORDER_FILTERS.map((f) => {
                   const count =
-                    f.id === "all" ? ORDERS.length : (counts[f.id] ?? 0);
+                    f.id === "all" ? orders.length : (counts[f.id] ?? 0);
                   if (f.id !== "all" && count === 0) return null;
                   return (
                     <button
@@ -129,7 +107,7 @@ export default function OrdersPage() {
               </div>
             )}
 
-            {!isLoading && ORDERS.length === 0 && (
+            {!isLoading && orders.length === 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
                   <Package
@@ -153,7 +131,7 @@ export default function OrdersPage() {
               </div>
             )}
 
-            {!isLoading && ORDERS.length > 0 && filtered.length === 0 && (
+            {!isLoading && orders.length > 0 && filtered.length === 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
                 <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
                   <Search className="w-8 h-8 text-gray-400" strokeWidth={2} />

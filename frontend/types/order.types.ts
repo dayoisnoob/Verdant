@@ -47,17 +47,23 @@ export interface SingleOrder extends CustomerOrder {
   items: OrderItems[];
 }
 
-export interface ordersApi {
-  orders: AllOrders[];
+export interface OrdersResponse {
+  orders: Order[];
   pagination: Pagination;
 }
 
-export interface AllOrders {
+export interface Order {
   id: string;
   status: string;
+  discount: number;
   createdAt: Date;
+  shippingFee: number;
   totalCents: number;
   orderNumber: string;
   items: OrderItems[];
   subtotalCents: number;
+  totalCount: string;
 }
+
+export type OrderStatus = "delivered" | "shipped" | "paid" | "processing";
+export type Tab = "overview" | "orders" | "saved" | "addresses" | "settings";

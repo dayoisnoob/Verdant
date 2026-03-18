@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { StarRating } from "./StarRating";
 import { LOW_PRODUCT_THRESHOLD } from "@/lib/constants";
 
-function discountPct(price: string, original: string) {
-  return Math.round((1 - parseFloat(price) / parseFloat(original)) * 100);
+function discountPct(price: number, original: number) {
+  return Math.round((1 - price / original) * 100);
 }
 
 export default function ProductCard({
@@ -126,11 +126,11 @@ export default function ProductCard({
           <div className="flex flex-col gap-0.5">
             <div className="flex items-baseline gap-2">
               <span className="font-black text-verdant-dark text-xl leading-none">
-                £{Number(p.price).toFixed(2)}
+                £{(p.price / 100).toFixed(2)}
               </span>
               {p.originalPrice && (
                 <span className="text-xs font-bold text-gray-400 line-through">
-                  £{p.originalPrice}
+                  £{(p.originalPrice / 100).toFixed(2)}
                 </span>
               )}
             </div>

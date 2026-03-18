@@ -46,8 +46,8 @@ export interface Product {
   name: string;
   slug: string;
   description: string;
-  price: string;
-  originalPrice: string | null;
+  price: number;
+  originalPrice: number | null;
   category: string;
   unit: string;
   weight: string;
