@@ -22,3 +22,11 @@ export const tokenExpiry = (token: 'refresh' | 'temp') => {
     ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     : new Date(Date.now() + 60 * 60 * 1000);
 };
+
+export const formatNigerianPhoneNumber = (
+  phoneNumber: string | undefined
+): string => {
+  if (!phoneNumber) return '';
+
+  return `+234${phoneNumber?.replace(/[^\d+]/g, '')}`;
+};

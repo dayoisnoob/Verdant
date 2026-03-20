@@ -1,18 +1,21 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import helmet from 'helmet';
 import express, { type Request, type Response } from 'express';
-import { globalErrorHandler, notFoundError } from './middlewares/error';
-import addressRouter from './router/address.ts';
-import authRouter from './router/auth.ts';
-import cartRouter from './router/cart.ts';
-import couponsRouter from './router/coupons.ts';
-import orderRouter from './router/orders.ts';
-import paymentRouter from './router/payments.ts';
-import productRouter from './router/products.ts';
-import wishlistRouter from './router/wishlist.ts';
+import helmet from 'helmet';
 import { env } from './config/env.ts';
-import { globalLimiter } from './middlewares/rateLimit.ts';
+import {
+  globalErrorHandler,
+  notFoundError,
+} from './middleware/error.middleware.ts';
+import { globalLimiter } from './middleware/rate-limit.middleware.ts';
+import addressRouter from './routes/address.routes.ts';
+import authRouter from './routes/auth.routes.ts';
+import cartRouter from './routes/cart.routes.ts';
+import couponsRouter from './routes/coupons.routes.ts';
+import orderRouter from './routes/orders.routes.ts';
+import paymentRouter from './routes/payments.routes.ts';
+import productRouter from './routes/products.routes.ts';
+import wishlistRouter from './routes/wishlist.routes.ts';
 
 export const app = express();
 

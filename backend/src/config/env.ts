@@ -7,7 +7,8 @@ const envSchema = z.object({
     .default('development'),
 
   DATABASE_URL: z.string(),
-  REDIS_URL: z.string(),
+  DATABASE_URL_TEST: z.string(),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
 
   PORT: z.string().default('8000'),
 
@@ -35,6 +36,10 @@ const envSchema = z.object({
   REFRESH_COOKIE_MAX_AGE: z.string(),
 
   RESEND_API: z.string(),
+
+  REDIS_HOST: z.string().default('localhost'),
+  REDIS_PORT: z.string().default('6379'),
+  REDIS_PASSWORD: z.string().optional(),
 });
 
 const result = envSchema.safeParse(process.env);
