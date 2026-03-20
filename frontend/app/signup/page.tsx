@@ -52,7 +52,6 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-[460px] flex flex-col items-center">
-        {/* ── Logo ── */}
         <Link
           href="/"
           className="font-playfair text-3xl sm:text-4xl font-black text-verdant-dark tracking-tight hover:text-green transition-colors mb-8"
@@ -60,10 +59,8 @@ export default function SignupPage() {
           Ver<em className="not-italic text-green">dant</em>
         </Link>
 
-        {/* ── Card ── */}
         <div className="w-full bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 overflow-hidden">
           <div className="px-6 py-8 sm:p-10">
-            {/* Header */}
             <div className="text-center mb-8">
               <h1 className="font-playfair font-black text-verdant-dark text-3xl mb-2">
                 Create Account
@@ -79,13 +76,11 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* ── Form ── */}
             <form
               onSubmit={handleSubmit(onSubmit)}
               noValidate
               className="flex flex-col gap-5"
             >
-              {/* Name Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {(["firstName", "lastName"] as const).map((field) => (
                   <div key={field} className="flex flex-col gap-1.5">
@@ -107,7 +102,6 @@ export default function SignupPage() {
                 ))}
               </div>
 
-              {/* Email */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                   Email Address
@@ -126,7 +120,6 @@ export default function SignupPage() {
                 )}
               </div>
 
-              {/* Password */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                   Password
@@ -169,7 +162,6 @@ export default function SignupPage() {
                 )}
               </div>
 
-              {/* Confirm Password */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                   Confirm Password
@@ -202,7 +194,6 @@ export default function SignupPage() {
                 )}
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -225,7 +216,6 @@ export default function SignupPage() {
           </div>
         </div>
 
-        {/* ── Footer Links ── */}
         <p className="text-center text-xs font-bold text-gray-400 mt-8 uppercase tracking-widest">
           By signing up you agree to our{" "}
           <Link

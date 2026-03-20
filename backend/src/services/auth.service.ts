@@ -14,13 +14,13 @@ import { passwordResetTokensTable } from '../db/schema/passwordResetToken';
 import { refreshTokensTable } from '../db/schema/refreshToken';
 import { wishlistsTable } from '../db/schema/wishlist';
 import { queueEmail } from '../queues/email.queue';
-import type { DeviceInfo } from '../types/types';
 import { Tokens } from '../utils/tokens.util';
 import type {
   LoginInput,
   SignupInput,
   updateInput,
 } from '../validations/auth.validation';
+import type { DeviceInfo } from '../types/auth.types.ts';
 
 export class AuthService {
   static async register(userData: SignupInput, deviceInfo: DeviceInfo) {

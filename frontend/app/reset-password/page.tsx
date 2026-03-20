@@ -103,7 +103,6 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-[#0f1c13] flex items-center justify-center px-4 py-12 relative overflow-hidden">
       <div className="relative w-full max-w-[400px]">
-        {/* Logo */}
         <div className="text-center mb-8">
           <Link
             href="/"
@@ -116,11 +115,9 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-[#FAF7F0] rounded-[1.75rem] shadow-[0_40px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden">
           <div className="px-8 pt-7 pb-9">
             {success ? (
-              /* ── Success state ── */
               <div className="text-center py-4 flex flex-col items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-green-pale flex items-center justify-center text-3xl">
                   ✅
@@ -143,7 +140,6 @@ export default function ResetPasswordPage() {
               </div>
             ) : (
               <>
-                {/* Heading */}
                 <div className="mb-6">
                   <h1 className="font-playfair font-black text-verdant-dark text-[1.85rem] leading-tight">
                     New password
@@ -153,7 +149,6 @@ export default function ResetPasswordPage() {
                   </p>
                 </div>
 
-                {/* Banner error */}
                 <div className="mb-5 overflow-hidden">
                   {bannerError && (
                     <div className="bg-red-50 border border-red-100 rounded-2xl px-4 py-3.5 flex gap-3 items-start">
@@ -167,10 +162,8 @@ export default function ResetPasswordPage() {
                   )}
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
                   <div className="flex flex-col gap-4">
-                    {/* New password */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
                         New password
@@ -202,7 +195,6 @@ export default function ResetPasswordPage() {
                         </button>
                       </div>
 
-                      {/* Strength bar */}
                       {password && <PasswordStrengthBar password={password} />}
 
                       <p className="text-[0.68rem] text-red-500 min-h-[14px] leading-none">
@@ -210,7 +202,6 @@ export default function ResetPasswordPage() {
                       </p>
                     </div>
 
-                    {/* Confirm password */}
                     <div className="flex flex-col gap-1.5 -mt-1">
                       <label className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-verdant-muted">
                         Confirm password
@@ -245,7 +236,6 @@ export default function ResetPasswordPage() {
                       </p>
                     </div>
 
-                    {/* Submit */}
                     <button
                       type="submit"
                       disabled={isSubmitting}

@@ -6,8 +6,11 @@ import {
   validateUrlParams,
 } from '../middleware/validation.middleware';
 import { asyncHandler } from '../utils/async-handler';
-import { applyCouponSchema, createCouponSchema } from '../validations/coupon';
-import { codeParamsSchema } from '../validations/urlParams';
+import {
+  applyCouponSchema,
+  createCouponSchema,
+} from '../validations/coupon.validation';
+import { codeParamsSchema } from '../validations/urlParams.validation';
 
 const router = Router();
 

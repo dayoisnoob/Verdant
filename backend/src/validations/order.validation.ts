@@ -21,12 +21,6 @@ const addressSchema = z.object({
   phone: z.string().optional(),
 });
 
-// export const createOrderSchema = z.object({
-//   items: z.array(itemSchema).min(1, 'Cart is empty'),
-//   address: addressSchema,
-//   shippingMethod: z.enum(['standard', 'express', 'overnight']),
-// });
-
 export const updateOrderSchema = z.object({
   status: z.enum([
     'paid',
@@ -38,5 +32,4 @@ export const updateOrderSchema = z.object({
   ]),
 });
 
-// export type createOrderInput = z.infer<typeof createOrderSchema>;
 export type updateOrderInput = z.infer<typeof updateOrderSchema>;

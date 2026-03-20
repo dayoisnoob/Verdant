@@ -10,8 +10,8 @@ import {
   addItemSchema,
   mergeCartsSchema,
   updateItemSchema,
-} from '../validations/cart';
-import { productIdParamsSchema } from '../validations/urlParams';
+} from '../validations/cart.validation';
+import { productIdParamsSchema } from '../validations/urlParams.validation';
 
 const router = Router();
 

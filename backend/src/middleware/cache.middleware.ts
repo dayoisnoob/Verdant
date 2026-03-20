@@ -1,4 +1,3 @@
-// middlewares/cache.middleware.ts
 import type { NextFunction, Request, Response } from 'express';
 import { cache } from '../config/redis';
 

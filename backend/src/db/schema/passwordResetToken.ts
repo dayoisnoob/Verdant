@@ -1,4 +1,3 @@
-// db/schema/passwordResetTokens.js
 import {
   pgTable,
   uuid,

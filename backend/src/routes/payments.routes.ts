@@ -6,7 +6,6 @@ import { authenticate } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
-// Webhook must be BEFORE any express.json() middleware and use raw body
 router.post('/webhook', asyncHandler(PaymentController.handleWebhook));
 
 router.post(

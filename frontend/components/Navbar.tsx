@@ -222,7 +222,6 @@ export default function Navbar() {
             >
               <ShoppingBag size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Basket</span>
-              {/* ── Loading Skeleton / Badge ── */}
               {isLoading ? (
                 <span className="w-5 h-5 rounded-md bg-white/20 text-white flex items-center justify-center flex-shrink-0 ml-1">
                   <Loader2 size={12} strokeWidth={3} className="animate-spin" />

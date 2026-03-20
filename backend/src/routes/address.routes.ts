@@ -6,8 +6,8 @@ import {
   validateUrlParams,
 } from '../middleware/validation.middleware';
 import { asyncHandler } from '../utils/async-handler';
-import { addressSchema } from '../validations/address';
-import { addressIdParamsSchema } from '../validations/urlParams';
+import { addressSchema } from '../validations/address.validation';
+import { addressIdParamsSchema } from '../validations/urlParams.validation';
 
 const router = Router();
 

@@ -16,7 +16,6 @@ export default function Newsletter() {
 
   return (
     <section className="bg-green py-20 px-20 text-center relative overflow-hidden">
-      {/* Decorative */}
       <span className="absolute top-[-2rem] left-[5%] text-[7rem] opacity-10 select-none">
         🌿
       </span>

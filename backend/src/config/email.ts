@@ -1,8 +1,12 @@
 import Mailgen from 'mailgen';
 import { Resend } from 'resend';
 import { logger } from './logger.ts';
-import type { SendMail } from '../types/types.ts';
 import { env } from './env.ts';
+
+export interface SendMail {
+  firstName: string;
+  email: string;
+}
 
 const resend = new Resend(env.RESEND_API);
 
@@ -123,7 +127,7 @@ export const sendMail = async (
   const emailText = mailGenerator.generatePlaintext(email);
 
   await resend.emails.send({
-    from: 'Verdant <onboarding@resend.dev>', // Update to your verified domain when going to production (e.g., 'Verdant <hello@verdant.com>')
+    from: 'Verdant <onboarding@resend.dev>',
     to: [user.email],
     subject: config.subject,
     html: emailBody,

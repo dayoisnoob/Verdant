@@ -40,7 +40,6 @@ export default function AddressesTab() {
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {/* ── Tab Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2 sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0">
           <div className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest border-2 bg-green border-green text-white shadow-sm whitespace-nowrap">
@@ -62,7 +61,6 @@ export default function AddressesTab() {
         )}
       </div>
 
-      {/* ── Add New Address Form Container ── */}
       {showAddForm && (
         <div className="bg-white rounded-3xl border-2 border-green shadow-sm overflow-hidden flex flex-col mb-2 animate-fade-in">
           <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50">
@@ -87,7 +85,6 @@ export default function AddressesTab() {
         </div>
       )}
 
-      {/* ── Address List / Empty State ── */}
       {addresses.length === 0 && !showAddForm ? (
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
           <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">

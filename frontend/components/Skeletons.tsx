@@ -11,7 +11,6 @@ export const Shimmer = ({ className }: { className?: string }) => {
 export const HeroSkeleton = () => {
   return (
     <section className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-cream pt-20">
-      {/* Left copy */}
       <div className="flex flex-col justify-center w-full lg:w-1/2 px-6 py-14 sm:px-12 lg:px-20 lg:py-0 gap-5">
         <Shimmer className="h-6 w-44 rounded-full" />
         <div className="flex flex-col gap-3">
@@ -37,7 +36,6 @@ export const HeroSkeleton = () => {
           ))}
         </div>
       </div>
-      {/* Right image panel */}
       <div className="w-full lg:w-1/2 h-64 sm:h-96 lg:h-auto">
         <Shimmer className="w-full h-full rounded-none" />
       </div>

@@ -101,7 +101,6 @@ export default function SettingsTab({ user }: { user: UserData }) {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl">
-      {/* ── Personal Information ── */}
       <form
         onSubmit={handleProfile(onSaveProfile)}
         className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col"
@@ -169,7 +168,6 @@ export default function SettingsTab({ user }: { user: UserData }) {
         </div>
       </form>
 
-      {/* ── Password ── */}
       <form
         onSubmit={handlePassword(onSavePassword)}
         className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col"
@@ -238,7 +236,6 @@ export default function SettingsTab({ user }: { user: UserData }) {
         </div>
       </form>
 
-      {/* ── Danger Zone ── */}
       <div className="bg-white rounded-3xl border border-red-100 shadow-sm overflow-hidden flex flex-col mt-4">
         <div className="px-6 py-5 border-b border-red-50 flex items-center gap-3 bg-red-50/50">
           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500">

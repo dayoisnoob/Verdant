@@ -189,7 +189,6 @@ export class CartService {
       discountPence,
       deliveryPence,
       totalPence,
-      // itemCount: cart.items.reduce((n, i) => n + i.quantity, 0),
     };
   }
 

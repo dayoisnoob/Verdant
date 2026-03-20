@@ -238,7 +238,6 @@ export default function AddressCard({
     setConfirmDelete(false);
   };
 
-  // ── VIEW MODE ──
   if (!editing) {
     return (
       <div
@@ -292,7 +291,6 @@ export default function AddressCard({
           </div>
         </div>
 
-        {/* Action Row Footer */}
         <div className="border-t border-gray-100 bg-gray-50/50 p-4">
           {!confirmDelete ? (
             <div className="flex items-center gap-3 flex-wrap">
@@ -349,7 +347,6 @@ export default function AddressCard({
     );
   }
 
-  // ── EDIT MODE ──
   return (
     <div className="bg-white rounded-2xl border-2 border-green shadow-sm overflow-hidden flex flex-col">
       <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50">

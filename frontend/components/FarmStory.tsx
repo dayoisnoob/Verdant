@@ -2,7 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 const VALUES = [
-  { icon: "🌱", label: "Regenerative", desc: "Farms that give back to the earth" },
+  {
+    icon: "🌱",
+    label: "Regenerative",
+    desc: "Farms that give back to the earth",
+  },
   { icon: "🚜", label: "Local First", desc: "Always within 60 miles" },
   { icon: "📦", label: "Zero Waste", desc: "Compostable packaging only" },
   { icon: "⭐", label: "Fair Pay", desc: "Farmers earn a living wage" },
@@ -11,7 +15,6 @@ const VALUES = [
 export default function FarmStory() {
   return (
     <section className="grid grid-cols-2 min-h-[500px]">
-      {/* Visual */}
       <div className="relative overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=900&h=700&fit=crop"
@@ -22,7 +25,8 @@ export default function FarmStory() {
         <div className="absolute inset-0 bg-gradient-to-br from-green/40 to-green-dark/50" />
         <div className="absolute bottom-8 left-8 right-8">
           <blockquote className="font-playfair text-xl italic text-white leading-relaxed">
-            &ldquo;We don&apos;t grow for the shelf. We grow for the table.&rdquo;
+            &ldquo;We don&apos;t grow for the shelf. We grow for the
+            table.&rdquo;
           </blockquote>
           <p className="text-white/70 text-sm mt-2">
             — James Holt, Green Meadow Farm, Kent
@@ -30,7 +34,6 @@ export default function FarmStory() {
         </div>
       </div>
 
-      {/* Text */}
       <div className="bg-cream px-20 py-20 flex flex-col justify-center">
         <p className="text-xs tracking-[0.15em] uppercase text-green mb-3">
           Our Promise

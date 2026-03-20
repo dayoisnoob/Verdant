@@ -1,6 +1,5 @@
-// queues/email.queue.ts
 import { Queue, Worker, Job } from 'bullmq';
-import { sendMail } from '../services/email.service';
+import { sendMail } from '../config/email';
 import { logger } from '../config/logger';
 import { bullMQConnection, redis } from '../config/redis';
 

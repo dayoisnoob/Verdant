@@ -1,7 +1,7 @@
 "use client";
 
 import { resendVerificationEmail } from "@/lib/api";
-import { useAuthStore, useEmailStore } from "@/store/store";
+import { useEmailStore } from "@/store/store";
 import { ArrowLeft, CheckCircle2, Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -81,7 +81,6 @@ export default function CheckEmailPage() {
           </div>
         </div>
 
-        {/* ── Footer Link ── */}
         <div className="mt-8 text-center flex flex-col gap-3">
           <Link
             href="/login"

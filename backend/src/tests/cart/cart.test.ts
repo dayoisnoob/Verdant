@@ -66,7 +66,6 @@ describe('POST /api/cart/items', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ productId, quantity: 1 });
 
-    console.log(res.body);
     expect(res.status).toBe(201);
     expect(res.body.data.item.productId).toBe(productId);
     expect(res.body.data.item.quantity).toBe(1);

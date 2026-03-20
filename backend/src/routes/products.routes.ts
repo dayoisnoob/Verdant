@@ -11,8 +11,11 @@ import {
   createProductValidation,
   getProductsSchema,
   updateProductSchema,
-} from '../validations/products';
-import { idParamsSchema, slugParamsSchema } from '../validations/urlParams';
+} from '../validations/products.validation';
+import {
+  idParamsSchema,
+  slugParamsSchema,
+} from '../validations/urlParams.validation';
 import { cacheMiddleware } from '../middleware/cache.middleware';
 import { FIVE_MIN_CACHE, ONE_HOUR_CACHE, TEN_MIN_CACHE } from '../constants';
 

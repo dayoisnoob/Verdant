@@ -26,7 +26,7 @@ import {
   resetPasswordSchemaValidation,
   signupSchema,
   updateUserSchema,
-} from '../validations/auth.validations.ts';
+} from '../validations/auth.validation.ts';
 
 const router = Router();
 
@@ -75,7 +75,6 @@ router.post(
   asyncHandler(AuthController.resetPassword)
 );
 
-// //Authenticated Routes
 router.use(authenticate);
 
 router.post('/logout', asyncHandler(AuthController.logout));

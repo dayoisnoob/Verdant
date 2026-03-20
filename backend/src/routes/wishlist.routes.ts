@@ -3,7 +3,7 @@ import { WishlistController } from '../controllers/wishlist.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { validateUrlParams } from '../middleware/validation.middleware';
 import { asyncHandler } from '../utils/async-handler';
-import { productIdParamsSchema } from '../validations/urlParams';
+import { productIdParamsSchema } from '../validations/urlParams.validation';
 
 const router = Router();
 

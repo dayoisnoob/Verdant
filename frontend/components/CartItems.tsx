@@ -116,7 +116,6 @@ export default function CartItems({
                 </div>
 
                 <div className="flex items-end justify-between mt-4">
-                  {/* ── Active Cart Stepper ── */}
                   <div className="flex items-center justify-between border-2 border-green bg-green/5 rounded-xl overflow-hidden h-10 w-28 sm:w-32 flex-shrink-0 transition-colors">
                     <button
                       disabled={p.quantity <= 1 || isThisItemUpdating}

@@ -22,7 +22,6 @@ export default function FarmsPage() {
     <>
       <Navbar />
       <main className="pt-24 bg-cream min-h-screen">
-        {/* Hero */}
         <div className="relative h-72 overflow-hidden">
           <Image
             src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1600&h=500&fit=crop"
@@ -44,7 +43,6 @@ export default function FarmsPage() {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="bg-green py-8 px-20 grid grid-cols-4 divide-x divide-white/20">
           {[
             { num: `${farms.length}+`, label: "Partner Farms" },
@@ -66,7 +64,6 @@ export default function FarmsPage() {
           ))}
         </div>
 
-        {/* Farms Grid */}
         <div className="px-20 py-20 grid grid-cols-3 gap-8">
           {farms.map(([name, info]) => (
             <div
@@ -74,7 +71,6 @@ export default function FarmsPage() {
               id={name.toLowerCase().replace(/\s+/g, "-")}
               className="bg-white rounded-2xl overflow-hidden border border-green/10 hover:shadow-[0_8px_32px_rgba(45,106,79,0.12)] transition-all duration-300"
             >
-              {/* Card header */}
               <div className="bg-green-pale px-6 pt-8 pb-6">
                 <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm mb-4">
                   {FARM_ICONS[name] ?? "🌿"}
@@ -90,7 +86,6 @@ export default function FarmsPage() {
                 )}
               </div>
 
-              {/* Products */}
               <div className="px-6 py-5">
                 <p className="text-xs uppercase tracking-wider text-[#aaa] mb-3">
                   {info.products.length} product

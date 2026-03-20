@@ -42,7 +42,6 @@ export default function SeasonalPage() {
 
       <main className="flex-1 pt-24 pb-20">
         <div className="max-w-[1600px] mx-auto">
-          {/* ── Page Header ── */}
           <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-8">
             <div className="py-8 md:py-12 border-b border-gray-200">
               <div className="flex items-center gap-2 mb-4">
@@ -66,7 +65,6 @@ export default function SeasonalPage() {
             </div>
           </div>
 
-          {/* ── Season Tabs ── */}
           <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-10">
             <div className="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-4 -mx-6 px-6 sm:mx-0 sm:px-0">
               {SEASONS.map((s) => (
@@ -86,7 +84,6 @@ export default function SeasonalPage() {
             </div>
           </div>
 
-          {/* ── Products Grid ── */}
           <div className="px-6 sm:px-10 lg:px-16 xl:px-20">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
               <div className="flex items-center gap-3">
@@ -127,7 +124,6 @@ export default function SeasonalPage() {
               </div>
             )}
 
-            {/* ── All Seasonal Banner ── */}
             <div className="mt-20 bg-verdant-dark rounded-3xl p-10 md:p-16 text-center flex flex-col items-center justify-center relative overflow-hidden shadow-sm border border-gray-800">
               <div className="relative z-10 flex flex-col items-center">
                 <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-green-light mb-6 backdrop-blur-md border border-white/20">

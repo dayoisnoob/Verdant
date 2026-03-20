@@ -11,7 +11,6 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
 
   return (
     <section className="px-20 py-22">
-      {/* Header */}
       <div className="flex justify-between items-end mb-10">
         <div>
           <p className="text-xs tracking-[0.15em] uppercase text-green mb-2">
@@ -31,7 +30,6 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
         </Link>
       </div>
 
-      {/* Bento Grid */}
       <div
         className="grid gap-4"
         style={{
@@ -73,7 +71,8 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                   {cat.name}
                 </div>
                 <div className="text-white/70 text-xs mt-1">
-                  {cat.count} product{cat.count !== 1 ? "s" : ""} · {cat.organicCount} organic
+                  {cat.count} product{cat.count !== 1 ? "s" : ""} ·{" "}
+                  {cat.organicCount} organic
                 </div>
               </div>
             </Link>

@@ -22,7 +22,6 @@ export function RemoveDialog({
       />
 
       <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.15)] p-6">
-        {/* Icon */}
         <div className="w-11 h-11 rounded-full bg-red-50 flex items-center justify-center mb-4">
           <svg
             viewBox="0 0 24 24"
@@ -49,7 +48,6 @@ export function RemoveDialog({
         </p>
 
         <div className="flex flex-col gap-2.5">
-          {/* Wire up: onWishlist → add to wishlist then remove from cart */}
           {!isWishlisted && (
             <button
               onClick={onWishlist}
@@ -72,7 +70,6 @@ export function RemoveDialog({
             </button>
           )}
 
-          {/* Wire up: onRemove → remove from cart */}
           <button
             onClick={onRemove}
             className="w-full py-3 rounded-full text-sm font-semibold text-red-500 border border-red-100 hover:bg-red-50 transition-all"

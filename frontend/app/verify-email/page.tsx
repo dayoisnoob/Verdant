@@ -44,17 +44,13 @@ export default function VerifyEmailPage() {
   return (
     <>
       <main className="min-h-screen bg-cream flex items-center justify-center px-6 py-24">
-        {/* Background texture */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_40%,rgba(82,183,136,0.07),transparent)] pointer-events-none" />
 
         <div className="relative w-full max-w-md">
-          {/* Card */}
           <div className="bg-white border border-green/10 rounded-3xl shadow-[0_8px_40px_rgba(45,106,79,0.1)] overflow-hidden">
-            {/* Top green accent bar */}
             <div className="h-1.5 bg-gradient-to-r from-green via-green-light to-green-pale" />
 
             <div className="px-10 py-12 text-center">
-              {/* Logo */}
               <Link
                 href="/"
                 className="font-playfair text-2xl font-black text-green inline-block mb-10"
@@ -62,7 +58,6 @@ export default function VerifyEmailPage() {
                 Ver<em className="not-italic text-green-light">dant</em>
               </Link>
 
-              {/* ── Loading ── */}
               {status === "loading" && (
                 <div className="flex flex-col items-center">
                   <div className="w-20 h-20 rounded-full bg-green-pale flex items-center justify-center mb-6">
@@ -75,7 +70,6 @@ export default function VerifyEmailPage() {
                     Hang on a moment while we confirm your address...
                   </p>
 
-                  {/* Animated dots */}
                   <div className="flex gap-1.5 mt-6">
                     {[0, 1, 2].map((i) => (
                       <div
@@ -90,7 +84,6 @@ export default function VerifyEmailPage() {
                 </div>
               )}
 
-              {/* ── Success ── */}
               {status === "success" && (
                 <div className="flex flex-col items-center">
                   <div className="w-20 h-20 rounded-full bg-green-pale flex items-center justify-center mb-6">
@@ -103,7 +96,6 @@ export default function VerifyEmailPage() {
                     Your email has been confirmed. Redirecting you...
                   </p>
 
-                  {/* Progress bar */}
                   <div className="w-full h-1.5 bg-green-pale rounded-full overflow-hidden">
                     <div className="h-full bg-green rounded-full animate-[grow_2s_ease-in-out_forwards]" />
                   </div>
@@ -114,7 +106,6 @@ export default function VerifyEmailPage() {
                 </div>
               )}
 
-              {/* ── Error ── */}
               {status === "error" && (
                 <div className="flex flex-col items-center">
                   <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-6">
@@ -145,7 +136,6 @@ export default function VerifyEmailPage() {
               )}
             </div>
 
-            {/* Footer strip */}
             <div className="border-t border-green/10 px-10 py-5 bg-green-pale/40 text-center">
               <p className="text-xs text-verdant-muted">
                 Didn&apos;t receive an email?{" "}
@@ -159,7 +149,6 @@ export default function VerifyEmailPage() {
             </div>
           </div>
 
-          {/* Below card trust note */}
           <p className="text-center text-xs text-[#bbb] mt-6">
             Need help?{" "}
             <Link href="/contact" className="text-green hover:underline">
@@ -169,7 +158,6 @@ export default function VerifyEmailPage() {
         </div>
       </main>
 
-      {/* Inline keyframes for bounce + progress bar grow */}
       <style>{`
         @keyframes bounce {
           0%, 100% { transform: translateY(0); opacity: 0.4; }

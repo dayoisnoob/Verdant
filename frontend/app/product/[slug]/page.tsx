@@ -310,7 +310,6 @@ export default function ProductPage() {
                         </div>
                       )}
 
-                    {/* ── Add to Cart / Quantity Selector ── */}
                     <div className="flex flex-col sm:flex-row gap-4 items-stretch h-14">
                       {qtyInCart >= 1 ? (
                         <div className="flex items-center justify-between border-2 border-green bg-green/5 rounded-xl overflow-hidden w-full sm:w-40 flex-shrink-0 animate-in fade-in zoom-in-95 duration-200">

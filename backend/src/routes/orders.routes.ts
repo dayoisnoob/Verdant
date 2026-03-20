@@ -7,11 +7,11 @@ import {
   validateUrlQuery,
 } from '../middleware/validation.middleware';
 import { asyncHandler } from '../utils/async-handler';
-import { getOrdersQuery, updateOrderSchema } from '../validations/order';
+import { getOrdersQuery, updateOrderSchema } from '../validations/order.validation';
 import {
   orderIdParamsSchema,
   sessionIdParamsSchema,
-} from '../validations/urlParams';
+} from '../validations/urlParams.validation';
 
 const router = Router();
 

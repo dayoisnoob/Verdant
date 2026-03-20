@@ -14,7 +14,7 @@ import {
 } from 'drizzle-orm';
 import { db } from '../config/db';
 import { orderItemsTable, ordersTable, productsTable } from '../db';
-import type { Product } from '../types/types';
+import type { Product } from '../types/product.types';
 import { ApiError } from '../utils/api-response';
 import type { UpdateProductInput } from '../validations/products.validation';
 import { cache } from '../config/redis';

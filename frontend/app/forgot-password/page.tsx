@@ -46,7 +46,6 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-[420px] flex flex-col items-center">
-        {/* ── Logo ── */}
         <Link
           href="/"
           className="font-playfair text-3xl sm:text-4xl font-black text-verdant-dark tracking-tight hover:text-green transition-colors mb-8"
@@ -54,10 +53,8 @@ export default function ForgotPasswordPage() {
           Ver<em className="not-italic text-green">dant</em>
         </Link>
 
-        {/* ── Main Card ── */}
         <div className="w-full bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 overflow-hidden">
           <div className="px-6 py-8 sm:p-10">
-            {/* Header */}
             <div className="mb-8">
               <div className="w-16 h-16 rounded-2xl bg-green/10 border border-green/20 flex items-center justify-center mb-6 shadow-sm">
                 <Lock className="w-8 h-8 text-green" strokeWidth={2} />
@@ -75,7 +72,6 @@ export default function ForgotPasswordPage() {
               </p>
             </div>
 
-            {/* ── Sent State ── */}
             {sent ? (
               <div className="flex flex-col gap-6">
                 <div className="bg-green/5 border border-green/20 rounded-2xl p-5 flex gap-4 items-start">
@@ -107,13 +103,11 @@ export default function ForgotPasswordPage() {
                 </Link>
               </div>
             ) : (
-              /* ── Form State ── */
               <form
                 onSubmit={handleSubmit}
                 noValidate
                 className="flex flex-col gap-5"
               >
-                {/* Error Banner */}
                 {error && (
                   <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center gap-3 mb-1">
                     <AlertCircle
@@ -127,7 +121,6 @@ export default function ForgotPasswordPage() {
                   </div>
                 )}
 
-                {/* Email Input */}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                     Email Address
@@ -146,7 +139,6 @@ export default function ForgotPasswordPage() {
                   />
                 </div>
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -166,7 +158,6 @@ export default function ForgotPasswordPage() {
                   )}
                 </button>
 
-                {/* Back Link */}
                 <div className="mt-2 text-center">
                   <Link
                     href="/login"
@@ -180,7 +171,6 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        {/* ── Support Tip Box ── */}
         <div className="w-full mt-6 bg-white border border-gray-200 rounded-2xl p-5 flex gap-4 items-start shadow-sm">
           <div className="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0 text-yellow-600">
             <Lightbulb size={16} strokeWidth={2.5} />

@@ -1,12 +1,11 @@
 import crypto from 'crypto';
-import { eq } from 'drizzle-orm';
-import { db } from '../../config/db.js';
-import { logger } from '../../config/logger.js';
-import { refreshTokensTable } from '../../db/schema/refreshToken.js';
-import type { DeviceInfo, JwtPayload, User } from '../../types/types.js';
-import { tokenExpiry } from '../helpers.js';
-import { cryptoHash, randomBytes } from '../hash.util.js';
-import { jwtToken } from '../jwt.util.js';
+import { db } from '../config/db';
+import { refreshTokensTable } from '../db/schema/refreshToken';
+import { cryptoHash, randomBytes } from './hash.util';
+import { tokenExpiry } from './helpers';
+import { jwtToken } from './jwt.util';
+import type { DeviceInfo, User } from '../types/auth.types';
+import type { JwtPayload } from 'jsonwebtoken';
 
 type DbOrTx = Parameters<Parameters<typeof db.transaction>[0]>[0] | typeof db;
 type PartialUser = Pick<

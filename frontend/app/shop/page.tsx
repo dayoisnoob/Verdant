@@ -153,7 +153,6 @@ function ShopContent() {
 
       <main className="flex-1 pt-24 pb-20">
         <div className="px-6 sm:px-10 lg:px-16 xl:px-20 max-w-[1600px] mx-auto">
-          {/* Header */}
           <div className="py-8 md:py-12 border-b border-gray-200">
             <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-4">
               Our Produce
@@ -170,10 +169,8 @@ function ShopContent() {
             </div>
           </div>
 
-          {/* Controls & Filters */}
           <div className="py-6 flex flex-col gap-6 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Mobile Filter Toggle */}
               <button
                 onClick={() => setFiltersOpen((v) => !v)}
                 className="sm:hidden flex items-center justify-center gap-2 text-sm font-bold px-5 py-3 rounded-xl border-2 border-gray-200 bg-white text-verdant-dark hover:border-green transition-colors w-full"
@@ -185,7 +182,6 @@ function ShopContent() {
                 )}
               </button>
 
-              {/* Desktop Filters */}
               <div className="hidden sm:flex items-center gap-3 flex-wrap">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">
                   Filter by:
@@ -214,7 +210,6 @@ function ShopContent() {
                 )}
               </div>
 
-              {/* Custom Sort Dropdown */}
               <div className="hidden sm:block relative min-w-[200px]">
                 <select
                   value={sortBy}
@@ -235,7 +230,6 @@ function ShopContent() {
               </div>
             </div>
 
-            {/* Mobile Expanded Filters */}
             {filtersOpen && (
               <div className="sm:hidden bg-gray-50 rounded-2xl p-5 flex flex-col gap-6 border border-gray-100">
                 <div className="flex flex-col gap-3">
@@ -284,7 +278,6 @@ function ShopContent() {
               </div>
             )}
 
-            {/* Categories (Scrollable row) */}
             <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2 -mx-6 px-6 sm:mx-0 sm:px-0">
               {["All", ...CATEGORIES].map((cat) => (
                 <button
@@ -302,7 +295,6 @@ function ShopContent() {
             </div>
           </div>
 
-          {/* Product Grid */}
           <div className="pt-10">
             {isLoading ? (
               <ProductGridSkeleton />
@@ -336,7 +328,6 @@ function ShopContent() {
             )}
           </div>
 
-          {/* Pagination */}
           {pagination && !isLoading && PRODUCTS.length > 0 && (
             <div className="mt-16 pb-8">
               <Pagination
