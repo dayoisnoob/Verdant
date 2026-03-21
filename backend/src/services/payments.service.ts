@@ -2,13 +2,13 @@ import { eq, inArray, sql } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { db } from '../config/db';
 import { env } from '../config/env';
+import { logger } from '../config/logger';
 import { stripe } from '../config/stripe';
 import { couponRedemptionsTable, productsTable } from '../db';
 import { couponsTable } from '../db/schema/coupons';
-import { OrderService } from './orders.service';
-import { logger } from '../config/logger';
 import { ApiError } from '../utils/api-response';
 import { CartService } from './cart.service';
+import { OrderService } from './orders.service';
 
 export interface LineItems {
   quantity: number;
@@ -79,7 +79,7 @@ export class PaymentService {
               images: product.images[0]?.url ? [product.images[0]?.url] : [],
               metadata: { productId: product.id },
             },
-            unit_amount: Math.round(+product.price * 100),
+            unit_amount: Math.round(+product.price),
           },
           quantity: item.quantity,
         };
@@ -183,15 +183,16 @@ export class PaymentService {
               productId: product?.metadata?.productId ?? '',
               name: item.description ?? '',
               quantity: item.quantity ?? 1,
-              price: (item.price?.unit_amount ?? 0) / 100,
+              price: item.price?.unit_amount ?? 0,
               image: product?.images?.[0] ?? '',
             };
           })
           .filter((item) => !!item.productId);
 
-        const subtotal =
-          items.reduce((sum, item) => sum + item.price * item.quantity, 0) *
-          100;
+        const subtotal = items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
 
         let order;
 

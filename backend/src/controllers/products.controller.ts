@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { ProductService } from '../services/products.service';
 import { ApiError, ApiResponse } from '../utils/api-response';
+import { logger } from '../config/logger';
 
 export class ProductController {
   static async createProduct(req: Request, res: Response) {

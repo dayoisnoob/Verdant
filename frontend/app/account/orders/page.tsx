@@ -5,15 +5,12 @@ import Navbar from "@/components/Navbar";
 import { OrderCard } from "@/components/OrderCard";
 import { useOrders } from "@/hooks";
 import { ORDER_FILTERS, ORDER_STATUS_CONFIG } from "@/lib/constants";
-import { FilterStatus } from "@/types";
 import { ArrowRight, Loader2, Package, Search } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function OrdersPage() {
-  const [filter, setFilter] = useState<FilterStatus>("all");
-
-  const { orders, filtered, counts, isLoading } = useOrders();
+  const { orders, filtered, counts, isLoading, filter, setFilter } =
+    useOrders();
 
   return (
     <div className="bg-cream min-h-screen flex flex-col">

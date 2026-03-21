@@ -129,10 +129,12 @@ export const useOrders = () => {
   const orders = data?.orders ?? [];
   const filtered =
     filter === "all" ? orders : orders.filter((o) => o.status === filter);
+
   const counts = orders.reduce<Record<string, number>>((acc, o) => {
     acc[o.status] = (acc[o.status] ?? 0) + 1;
     return acc;
   }, {});
+
   return {
     orders,
     filtered,

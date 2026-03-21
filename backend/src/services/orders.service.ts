@@ -40,9 +40,7 @@ export interface CreateOrderData {
 export class OrderService {
   static async createOrder(data: CreateOrderData) {
     const orderNumber = generateOrderNumber();
-    const shippingFee = data.shippingFee
-      ? Math.round(data.shippingFee * 100)
-      : null;
+    const shippingFee = data.shippingFee ? Math.round(data.shippingFee) : null;
 
     const order = await db.transaction(async (tx) => {
       const [orderRecord] = await tx
@@ -72,8 +70,8 @@ export class OrderService {
           productName: item.name,
           image: item.image,
           quantity: item.quantity,
-          unitPriceCents: Math.round(item.price * 100),
-          totalPriceCents: Math.round(item.price * item.quantity * 100),
+          unitPricePence: Math.round(item.price),
+          totalPricePence: Math.round(item.price * item.quantity),
         }))
       );
 
@@ -161,8 +159,8 @@ export class OrderService {
               productId: orderItemsTable.productId,
               quantity: orderItemsTable.quantity,
               image: orderItemsTable.image,
-              unitPriceCents: orderItemsTable.unitPriceCents,
-              totalPriceCents: orderItemsTable.totalPriceCents,
+              unitPricePence: orderItemsTable.unitPricePence,
+              totalPricePence: orderItemsTable.totalPricePence,
             })
             .from(orderItemsTable)
             .where(inArray(orderItemsTable.orderId, orderIds))
@@ -211,8 +209,8 @@ export class OrderService {
         orderNumber: ordersTable.orderNumber,
         stripeSessionId: ordersTable.stripeSessionId,
         status: ordersTable.status,
-        subtotalCents: ordersTable.subtotalPence,
-        totalCents: ordersTable.totalPence,
+        subtotalPence: ordersTable.subtotalPence,
+        totalPence: ordersTable.totalPence,
         discountAmount: ordersTable.discountAmount,
         currency: ordersTable.currency,
         customerEmail: ordersTable.customerEmail,
@@ -247,6 +245,7 @@ export class OrderService {
 
     return { order: { ...orderRecord, items } };
   }
+
   static async getAllOrders() {
     const orders = await db
       .select({
@@ -255,8 +254,8 @@ export class OrderService {
         orderNumber: ordersTable.orderNumber,
         stripeSessionId: ordersTable.stripeSessionId,
         status: ordersTable.status,
-        subtotalCents: ordersTable.subtotalPence,
-        totalCents: ordersTable.totalPence,
+        subtotalPence: ordersTable.subtotalPence,
+        totalPence: ordersTable.totalPence,
         discountAmount: ordersTable.discountAmount,
         currency: ordersTable.currency,
         customerEmail: ordersTable.customerEmail,
@@ -291,8 +290,8 @@ export class OrderService {
               productId: orderItemsTable.productId,
               quantity: orderItemsTable.quantity,
               image: orderItemsTable.image,
-              unitPriceCents: orderItemsTable.unitPriceCents,
-              totalPriceCents: orderItemsTable.totalPriceCents,
+              unitPricePence: orderItemsTable.unitPricePence,
+              totalPricePence: orderItemsTable.totalPricePence,
             })
             .from(orderItemsTable)
             .where(inArray(orderItemsTable.orderId, orderIds))

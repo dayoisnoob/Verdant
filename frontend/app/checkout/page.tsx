@@ -167,10 +167,10 @@ export default function CheckoutPage() {
   } = useCart(couponDiscount);
 
   useEffect(() => {
-    if (!cartItems.length) {
+    if (cartItems && !cartItems.length) {
       router.push("/basket");
     }
-  }, [cartItems.length, router]);
+  }, [cartItems, cartItems.length, router]);
 
   const {
     data: addresses = [],

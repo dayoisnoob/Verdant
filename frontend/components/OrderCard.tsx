@@ -3,7 +3,7 @@
 import { getOrderById } from "@/lib/api";
 import { ORDER_PREVIEW_LIMIT, ORDER_STATUS_CONFIG } from "@/lib/constants";
 import { convertDate } from "@/lib/helpers";
-import { AllOrders } from "@/types";
+import { Order } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronDown,
@@ -16,7 +16,7 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 
-export function OrderCard({ order }: { order: AllOrders }) {
+export function OrderCard({ order }: { order: Order }) {
   const [expanded, setExpanded] = useState(false);
 
   const status = ORDER_STATUS_CONFIG[order.status] ?? {
@@ -58,7 +58,7 @@ export function OrderCard({ order }: { order: AllOrders }) {
 
             <div className="flex items-center gap-4 flex-wrap mb-5">
               <span className="font-playfair font-black text-verdant-dark text-3xl">
-                £{Number(order.totalCents / 100).toFixed(2)}
+                £{(order.totalPence / 100).toFixed(2)}
               </span>
               <div
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 border-transparent ${status.bg}`}
@@ -165,7 +165,7 @@ export function OrderCard({ order }: { order: AllOrders }) {
                             strokeWidth={2}
                           />
                         )}
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-verdant-dark text-white text-[10px] font-bold rounded-md flex items-center justify-center border-2 border-white">
+                        <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-verdant-dark text-white text-[10px] font-bold rounded-md flex items-center justify-center border-2 border-white">
                           {item.quantity}
                         </span>
                       </div>
@@ -174,12 +174,12 @@ export function OrderCard({ order }: { order: AllOrders }) {
                           {item.productName}
                         </p>
                         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                          £{(parseFloat(item.unitPriceCents) / 100).toFixed(2)}{" "}
-                          each
+                          £{(item.unitPricePence / 100).toFixed(2)} each{" "}
+                          {item.quantity}x
                         </p>
                       </div>
                       <p className="text-base font-black text-verdant-dark flex-shrink-0">
-                        £{(parseFloat(item.totalPriceCents) / 100).toFixed(2)}
+                        £{(item.totalPricePence / 100).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -246,7 +246,7 @@ export function OrderCard({ order }: { order: AllOrders }) {
                         Subtotal
                       </span>
                       <span className="font-bold text-verdant-dark">
-                        £{Number(details.subtotalCents / 100).toFixed(2)}
+                        £{Number(details.subtotalPence / 100).toFixed(2)}
                       </span>
                     </div>
                     {details.discountAmount > 0 && (
@@ -275,7 +275,7 @@ export function OrderCard({ order }: { order: AllOrders }) {
                         Total
                       </span>
                       <span className="font-playfair font-black text-green text-2xl leading-none">
-                        £{Number(details.totalCents / 100).toFixed(2)}
+                        £{Number(details.totalPence / 100).toFixed(2)}
                       </span>
                     </div>
                   </div>

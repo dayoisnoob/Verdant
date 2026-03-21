@@ -124,7 +124,7 @@ export default function ProfilePage() {
   const initials = user.firstName[0] + (user.lastName?.[0] ?? "");
   const defaultAddress = addresses.find((a) => a.isDefault);
   const totalSpent = (
-    orders.reduce((acc, o) => acc + o.totalCents, 0) / 100
+    orders.reduce((acc, o) => acc + o.totalPence, 0) / 100
   ).toFixed(2);
 
   const activeTab = TABS.find((t) => t.id === tab);

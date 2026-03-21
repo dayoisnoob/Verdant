@@ -99,7 +99,7 @@ export default function Hero({ featuredProducts }: HeroProps) {
             </div>
             <div className="flex-shrink-0 text-right">
               <div className="font-playfair font-black text-green text-xl leading-none">
-                £{hero.price}
+                £{(hero.price / 100).toFixed(2)}
               </div>
               <div className="text-[11px] font-bold text-gray-400 mt-1.5 uppercase tracking-wider">
                 {hero.unit}

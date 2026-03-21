@@ -80,7 +80,7 @@ export const registerCleanupJobs = () => {
     await cleanExpiredPasswordResetTokens();
   });
 
-  cron.schedule('0 3 * * 0', async () => {
+  cron.schedule('0 1 * * 0', async () => {
     logger.info('Running weekly cart cleanup');
     await cleanAbandonedCarts();
   });

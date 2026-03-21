@@ -1,0 +1,25 @@
+Yes, skip it for now.
+
+Here's the honest breakdown of what actually matters for your portfolio as a backend engineer:
+
+**What a recruiter will look at**
+- Your schema design — how you modelled products, orders, carts, users
+- Your auth implementation — JWT, email verification, token expiry
+- Your order lifecycle — how a cart becomes an order, what happens after payment
+- Your Stripe webhook handler — this alone shows you understand async, real-world backend patterns
+- Your error handling — do your APIs return sensible errors or just 500s
+- Your middleware — auth guards, role checks, input validation
+- Your service layer — is business logic separated from controllers
+
+**What they won't care much about**
+- Whether you built an admin dashboard
+- Whether the analytics charts look nice
+- How many pages the frontend has
+
+The dashboard is a frontend project wearing a backend hat. It's mostly `useQuery` calls and table rendering. There's almost no backend complexity in it beyond the analytics service, which you've already written.
+
+**What to do instead**
+
+When the main store backend is solid and tested, write a proper README. Document your API endpoints, your schema decisions, why you made certain choices — like prices in pence, product snapshots in cart items, webhook-first order creation. That documentation tells the backend story far better than a dashboard does.
+
+Build the dashboard after you get a job, or if you genuinely have time and want to. But it is not what gets you hired.

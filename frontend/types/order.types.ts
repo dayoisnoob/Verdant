@@ -15,22 +15,22 @@ export interface OrderItems {
   productName: string;
   productId: string;
   quantity: number;
-  unitPriceCents: string;
-  totalPriceCents: string;
+  unitPricePence: number;
+  totalPricePence: number;
 }
 
 export interface CustomerOrder {
   id: string;
   orderNumber: string;
   status: string;
-  subtotalCents: number;
+  subtotalPence: number;
   deliveryNotes?: string;
   shippingFee: number;
   stripeSessionId: string;
   customerEmail: string;
   discountAmount: number;
   userId: string;
-  totalCents: number;
+  totalPence: number;
   currency?: number;
   shippingAddress: {
     firstName: string;
@@ -58,10 +58,10 @@ export interface Order {
   discount: number;
   createdAt: Date;
   shippingFee: number;
-  totalCents: number;
+  totalPence: number;
   orderNumber: string;
   items: OrderItems[];
-  subtotalCents: number;
+  subtotalPence: number;
   totalCount: string;
 }
 

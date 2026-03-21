@@ -18,6 +18,7 @@ import type { Product } from '../types/product.types';
 import { ApiError } from '../utils/api-response';
 import type { UpdateProductInput } from '../validations/products.validation';
 import { cache } from '../config/redis';
+import { logger } from '../config/logger';
 
 export class ProductService {
   static async createProduct(data: Product | Product[]) {
@@ -268,7 +269,7 @@ export class ProductService {
   }
 
   static async trending() {
-    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    const daysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000);
 
     const trendingProducts = await db
       .select({
@@ -280,7 +281,7 @@ export class ProductService {
       .innerJoin(productsTable, eq(productsTable.id, orderItemsTable.productId))
       .where(
         and(
-          gte(ordersTable.createdAt, threeDaysAgo),
+          gte(ordersTable.createdAt, daysAgo),
           notInArray(ordersTable.status, ['cancelled', 'refunded'])
         )
       )
