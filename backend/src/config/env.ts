@@ -8,14 +8,14 @@ const envSchema = z.object({
     .default('development'),
 
   DATABASE_URL: z.string(),
-  DATABASE_URL_TEST: z.string(),
+  DATABASE_URL_TEST: z.string().optional(),
   REDIS_URL: z.string().default('redis://localhost:6379'),
 
   PORT: z.string().default('8000'),
 
-  POSTGRES_USER: z.string(),
-  POSTGRES_PASSWORD: z.string(),
-  POSTGRES_DB: z.string(),
+  POSTGRES_USER: z.string().optional(),
+  POSTGRES_PASSWORD: z.string().optional(),
+  POSTGRES_DB: z.string().optional(),
 
   CORS_ORIGIN: z.string(),
   STRIPE_SECRET_KEY: z.string(),
@@ -23,12 +23,12 @@ const envSchema = z.object({
   JWT_ACCESS_TOKEN: z.string(),
   JWT_ACCESS_TOKEN_EXPIRY: z.string().default('15m'),
 
-  EMAIL_HOST: z.string(),
-  EMAIL_PORT: z.string(),
-  EMAIL_USER: z.string(),
-  EMAIL_PASSWORD: z.string(),
-  EMAIL_FROM: z.string(),
-  EMAIL_FROM_NAME: z.string(),
+  EMAIL_HOST: z.string().optional(),
+  EMAIL_PORT: z.string().optional(),
+  EMAIL_USER: z.string().optional(),
+  EMAIL_PASSWORD: z.string().optional(),
+  EMAIL_FROM: z.string().optional(),
+  EMAIL_FROM_NAME: z.string().optional(),
 
   STRIPE_WEBHOOK_SECRET: z.string(),
 
@@ -38,7 +38,7 @@ const envSchema = z.object({
 
   RESEND_API: z.string(),
 
-  REDIS_HOST: z.string().default('localhost'),
+  REDIS_HOST: z.string(),
   REDIS_PORT: z.string().default('6379'),
   REDIS_PASSWORD: z.string().optional(),
 });

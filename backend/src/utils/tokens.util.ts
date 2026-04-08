@@ -4,8 +4,7 @@ import { refreshTokensTable } from '../db/schema/refreshToken';
 import { cryptoHash, randomBytes } from './hash.util';
 import { tokenExpiry } from './helpers';
 import { jwtToken } from './jwt.util';
-import type { DeviceInfo, User } from '../types/auth.types';
-import type { JwtPayload } from 'jsonwebtoken';
+import type { DeviceInfo, JwtPayload, User } from '../types/auth.types';
 
 type DbOrTx = Parameters<Parameters<typeof db.transaction>[0]>[0] | typeof db;
 type PartialUser = Pick<
