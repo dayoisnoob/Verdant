@@ -1,1 +1,1 @@
-web: bun run build && bun dist/server.ts
+web: bun run build && bun dist/server.js
