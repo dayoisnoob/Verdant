@@ -31,10 +31,20 @@ process.on('SIGINT', () => {
   });
 });
 
+// process.on('unhandledRejection', (err) => {
+//   logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
+//   logger.error(err);
+//   server.close(() => {
+//     process.exit(1);
+//   });
+// });
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  process.exit(1);
+});
+
 process.on('unhandledRejection', (err) => {
-  logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  logger.error(err);
-  server.close(() => {
-    process.exit(1);
-  });
+  console.error('Unhandled rejection:', err);
+  process.exit(1);
 });
