@@ -8,7 +8,7 @@ import { registerCleanupJobs } from './jobs/cleanup.';
 const PORT = env.PORT || 7000;
 const NODE_ENV = env.NODE_ENV;
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`Server listening on port ${PORT}`);
   logger.info(`Working environment: ${NODE_ENV}`);
 
