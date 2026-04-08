@@ -91,7 +91,7 @@ export default function HomePage() {
 
               {trendingLoading ? (
                 <FeaturedSkeleton />
-              ) : (
+              ) : trending?.length === 0 ? null : (
                 <ProductSection
                   label="Right Now"
                   title="Trending Produce"
