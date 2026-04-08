@@ -34,5 +34,6 @@ export const bullMQConnection = {
   host: env.REDIS_HOST,
   port: Number(env.REDIS_PORT),
   ...(env.REDIS_PASSWORD && { password: env.REDIS_PASSWORD }),
+  ...(env.NODE_ENV === 'production' && { tls: {} }),
   maxRetriesPerRequest: null,
 };
