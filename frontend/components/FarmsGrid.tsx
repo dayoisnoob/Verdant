@@ -1,5 +1,5 @@
+import { FARM_ICONS } from "@/lib/constants";
 import Link from "next/link";
-import { FARM_ICONS } from "@/data/products";
 
 interface FarmInfo {
   name: string;
