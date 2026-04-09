@@ -1,5 +1,8 @@
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { db } from '../config/db';
+import { sendMail } from '../config/email';
+import { env } from '../config/env';
+import { logger } from '../config/logger';
 import {
   addressesTable,
   orderItemsTable,
@@ -8,13 +11,10 @@ import {
   usersTable,
 } from '../db';
 import { ApiError } from '../utils/api-response';
+import { generateOrderNumber } from '../utils/helpers';
+import type { updateOrderInput } from '../validations/order.validation';
 import { CartService } from './cart.service';
 import { CouponService } from './coupon.service';
-import { generateOrderNumber } from '../utils/helpers';
-import { sendMail } from '../config/email';
-import { env } from '../config/env';
-import type { updateOrderInput } from '../validations/order.validation';
-import { logger } from '../config/logger';
 
 export interface CheckoutItem {
   productId: string;
