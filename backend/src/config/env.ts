@@ -22,12 +22,7 @@ const envSchema = z.object({
   JWT_ACCESS_TOKEN: z.string(),
   JWT_ACCESS_TOKEN_EXPIRY: z.string().default('15m'),
 
-  EMAIL_HOST: z.string().optional(),
-  EMAIL_PORT: z.string().optional(),
-  EMAIL_USER: z.string().optional(),
-  EMAIL_PASSWORD: z.string().optional(),
-  EMAIL_FROM: z.string().optional(),
-  EMAIL_FROM_NAME: z.string().optional(),
+  EMAIL_FROM: z.string(),
 
   STRIPE_WEBHOOK_SECRET: z.string(),
 

@@ -127,7 +127,7 @@ export const sendMail = async (
   const emailText = mailGenerator.generatePlaintext(email);
 
   await resend.emails.send({
-    from: 'Verdant <onboarding@resend.dev>',
+    from: env.EMAIL_FROM,
     to: [user.email],
     subject: config.subject,
     html: emailBody,
