@@ -7,8 +7,6 @@ export const COOKIE_OPTIONS: CookieOptions = {
   sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   maxAge: +env.REFRESH_COOKIE_MAX_AGE,
   path: '/',
-  domain:
-    process.env.NODE_ENV === 'production' ? '.shopverdant.store' : undefined,
 };
 
 export const RESEND_COOLDOWN_SECONDS = 60;
