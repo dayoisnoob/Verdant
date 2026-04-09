@@ -2,6 +2,7 @@ import { UserApi, UserData } from "@/types";
 import { RegistrationForm } from "@/validations";
 import { apiFetch } from "../apiFetch";
 import { initiateLogin } from "../helpers";
+import { useAuthStore } from "@/store/store";
 
 export const login = async (data: { email: string; password: string }) => {
   const res = await apiFetch<UserApi>(`/api/auth/login`, {
@@ -10,6 +11,9 @@ export const login = async (data: { email: string; password: string }) => {
   });
 
   await initiateLogin(res);
+
+  console.log("user:", useAuthStore.getState().user);
+  console.log("accessToken:", useAuthStore.getState().accessToken);
 };
 
 export const register = async (data: RegistrationForm) => {
