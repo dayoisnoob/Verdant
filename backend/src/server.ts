@@ -3,12 +3,12 @@ import { app } from './app';
 import { logger } from './config/logger';
 import { env } from './config/env';
 import { registerCleanupJobs } from './jobs/cleanup.';
-// import { emailWorker } from './queues/email.queue';
+import { emailWorker } from './queues/email.queue';
 
 const PORT = env.PORT || 7000;
 const NODE_ENV = env.NODE_ENV;
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, () => {
   logger.info(`Server listening on port ${PORT}`);
   logger.info(`Working environment: ${NODE_ENV}`);
 
@@ -21,7 +21,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 
 process.on('SIGTERM', async () => {
   logger.info('Sigterm received, shutting down gracefully');
-  // await emailWorker.close();
+  await emailWorker.close();
   server.close(() => {
     logger.info('Process terminated');
     process.exit(0);
