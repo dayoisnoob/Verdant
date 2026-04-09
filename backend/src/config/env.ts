@@ -17,7 +17,6 @@ const envSchema = z.object({
   POSTGRES_PASSWORD: z.string().optional(),
   POSTGRES_DB: z.string().optional(),
 
-  CORS_ORIGIN: z.string(),
   STRIPE_SECRET_KEY: z.string(),
 
   JWT_ACCESS_TOKEN: z.string(),

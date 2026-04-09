@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller.ts';
-import { authenticate, requireAdmin } from '../middleware/auth.middleware.ts';
+import { authenticate } from '../middleware/auth.middleware.ts';
 import {
   changePasswordLimiter,
   forgotPasswordHourlyLimiter,
