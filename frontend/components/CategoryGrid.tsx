@@ -1,6 +1,6 @@
+import { CATEGORY_META } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
-import { CATEGORY_META } from "@/data/products";
 
 interface CategoryGridProps {
   categories: { name: string; count: number; organicCount: number }[];
