@@ -70,6 +70,11 @@ export const productSchema = z.object({
       })
     )
     .min(1, 'At least one image is required'),
+
+  stock: z.coerce
+    .number()
+    .int('Stock must be an integer')
+    .min(0, 'Stock cannot be negative'),
 });
 
 export const createProductValidation = z.union([

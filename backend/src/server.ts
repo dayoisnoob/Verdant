@@ -11,11 +11,6 @@ const NODE_ENV = env.NODE_ENV;
 const server = app.listen(PORT, () => {
   logger.info(`Server listening on port ${PORT}`);
   logger.info(`Working environment: ${NODE_ENV}`);
-
-  setTimeout(() => {
-    logger.info('Server still alive after 5s');
-  }, 5000);
-
   registerCleanupJobs();
 });
 

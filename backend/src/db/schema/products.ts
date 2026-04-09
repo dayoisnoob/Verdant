@@ -28,7 +28,7 @@ export const productsTable = pgTable(
     isSeasonal: boolean('is_seasonal'),
     isFeatured: boolean('is_featured'),
     isOnSale: boolean('is_on_sale'),
-    stock: integer('stock').notNull().default(0),
+    stock: integer('stock').notNull(),
     inStock: boolean('in_stock').default(true).notNull(),
     rating: varchar('rating').notNull(),
     reviewCount: integer('review_count'),
