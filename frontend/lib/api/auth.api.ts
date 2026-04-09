@@ -10,6 +10,8 @@ export const login = async (data: { email: string; password: string }) => {
     body: JSON.stringify(data),
   });
 
+  console.log(res);
+
   await initiateLogin(res);
 
   console.log("user:", useAuthStore.getState().user);

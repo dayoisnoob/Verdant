@@ -11,6 +11,8 @@ export const authenticate = (
   try {
     const authHeader = req.headers.authorization;
 
+    logger.info(authHeader);
+
     if (!authHeader?.startsWith('Bearer ')) {
       throw new ApiError(
         401,
