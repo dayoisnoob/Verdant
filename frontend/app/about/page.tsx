@@ -3,7 +3,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Newsletter from "@/components/Newsletter";
 import Footer from "@/components/Footer";
-import { PRODUCTS } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { getAllProducts } from "@/lib/api";
 
 const TIMELINE = [
   {
@@ -51,10 +52,16 @@ const TEAM = [
   },
 ];
 
-const farmCount = new Set(PRODUCTS.map((p) => p.farm)).size;
-const organicCount = PRODUCTS.filter((p) => p.isOrganic).length;
-
 export default function AboutPage() {
+  const { data: PRODUCTS } = useQuery({
+    queryKey: ["all-products"],
+    queryFn: () => getAllProducts(),
+  });
+
+  if (!PRODUCTS) return null;
+
+  const farmCount = new Set(PRODUCTS.map((p) => p.farm)).size;
+  const organicCount = PRODUCTS.filter((p) => p.isOrganic).length;
   return (
     <>
       <Navbar />
