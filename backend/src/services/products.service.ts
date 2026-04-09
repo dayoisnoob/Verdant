@@ -13,12 +13,11 @@ import {
   sql,
 } from 'drizzle-orm';
 import { db } from '../config/db';
+import { cache } from '../config/redis';
 import { orderItemsTable, ordersTable, productsTable } from '../db';
 import type { Product } from '../types/product.types';
 import { ApiError } from '../utils/api-response';
 import type { UpdateProductInput } from '../validations/products.validation';
-import { cache } from '../config/redis';
-import { logger } from '../config/logger';
 
 export class ProductService {
   static async createProduct(data: Product | Product[]) {
@@ -311,6 +310,7 @@ const productCardSelect = {
   id: productsTable.id,
   name: productsTable.name,
   slug: productsTable.slug,
+  category: productsTable.category,
   price: productsTable.price,
   originalPrice: productsTable.originalPrice,
   images: productsTable.images,

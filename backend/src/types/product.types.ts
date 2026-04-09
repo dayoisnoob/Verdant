@@ -21,6 +21,7 @@ export interface Product {
   nutritionHighlights: string[];
   storageInstructions: string;
   images: ProductImage[];
+  stock: number;
 }
 
 export interface ProductImage {

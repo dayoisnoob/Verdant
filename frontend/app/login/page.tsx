@@ -70,7 +70,7 @@ export default function LoginPage() {
   };
 
   const inputCls = (hasError: boolean) =>
-    `w-full border-2 bg-gray-50/50 rounded-xl px-4 py-3.5 text-sm outline-none transition-all font-bold text-verdant-dark placeholder:text-gray-400 ${
+    `w-full border-2 bg-gray-50/50 rounded-xl px-4 py-3.5 text-sm outline-none transition-all font-medium text-verdant-dark placeholder:text-gray-400 ${
       hasError
         ? "border-red-200 focus:border-red-400 focus:bg-white"
         : "border-gray-200 focus:border-green hover:bg-white"
@@ -96,7 +96,7 @@ export default function LoginPage() {
                 No account?{" "}
                 <Link
                   href="/signup"
-                  className="text-green font-bold hover:text-green-mid transition-colors"
+                  className="text-green font-medium hover:text-green-mid transition-colors"
                 >
                   Sign up free
                 </Link>
@@ -138,7 +138,7 @@ export default function LoginPage() {
                     strokeWidth={2.5}
                     className="text-red-500 flex-shrink-0"
                   />
-                  <p className="text-sm font-bold text-red-600 leading-snug">
+                  <p className="text-sm font-medium text-red-600 leading-snug">
                     {bannerError}
                   </p>
                 </div>
@@ -163,7 +163,7 @@ export default function LoginPage() {
                   className={inputCls(!!errors.email)}
                 />
                 {errors.email && (
-                  <p className="text-xs font-bold text-red-500 mt-1">
+                  <p className="text-xs font-medium text-red-500 mt-1">
                     {errors.email.message}
                   </p>
                 )}
@@ -176,7 +176,7 @@ export default function LoginPage() {
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-[11px] font-bold text-green hover:text-green-mid transition-colors"
+                    className="text-[11px] font-medium text-green hover:text-green-mid transition-colors"
                   >
                     Forgot password?
                   </Link>
@@ -203,7 +203,7 @@ export default function LoginPage() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-xs font-bold text-red-500 mt-1">
+                  <p className="text-xs font-medium text-red-500 mt-1">
                     {errors.password.message}
                   </p>
                 )}

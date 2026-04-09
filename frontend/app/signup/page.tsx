@@ -43,7 +43,7 @@ export default function SignupPage() {
   const password = useWatch({ control, name: "password", defaultValue: "" });
 
   const inputCls = (hasError: boolean) =>
-    `w-full border-2 bg-gray-50/50 rounded-xl px-4 py-3.5 text-sm outline-none transition-all font-bold text-verdant-dark placeholder:text-gray-400 ${
+    `w-full border-2 bg-gray-50/50 rounded-xl px-4 py-3.5 text-sm outline-none transition-all font-medium text-verdant-dark placeholder:text-gray-400 ${
       hasError
         ? "border-red-200 focus:border-red-400 focus:bg-white"
         : "border-gray-200 focus:border-green hover:bg-white"
@@ -69,7 +69,7 @@ export default function SignupPage() {
                 Already a member?{" "}
                 <Link
                   href="/login"
-                  className="text-green font-bold hover:text-green-mid transition-colors"
+                  className="text-green font-medium hover:text-green-mid transition-colors"
                 >
                   Sign in
                 </Link>
@@ -94,7 +94,7 @@ export default function SignupPage() {
                       className={inputCls(!!errors[field])}
                     />
                     {errors[field] && (
-                      <p className="text-xs font-bold text-red-500 mt-0.5">
+                      <p className="text-xs font-medium text-red-500 mt-0.5">
                         {errors[field]?.message}
                       </p>
                     )}
@@ -114,7 +114,7 @@ export default function SignupPage() {
                   className={inputCls(!!errors.email)}
                 />
                 {errors.email && (
-                  <p className="text-xs font-bold text-red-500 mt-0.5">
+                  <p className="text-xs font-medium text-red-500 mt-0.5">
                     {errors.email.message}
                   </p>
                 )}
@@ -156,7 +156,7 @@ export default function SignupPage() {
                 )}
 
                 {errors.password && (
-                  <p className="text-xs font-bold text-red-500 mt-0.5">
+                  <p className="text-xs font-medium text-red-500 mt-0.5">
                     {errors.password.message}
                   </p>
                 )}
@@ -188,7 +188,7 @@ export default function SignupPage() {
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-xs font-bold text-red-500 mt-0.5">
+                  <p className="text-xs font-medium text-red-500 mt-0.5">
                     {errors.confirmPassword.message}
                   </p>
                 )}

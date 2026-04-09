@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { CheckCircle, XCircle, Loader } from "lucide-react";
 import { verifyEmail } from "@/lib/api";
+import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Status = "loading" | "success" | "error";
 
@@ -42,132 +42,96 @@ export default function VerifyEmailPage() {
   }, [token, router]);
 
   return (
-    <>
-      <main className="min-h-screen bg-cream flex items-center justify-center px-6 py-24">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_40%,rgba(82,183,136,0.07),transparent)] pointer-events-none" />
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[420px] flex flex-col items-center">
+        <Link
+          href="/"
+          className="font-playfair text-3xl sm:text-4xl font-black text-verdant-dark tracking-tight hover:text-green transition-colors mb-8"
+        >
+          Ver<em className="not-italic text-green">dant</em>
+        </Link>
 
-        <div className="relative w-full max-w-md">
-          <div className="bg-white border border-green/10 rounded-3xl shadow-[0_8px_40px_rgba(45,106,79,0.1)] overflow-hidden">
-            <div className="h-1.5 bg-gradient-to-r from-green via-green-light to-green-pale" />
-
-            <div className="px-10 py-12 text-center">
-              <Link
-                href="/"
-                className="font-playfair text-2xl font-black text-green inline-block mb-10"
-              >
-                Ver<em className="not-italic text-green-light">dant</em>
-              </Link>
-
-              {status === "loading" && (
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-full bg-green-pale flex items-center justify-center mb-6">
-                    <Loader size={34} className="text-green animate-spin" />
-                  </div>
-                  <h1 className="font-playfair font-black text-verdant-dark text-2xl mb-3">
-                    Verifying your email
-                  </h1>
-                  <p className="text-verdant-muted text-sm leading-relaxed">
-                    Hang on a moment while we confirm your address...
-                  </p>
-
-                  <div className="flex gap-1.5 mt-6">
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="w-2 h-2 rounded-full bg-green-light"
-                        style={{
-                          animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {status === "success" && (
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-full bg-green-pale flex items-center justify-center mb-6">
-                    <CheckCircle size={38} className="text-green" />
-                  </div>
-                  <h1 className="font-playfair font-black text-verdant-dark text-2xl mb-3">
-                    You&apos;re verified!
-                  </h1>
-                  <p className="text-verdant-muted text-sm leading-relaxed mb-8">
-                    Your email has been confirmed. Redirecting you...
-                  </p>
-
-                  <div className="w-full h-1.5 bg-green-pale rounded-full overflow-hidden">
-                    <div className="h-full bg-green rounded-full animate-[grow_2s_ease-in-out_forwards]" />
-                  </div>
-
-                  <p className="text-xs text-[#bbb] mt-3">
-                    Redirecting in 2 seconds
-                  </p>
-                </div>
-              )}
-
-              {status === "error" && (
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-6">
-                    <XCircle size={38} className="text-red-400" />
-                  </div>
-                  <h1 className="font-playfair font-black text-verdant-dark text-2xl mb-3">
-                    Verification failed
-                  </h1>
-                  <p className="text-verdant-muted text-sm leading-relaxed mb-8">
-                    {message}
-                  </p>
-
-                  <div className="flex flex-col gap-3 w-full">
-                    <Link
-                      href="/login"
-                      className="w-full bg-green text-white py-3.5 rounded-full text-sm font-semibold hover:bg-green-mid transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(45,106,79,0.28)] text-center"
-                    >
-                      Back to Sign In
-                    </Link>
-                    <Link
-                      href="/signup"
-                      className="w-full border border-[#ddd] text-verdant-text py-3.5 rounded-full text-sm font-medium hover:border-green hover:text-green transition-colors text-center"
-                    >
-                      Create a new account
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-green/10 px-10 py-5 bg-green-pale/40 text-center">
-              <p className="text-xs text-verdant-muted">
-                Didn&apos;t receive an email?{" "}
-                <Link
-                  href="/resend-verification"
-                  className="text-green font-medium hover:underline"
-                >
-                  Resend verification link
-                </Link>
+        <div className="w-full bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 p-8 sm:p-10 text-center flex flex-col items-center">
+          {status === "loading" && (
+            <>
+              <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-6 shadow-sm">
+                <Loader2
+                  className="w-8 h-8 text-gray-400 animate-spin"
+                  strokeWidth={2.5}
+                />
+              </div>
+              <h1 className="font-playfair font-black text-verdant-dark text-3xl mb-3">
+                Verifying Email
+              </h1>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed mb-2">
+                Hang tight while we securely confirm your email address.
               </p>
-            </div>
-          </div>
+            </>
+          )}
 
-          <p className="text-center text-xs text-[#bbb] mt-6">
+          {status === "success" && (
+            <>
+              <div className="w-16 h-16 rounded-2xl bg-green/10 border border-green/20 flex items-center justify-center mb-6 shadow-sm">
+                <CheckCircle2
+                  className="w-8 h-8 text-green"
+                  strokeWidth={2.5}
+                />
+              </div>
+              <h1 className="font-playfair font-black text-verdant-dark text-3xl mb-3">
+                You&apos;re Verified!
+              </h1>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed mb-6">
+                Your account is ready to go.
+              </p>
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-green">
+                <Loader2 size={14} className="animate-spin" strokeWidth={3} />{" "}
+                Redirecting...
+              </div>
+            </>
+          )}
+
+          {status === "error" && (
+            <>
+              <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-6 shadow-sm">
+                <XCircle className="w-8 h-8 text-red-500" strokeWidth={2.5} />
+              </div>
+              <h1 className="font-playfair font-black text-verdant-dark text-3xl mb-3">
+                Verification Failed
+              </h1>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed mb-8">
+                {message}
+              </p>
+
+              <div className="flex flex-col gap-3 w-full">
+                <Link
+                  href="/login"
+                  className="w-full bg-green text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-green-mid transition-all shadow-sm"
+                >
+                  Back to Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-500 bg-white border-2 border-gray-200 hover:border-gray-300 hover:text-verdant-dark transition-colors"
+                >
+                  Create New Account
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+
+        {status === "error" && (
+          <p className="text-center text-xs font-bold text-gray-400 mt-8 uppercase tracking-widest">
             Need help?{" "}
-            <Link href="/contact" className="text-green hover:underline">
-              Contact our support team
+            <Link
+              href="/contact"
+              className="text-gray-500 hover:text-green transition-colors"
+            >
+              Contact Support
             </Link>
           </p>
-        </div>
-      </main>
-
-      <style>{`
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); opacity: 0.4; }
-          50% { transform: translateY(-6px); opacity: 1; }
-        }
-        @keyframes grow {
-          from { width: 0%; }
-          to { width: 100%; }
-        }
-      `}</style>
-    </>
+        )}
+      </div>
+    </div>
   );
 }
