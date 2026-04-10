@@ -1,19 +1,20 @@
 import { handleApiError } from "@/util";
 import { useAuthStore } from "@/store/store";
 import { refreshAccessToken } from "./api/index";
+import { NextRequest } from "next/server";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 let refreshPromise: Promise<void> | null = null;
 
 async function attemptFetch(path: string, options?: RequestInit) {
-  const accessToken = useAuthStore.getState().accessToken;
+  // const accessToken = useAuthStore.getState().accessToken;
 
   return fetch(`${BASE_URL}${path}`, {
     ...options,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      // ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       ...options?.headers,
     },
   });

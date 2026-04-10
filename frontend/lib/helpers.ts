@@ -1,8 +1,9 @@
-import { useAuthStore } from "@/store/store";
+import { useAuthStore, useGuestCartStore } from "@/store/store";
 import { UserApi } from "@/types";
 import { ApiError } from "@/util";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
+import { mergeGuestCart } from "./api";
 
 export const convertDate = (date: Date) => {
   const result = new Date(date);
@@ -40,6 +41,12 @@ export const initiateLogin = async (res: UserApi) => {
   useAuthStore.getState().login(res.user, res.accessToken);
 
   try {
+    const guestItems = useGuestCartStore.getState().items;
+    if (guestItems.length > 0) {
+      await mergeGuestCart(guestItems);
+      useGuestCartStore.getState().clearCart();
+      useGuestCartStore.persist.clearStorage();
+    }
   } catch (err) {
     console.error("Cart sync failed after login", err);
   }

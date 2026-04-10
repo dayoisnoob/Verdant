@@ -49,12 +49,19 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS).json(
-      new ApiResponse(200, 'Login successful', {
-        user: result.user,
-        accessToken: result.accessToken,
+    res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS);
+    res
+      .cookie('accessToken', result.accessToken, {
+        ...COOKIE_OPTIONS,
+        httpOnly: false,
+        maxAge: 15 * 60 * 1000,
       })
-    );
+      .json(
+        new ApiResponse(200, 'Login successful', {
+          user: result.user,
+          accessToken: result.accessToken,
+        })
+      );
   }
 
   static async resendVerificationMail(req: Request, res: Response) {

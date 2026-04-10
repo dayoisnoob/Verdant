@@ -9,21 +9,15 @@ export const authenticate = (
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.headers.authorization;
+    const accessToken = req.cookies.accessToken;
 
-    logger.info(authHeader);
+    logger.info({ accessToken }, 'Middleware:');
 
-    if (!authHeader?.startsWith('Bearer ')) {
+    if (!accessToken.trim()) {
       throw new ApiError(
         401,
         'Access denied. No valid authorization token provided'
       );
-    }
-
-    const accessToken = authHeader.substring(7);
-
-    if (!accessToken.trim()) {
-      throw new ApiError(401, 'Access denied. Invalid token format');
     }
 
     const decoded = jwtVerify(accessToken);
