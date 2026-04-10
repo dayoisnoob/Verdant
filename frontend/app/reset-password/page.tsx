@@ -7,11 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import PasswordStrengthBar from "react-password-strength-bar";
 
-export default function ResetPasswordPage() {
+function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -268,5 +268,13 @@ export default function ResetPasswordPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPageWrapper() {
+  return (
+    <Suspense>
+      <ResetPasswordPage />
+    </Suspense>
   );
 }

@@ -7,9 +7,9 @@ import { getOrderBySessionId, removeCoupon } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -225,5 +225,13 @@ export default function OrderConfirmationPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function OrderConfirmationPageWrapper() {
+  return (
+    <Suspense>
+      <OrderConfirmationPage />
+    </Suspense>
   );
 }
