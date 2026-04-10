@@ -4,21 +4,21 @@
 import { CartProvider } from "@/components/CartProvider";
 import QueryProvider from "@/components/QueryProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { useAppReady } from "@/hooks";
+// import { useAppReady } from "@/hooks";
 
-function AppReady({ children }: { children: React.ReactNode }) {
-  const appReady = useAppReady();
+// function AppReady({ children }: { children: React.ReactNode }) {
+//   const appReady = useAppReady();
 
-  if (!appReady) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+//   if (!appReady) {
+//     return (
+//       <div className="min-h-screen bg-cream flex items-center justify-center">
+//         <div className="w-8 h-8 rounded-full border-2 border-green border-t-transparent animate-spin" />
+//       </div>
+//     );
+//   }
 
-  return <>{children}</>;
-}
+//   return <>{children}</>;
+// }
 
 export default function AppProviders({
   children,
@@ -28,9 +28,7 @@ export default function AppProviders({
   return (
     <ErrorBoundary>
       <QueryProvider>
-        <AppReady>
-          <CartProvider>{children}</CartProvider>
-        </AppReady>
+        <CartProvider>{children}</CartProvider>
       </QueryProvider>
     </ErrorBoundary>
   );
