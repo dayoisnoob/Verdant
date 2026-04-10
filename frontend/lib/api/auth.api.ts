@@ -13,9 +13,6 @@ export const login = async (data: { email: string; password: string }) => {
   console.log(res);
 
   await initiateLogin(res);
-
-  console.log("user:", useAuthStore.getState().user);
-  console.log("accessToken:", useAuthStore.getState().accessToken);
 };
 
 export const register = async (data: RegistrationForm) => {
