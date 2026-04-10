@@ -1,9 +1,8 @@
-import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
+import { useAuthStore } from "@/store/store";
 import { UserApi } from "@/types";
 import { ApiError } from "@/util";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
-import { getCart, mergeGuestCart } from "./api";
 
 export const convertDate = (date: Date) => {
   const result = new Date(date);

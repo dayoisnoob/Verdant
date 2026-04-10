@@ -3,14 +3,15 @@
 import { getCart } from "@/lib/api";
 import { useAuthStore, useCartStore } from "@/store/store";
 import { ApiError } from "@/util";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const user = useAuthStore((state) => state.user);
+  const accessToken = useAuthStore((state) => state.accessToken);
   const setIsLoading = useCartStore((state) => state.setIsLoading);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !accessToken) {
       setIsLoading(false);
       return;
     }
@@ -29,7 +30,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     rehydrate();
-  }, [setIsLoading, user]);
+  }, [accessToken, setIsLoading, user]);
 
   return <>{children}</>;
 };
