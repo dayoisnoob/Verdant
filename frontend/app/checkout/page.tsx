@@ -544,9 +544,8 @@ export default function CheckoutPage() {
                                     {address.state}
                                   </p>
                                   <p className="text-sm text-gray-500">
-                                    +234 {address.phone1}
-                                    {address.phone2 &&
-                                      ` • +234 ${address.phone2}`}
+                                    {address.phone1}
+                                    {address.phone2 && ` •${address.phone2}`}
                                   </p>
                                 </div>
                               </div>

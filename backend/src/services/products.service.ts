@@ -316,6 +316,7 @@ const productCardSelect = {
   images: productsTable.images,
   farm: productsTable.farm,
   unit: productsTable.unit,
+  tags: productsTable.tags,
   stock: productsTable.stock,
   isOrganic: productsTable.isOrganic,
   reviewCount: productsTable.reviewCount,

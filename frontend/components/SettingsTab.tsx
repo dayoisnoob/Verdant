@@ -18,7 +18,31 @@ import {
 } from "@/validations";
 import { useLogout } from "@/hooks";
 import { AlertTriangle, CheckCircle2, Lock, User } from "lucide-react";
-import { Field, inputCls } from "./AdressesCard";
+
+/* ── Shared Form UI Components ── */
+
+const inputCls =
+  "w-full border-2 border-gray-100 bg-gray-50 rounded-xl px-4 py-3.5 text-sm outline-none focus:border-green focus:bg-white transition-all text-verdant-dark font-bold placeholder:text-gray-300";
+
+const Field = ({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) => (
+  <div className="flex flex-col gap-1.5 w-full">
+    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      {label}
+    </label>
+    {children}
+    {error && <p className="text-xs font-bold text-red-500 mt-0.5">{error}</p>}
+  </div>
+);
+
+/* ── Main Component ── */
 
 export default function SettingsTab({ user }: { user: UserData }) {
   const updateUser = useAuthStore((s) => s.updateUser);
@@ -103,18 +127,18 @@ export default function SettingsTab({ user }: { user: UserData }) {
     <div className="flex flex-col gap-8 w-full max-w-2xl">
       <form
         onSubmit={handleProfile(onSaveProfile)}
-        className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col"
+        className="bg-white/85 rounded-3xl border-2 border-gray-100 shadow-sm overflow-hidden flex flex-col"
       >
-        <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
-          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+        <div className="px-6 py-5 border-b-2 border-gray-100 flex items-center gap-3 bg-gray-50/50">
+          <div className="w-8 h-8 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center text-gray-500 shadow-sm">
             <User size={16} strokeWidth={2.5} />
           </div>
           <div>
             <h3 className="font-bold text-verdant-dark text-base leading-tight">
               Personal Information
             </h3>
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
-              Updates sync to your order history
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+              Manage your account details
             </p>
           </div>
         </div>
@@ -145,8 +169,8 @@ export default function SettingsTab({ user }: { user: UserData }) {
               disabled={savingProfile || (!profileDirty && !profileSaved)}
               className={`flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm disabled:cursor-not-allowed ${
                 profileSaved
-                  ? "bg-green-pale text-green border-2 border-green-light shadow-none"
-                  : "bg-green text-white hover:bg-green-mid disabled:opacity-60 disabled:shadow-none"
+                  ? "bg-green/10 text-green border-2 border-green/20 shadow-none"
+                  : "bg-green text-white hover:bg-green-mid disabled:opacity-60 disabled:shadow-none border-2 border-transparent"
               }`}
             >
               {savingProfile ? (
@@ -170,18 +194,18 @@ export default function SettingsTab({ user }: { user: UserData }) {
 
       <form
         onSubmit={handlePassword(onSavePassword)}
-        className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col"
+        className="bg-white/85 rounded-3xl border-2 border-gray-100 shadow-sm overflow-hidden flex flex-col"
       >
-        <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
-          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+        <div className="px-6 py-5 border-b-2 border-gray-100 flex items-center gap-3 bg-gray-50/50">
+          <div className="w-8 h-8 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center text-gray-500 shadow-sm">
             <Lock size={16} strokeWidth={2.5} />
           </div>
           <div>
             <h3 className="font-bold text-verdant-dark text-base leading-tight">
               Password
             </h3>
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
-              Leave blank to keep current password
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+              Secure your account
             </p>
           </div>
         </div>
@@ -228,7 +252,7 @@ export default function SettingsTab({ user }: { user: UserData }) {
             <button
               type="submit"
               disabled={passwordSaving}
-              className="bg-green text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-green-mid transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto"
+              className="bg-verdant-dark text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-black transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto"
             >
               {passwordSaving ? "Updating Password..." : "Update Password"}
             </button>
@@ -236,16 +260,16 @@ export default function SettingsTab({ user }: { user: UserData }) {
         </div>
       </form>
 
-      <div className="bg-white rounded-3xl border border-red-100 shadow-sm overflow-hidden flex flex-col mt-4">
-        <div className="px-6 py-5 border-b border-red-50 flex items-center gap-3 bg-red-50/50">
-          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+      <div className="bg-white/85 rounded-3xl border-2 border-red-100 shadow-sm overflow-hidden flex flex-col mt-4">
+        <div className="px-6 py-5 border-b-2 border-red-100 flex items-center gap-3 bg-red-50/50">
+          <div className="w-8 h-8 rounded-full bg-white border-2 border-red-100 flex items-center justify-center text-red-500 shadow-sm">
             <AlertTriangle size={16} strokeWidth={2.5} />
           </div>
           <div>
             <h3 className="font-bold text-red-600 text-base leading-tight">
               Danger Zone
             </h3>
-            <p className="text-[11px] font-bold text-red-400 uppercase tracking-widest mt-0.5">
+            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest mt-0.5">
               These actions are permanent
             </p>
           </div>
@@ -258,7 +282,7 @@ export default function SettingsTab({ user }: { user: UserData }) {
           </p>
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="text-xs font-bold text-red-500 uppercase tracking-widest border-2 border-red-100 bg-red-50 px-6 py-3.5 rounded-xl hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors whitespace-nowrap"
+            className="text-xs font-bold text-red-500 uppercase tracking-widest border-2 border-red-200 bg-red-50 px-6 py-3.5 rounded-xl hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors whitespace-nowrap shadow-sm"
           >
             Delete Account
           </button>

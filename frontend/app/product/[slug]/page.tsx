@@ -53,18 +53,80 @@ export default function ProductPage() {
 
   if (isLoading) {
     return (
-      <div className="bg-cream min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-green animate-spin" />
-            <p className="text-sm font-bold text-gray-500 tracking-widest uppercase">
-              Loading product...
-            </p>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <Container>
+        <div className="bg-cream min-h-screen flex flex-col">
+          <Navbar />
+          <main className="flex-1 pt-24 pb-20">
+            <div className="max-w-[1600px] mx-auto">
+              {/* Breadcrumb Skeleton */}
+              <div className="px-6 sm:px-10 lg:px-16 xl:px-20 mb-6 py-4">
+                <div className="w-48 h-4 bg-gray-200 rounded-md animate-pulse" />
+              </div>
+
+              <div className="px-6 sm:px-10 lg:px-16 xl:px-20 pb-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16 items-start">
+                  {/* Left: Images Skeleton */}
+                  <div className="lg:col-span-6 xl:col-span-5 flex flex-col gap-4 lg:sticky lg:top-28">
+                    <div className="w-full aspect-square bg-gray-200 rounded-2xl animate-pulse" />
+                    <div className="flex gap-4 overflow-hidden">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-200 rounded-2xl animate-pulse flex-shrink-0"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right: Details Skeleton */}
+                  <div className="lg:col-span-6 xl:col-span-7 flex flex-col gap-8 py-2">
+                    <div>
+                      <div className="flex gap-3 mb-4">
+                        <div className="w-20 h-6 bg-gray-200 rounded-md animate-pulse" />
+                        <div className="w-24 h-6 bg-gray-200 rounded-md animate-pulse" />
+                      </div>
+                      <div className="w-3/4 h-12 sm:h-16 bg-gray-200 rounded-xl animate-pulse mb-4" />
+                      <div className="w-40 h-6 bg-gray-200 rounded-md animate-pulse" />
+                    </div>
+
+                    <div className="w-32 h-12 bg-gray-200 rounded-xl animate-pulse" />
+
+                    <div className="flex flex-col gap-3">
+                      <div className="w-full h-4 bg-gray-200 rounded-md animate-pulse" />
+                      <div className="w-full h-4 bg-gray-200 rounded-md animate-pulse" />
+                      <div className="w-4/5 h-4 bg-gray-200 rounded-md animate-pulse" />
+                    </div>
+
+                    <div className="h-px bg-gray-200" />
+
+                    {/* Add to Cart Skeleton */}
+                    <div className="flex gap-4 h-14">
+                      <div className="flex-1 sm:max-w-40 bg-gray-200 rounded-xl animate-pulse" />
+                      <div className="w-14 h-14 bg-gray-200 rounded-xl flex-shrink-0 animate-pulse" />
+                    </div>
+
+                    <div className="h-px bg-gray-200" />
+
+                    {/* Farm Info Skeleton */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="h-24 bg-gray-200 rounded-2xl animate-pulse"
+                        />
+                      ))}
+                    </div>
+
+                    {/* Storage Info Skeleton */}
+                    <div className="h-28 bg-gray-200 rounded-2xl animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </Container>
     );
   }
 

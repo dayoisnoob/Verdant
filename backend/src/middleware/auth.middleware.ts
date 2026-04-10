@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { logger } from '../config/logger.ts';
 import { ApiError } from '../utils/api-response.js';
 import { jwtVerify } from '../utils/jwt.util.js';
+import { env } from '../config/env.ts';
 
 export const authenticate = (
   req: Request,
@@ -9,11 +10,12 @@ export const authenticate = (
   next: NextFunction
 ) => {
   try {
-    const accessToken = req.cookies.accessToken;
+    const isProd = env.NODE_ENV === 'production';
 
-    logger.info({ accessToken }, 'Middleware:');
+    const accessToken =
+      req.cookies[isProd ? '__Secure-auth.access' : 'auth.access'];
 
-    if (!accessToken.trim()) {
+    if (!accessToken?.trim()) {
       throw new ApiError(
         401,
         'Access denied. No valid authorization token provided'

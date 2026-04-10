@@ -16,7 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   CheckCircle2,
   Heart,
-  Loader2,
   LogOut,
   MapPin,
   Package,
@@ -89,12 +88,80 @@ export default function ProfilePage() {
     return (
       <div className="bg-cream min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-green animate-spin" />
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-              Loading your profile...
-            </p>
+        <main className="flex-1 pt-24 pb-20">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start mt-8">
+              {/* ── Desktop Sidebar Skeleton ── */}
+              <aside className="hidden lg:flex flex-col w-72 flex-shrink-0 sticky top-32 gap-6">
+                <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex flex-col gap-6">
+                  <div className="flex items-center gap-4 animate-pulse">
+                    <div className="w-14 h-14 rounded-2xl bg-gray-200 flex-shrink-0" />
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="h-5 w-3/4 bg-gray-200 rounded-md" />
+                      <div className="h-3 w-full bg-gray-200 rounded-md" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 animate-pulse">
+                    <div className="h-20 bg-gray-200 rounded-2xl" />
+                    <div className="h-20 bg-gray-200 rounded-2xl" />
+                  </div>
+                  <div className="h-8 bg-gray-200 rounded-xl animate-pulse" />
+                </div>
+
+                <div className="bg-white border border-gray-100 rounded-3xl p-2 flex flex-col gap-1 shadow-sm">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="h-12 bg-gray-100 rounded-xl w-full animate-pulse"
+                    />
+                  ))}
+                </div>
+
+                <div className="h-12 bg-gray-200 rounded-2xl w-full animate-pulse" />
+              </aside>
+
+              {/* ── Main Content Skeleton ── */}
+              <div className="flex-1 min-w-0 flex flex-col w-full">
+                {/* Mobile Header Skeleton */}
+                <div className="lg:hidden flex flex-col gap-6 mb-8 w-full">
+                  <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex items-center gap-4 animate-pulse">
+                    <div className="w-16 h-16 rounded-2xl bg-gray-200 flex-shrink-0" />
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="h-6 w-1/2 bg-gray-200 rounded-md" />
+                      <div className="h-4 w-3/4 bg-gray-200 rounded-md" />
+                      <div className="flex gap-2 mt-1">
+                        <div className="h-6 w-16 bg-gray-200 rounded-lg" />
+                        <div className="h-6 w-16 bg-gray-200 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 overflow-hidden animate-pulse">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="h-11 w-24 bg-gray-200 rounded-xl flex-shrink-0"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Title Skeleton */}
+                <div className="mb-8 animate-pulse">
+                  <div className="h-10 w-48 bg-gray-200 rounded-xl mb-3" />
+                  <div className="h-4 w-64 bg-gray-200 rounded-md" />
+                </div>
+
+                {/* Overview Tab Content Skeleton */}
+                <div className="flex flex-col gap-8 w-full animate-pulse">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="h-28 bg-white border border-gray-100 rounded-3xl shadow-sm" />
+                    <div className="h-28 bg-white border border-gray-100 rounded-3xl shadow-sm" />
+                  </div>
+                  <div className="h-64 bg-white border border-gray-100 rounded-3xl shadow-sm" />
+                  <div className="h-48 bg-white border border-gray-100 rounded-3xl shadow-sm" />
+                </div>
+              </div>
+            </div>
           </div>
         </main>
         <Footer />

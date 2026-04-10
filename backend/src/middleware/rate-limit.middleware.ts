@@ -77,6 +77,7 @@ export const changePasswordLimiter = createLimiter({
   keyGenerator: (req) => req.user!.id,
   max: 5,
   windowMinutes: 60,
+  message: 'Too many attempts. Wait 1 hour.',
 });
 
 export const refreshTokenLimiter = createLimiter({

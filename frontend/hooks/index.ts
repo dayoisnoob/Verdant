@@ -1,5 +1,8 @@
+"use client";
+
 import {
   addToWishlist,
+  getAllProducts,
   getUserOrders,
   getUserWishlist,
   logout as logoutApi,
@@ -8,7 +11,7 @@ import { DELIVERY_FEE, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
 import { FilterStatus } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export const useCart = (discount: number = 0) => {
@@ -47,6 +50,14 @@ export const useCart = (discount: number = 0) => {
     updateQuantity: cart.updateQuantity,
     clearCart: cart.clearCart,
   };
+};
+
+export const useAllProducts = () => {
+  const { data } = useQuery({
+    queryKey: ["all-products"],
+    queryFn: () => getAllProducts(),
+  });
+  return { data };
 };
 
 export const useLogout = () => {

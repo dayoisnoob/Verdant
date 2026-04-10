@@ -3,6 +3,7 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
+import { useAllProducts } from "@/hooks";
 import { getAllProducts } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -31,12 +32,11 @@ export default function SeasonalPage() {
 
   const season = SEASONS.find((s) => s.label === activeSeason)!;
 
-  const { data: PRODUCTS } = useQuery({
-    queryKey: ["all-products"],
-    queryFn: () => getAllProducts(),
-  });
+  const { data: PRODUCTS } = useAllProducts();
 
   if (!PRODUCTS) return null;
+
+  console.log(PRODUCTS);
 
   const seasonalProducts = PRODUCTS.filter(
     (p) => p.isSeasonal && p.tags.some((t) => season.tags.includes(t)),

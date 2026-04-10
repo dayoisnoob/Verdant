@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
-import { COOKIE_OPTIONS } from '../constants.ts';
+import { ACCESS_COOKIE, COOKIE_OPTIONS, REFRESH_COOKIE } from '../constants.ts';
 import { AuthService } from '../services/auth.service';
 import { ApiError, ApiResponse } from '../utils/api-response';
+import { env } from '../config/env.ts';
 
 export class AuthController {
   static deviceInfo(req: Request) {
@@ -49,12 +50,11 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS);
     res
-      .cookie('accessToken', result.accessToken, {
+      .cookie(REFRESH_COOKIE, result.refreshToken, COOKIE_OPTIONS)
+      .cookie(ACCESS_COOKIE, result.accessToken, {
         ...COOKIE_OPTIONS,
         httpOnly: false,
-        maxAge: 15 * 60 * 1000,
       })
       .json(
         new ApiResponse(200, 'Login successful', {
@@ -76,7 +76,10 @@ export class AuthController {
   }
 
   static async refreshAccessToken(req: Request, res: Response) {
-    const refreshToken = req.cookies?.refreshToken;
+    const isProd = env.NODE_ENV === 'production';
+
+    const refreshToken =
+      req.cookies[isProd ? '__Secure-auth.refresh' : 'auth.refresh'];
 
     if (!refreshToken) {
       throw new ApiError(401, 'Authentication required. Please sign in.');
@@ -87,11 +90,17 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS).json(
-      new ApiResponse(200, 'Access token successfully refreshed', {
-        accessToken: result.accessToken,
+    res
+      .cookie(REFRESH_COOKIE, result.refreshToken, COOKIE_OPTIONS)
+      .cookie(ACCESS_COOKIE, result.accessToken, {
+        ...COOKIE_OPTIONS,
+        httpOnly: false,
       })
-    );
+      .json(
+        new ApiResponse(200, 'Access token successfully refreshed', {
+          accessToken: result.accessToken,
+        })
+      );
   }
 
   static async logout(req: Request, res: Response) {

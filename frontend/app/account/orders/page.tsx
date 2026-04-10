@@ -5,8 +5,34 @@ import Navbar from "@/components/Navbar";
 import { OrderCard } from "@/components/OrderCard";
 import { useOrders } from "@/hooks";
 import { ORDER_FILTERS, ORDER_STATUS_CONFIG } from "@/lib/constants";
-import { ArrowRight, Loader2, Package, Search } from "lucide-react";
+import { ArrowRight, Package, Search } from "lucide-react";
 import Link from "next/link";
+
+const OrderCardSkeleton = () => (
+  <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 flex flex-col gap-6 w-full animate-pulse">
+    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+      <div className="flex flex-col gap-2">
+        <div className="w-32 h-3 bg-gray-200 rounded-md" />
+        <div className="w-40 h-5 bg-gray-200 rounded-md" />
+      </div>
+      <div className="w-24 h-8 bg-gray-200 rounded-lg" />
+    </div>
+
+    <div className="flex gap-3 overflow-hidden">
+      {[1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-xl flex-shrink-0"
+        />
+      ))}
+    </div>
+
+    <div className="flex items-end justify-between pt-5 border-t border-gray-100">
+      <div className="w-16 h-4 bg-gray-200 rounded-md" />
+      <div className="w-24 h-8 bg-gray-200 rounded-md" />
+    </div>
+  </div>
+);
 
 export default function OrdersPage() {
   const { orders, filtered, counts, isLoading, filter, setFilter } =
@@ -27,14 +53,17 @@ export default function OrdersPage() {
                 <h1 className="font-playfair font-black text-verdant-dark text-4xl sm:text-5xl tracking-tight mb-3">
                   My Orders
                 </h1>
-                <p className="text-gray-500 font-medium text-sm">
-                  {isLoading
-                    ? "Loading your orders..."
-                    : `${orders.length} order${orders.length !== 1 ? "s" : ""} placed`}
-                </p>
+
+                {isLoading ? (
+                  <div className="w-24 h-5 bg-gray-200 rounded-md animate-pulse mt-1" />
+                ) : (
+                  <p className="text-gray-500 font-medium text-sm">
+                    {orders.length} order{orders.length !== 1 ? "s" : ""} placed
+                  </p>
+                )}
               </div>
 
-              {!isLoading && orders.length > 0 && (
+              {orders.length > 0 ? (
                 <div className="flex items-center gap-3 flex-wrap">
                   {(["shipped", "delivered"] as const).map((s) => {
                     if (!counts[s]) return null;
@@ -58,10 +87,19 @@ export default function OrdersPage() {
                     );
                   })}
                 </div>
-              )}
+              ) : null}
             </div>
 
-            {!isLoading && orders.length > 0 && (
+            {isLoading ? (
+              <div className="flex items-center gap-2 mt-8 overflow-x-hidden pb-2 -mx-6 px-6 sm:mx-0 sm:px-0">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="w-28 h-11 bg-gray-200 rounded-xl animate-pulse flex-shrink-0"
+                  />
+                ))}
+              </div>
+            ) : orders.length > 0 ? (
               <div className="flex items-center gap-2 mt-8 overflow-x-auto custom-scrollbar pb-2 -mx-6 px-6 sm:mx-0 sm:px-0">
                 {ORDER_FILTERS.map((f) => {
                   const count =
@@ -91,21 +129,20 @@ export default function OrdersPage() {
                   );
                 })}
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="pt-10">
             {isLoading && (
-              <div className="flex flex-col items-center justify-center py-24 gap-4">
-                <Loader2 className="w-8 h-8 text-green animate-spin" />
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  Fetching your orders...
-                </p>
+              <div className="flex flex-col gap-6 w-full">
+                {[1, 2, 3].map((i) => (
+                  <OrderCardSkeleton key={i} />
+                ))}
               </div>
             )}
 
             {!isLoading && orders.length === 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
                   <Package
                     className="w-10 h-10 text-gray-400"
@@ -129,7 +166,7 @@ export default function OrdersPage() {
             )}
 
             {!isLoading && orders.length > 0 && filtered.length === 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
                 <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
                   <Search className="w-8 h-8 text-gray-400" strokeWidth={2} />
                 </div>

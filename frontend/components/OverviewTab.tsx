@@ -27,59 +27,56 @@ export default function OverviewTab({
   setTab,
 }: OverviewTabProps) {
   return (
-    <div className="flex flex-col gap-8 w-full">
+    <div className="flex flex-col gap-10 w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 flex items-center gap-6 hover:border-green/30 transition-colors">
-          <div className="w-14 h-14 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-            <Package className="w-6 h-6 text-gray-400" strokeWidth={2} />
+        <div className="bg-verdant-dark rounded-3xl border-2 border-black shadow-sm p-6 sm:p-8 flex items-center gap-6 transition-transform hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/10">
+            <Package className="w-6 h-6 text-white" strokeWidth={2} />
           </div>
           <div>
-            <p className="font-playfair font-black text-verdant-dark text-3xl md:text-4xl leading-none mb-1">
+            <p className="font-playfair font-black text-white text-3xl md:text-4xl leading-none mb-1.5">
               {orders.length}
             </p>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
               Total Orders
             </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 flex items-center gap-6 hover:border-green/30 transition-colors">
-          <div className="w-14 h-14 bg-green/10 border border-green/20 rounded-2xl flex items-center justify-center flex-shrink-0">
-            <CreditCard className="w-6 h-6 text-green" strokeWidth={2} />
+        <div className="bg-green/10 rounded-3xl border-2 border-green/20 shadow-sm p-6 sm:p-8 flex items-center gap-6 transition-transform hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm">
+            <CreditCard className="w-6 h-6 text-green" strokeWidth={2.5} />
           </div>
           <div className="min-w-0">
-            <p className="font-playfair font-black text-green text-3xl md:text-4xl leading-none mb-1 truncate">
+            <p className="font-playfair font-black text-green text-3xl md:text-4xl leading-none mb-1.5 truncate">
               £{totalSpent}
             </p>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
               Total Spent
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-        <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
-          <h3 className="font-bold text-verdant-dark text-base">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-end justify-between px-2">
+          <h3 className="font-playfair font-black text-verdant-dark text-xl sm:text-2xl tracking-tight">
             Latest Order
           </h3>
           {orders.length > 0 && (
             <button
               onClick={() => setTab("orders")}
-              className="text-xs font-bold text-green uppercase tracking-widest hover:text-green-mid flex items-center gap-1"
+              className="text-[10px] font-bold text-green uppercase tracking-widest hover:text-verdant-dark flex items-center gap-1 transition-colors"
             >
-              View All <ChevronRight size={14} />
+              View All <ChevronRight size={14} strokeWidth={2.5} />
             </button>
           )}
         </div>
 
         {orders.length === 0 ? (
-          <div className="p-10 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-full flex items-center justify-center mb-4">
-              <ShoppingBag
-                className="w-8 h-8 text-gray-300"
-                strokeWidth={1.5}
-              />
+          <div className="bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 p-10 flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-white/70 border-2 border-gray-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
+              <ShoppingBag className="w-8 h-8 text-gray-300" strokeWidth={2} />
             </div>
             <p className="font-bold text-verdant-dark text-lg mb-2">
               No orders yet
@@ -89,22 +86,20 @@ export default function OverviewTab({
             </p>
             <Link
               href="/shop"
-              className="text-xs font-bold uppercase tracking-widest bg-green text-white px-6 py-3 rounded-xl hover:bg-green-mid transition-colors shadow-sm"
+              className="text-[10px] font-bold uppercase tracking-widest bg-green text-white px-6 py-3.5 rounded-xl hover:bg-verdant-dark transition-colors shadow-sm"
             >
               Start Shopping
             </Link>
           </div>
         ) : (
-          <div className="p-6">
-            <OrderCard order={orders[0]} />
-          </div>
+          <OrderCard order={orders[0]} />
         )}
       </div>
 
       {orders.length === 0 && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-          <div className="px-6 py-5 border-b border-gray-50">
-            <h3 className="font-bold text-verdant-dark text-base mb-1">
+        <div className="flex flex-col gap-4">
+          <div className="px-2">
+            <h3 className="font-playfair font-black text-verdant-dark text-xl sm:text-2xl tracking-tight mb-1">
               Setup Guide
             </h3>
             <p className="text-xs font-medium text-gray-500">
@@ -112,7 +107,7 @@ export default function OverviewTab({
             </p>
           </div>
 
-          <div className="flex flex-col divide-y divide-gray-50 p-2">
+          <div className="bg-white rounded-3xl border-2 border-gray-100 shadow-sm overflow-hidden flex flex-col divide-y-2 divide-gray-50">
             {[
               {
                 done: true,
@@ -138,31 +133,35 @@ export default function OverviewTab({
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors rounded-xl"
+                className="flex items-center gap-5 p-5 sm:p-6 hover:bg-gray-50 transition-colors"
               >
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border-2 ${
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 border-2 shadow-sm ${
                     item.done
-                      ? "bg-green/10 text-green border-green/20"
-                      : "bg-gray-50 text-gray-400 border-gray-100"
+                      ? "bg-green text-white border-green-light"
+                      : "bg-white text-gray-300 border-gray-200"
                   }`}
                 >
                   {item.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p
-                    className={`text-sm font-bold truncate ${item.done ? "text-gray-400 line-through" : "text-verdant-dark"}`}
+                    className={`text-sm font-bold truncate ${
+                      item.done
+                        ? "text-gray-400 line-through"
+                        : "text-verdant-dark"
+                    }`}
                   >
                     {item.label}
                   </p>
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1 truncate">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 truncate">
                     {item.desc}
                   </p>
                 </div>
                 {!item.done && item.action && (
                   <button
                     onClick={item.action}
-                    className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:border-green hover:text-green transition-colors shadow-sm flex-shrink-0"
+                    className="w-10 h-10 rounded-xl bg-white border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:border-green hover:text-green transition-colors shadow-sm flex-shrink-0"
                   >
                     <ChevronRight size={18} strokeWidth={2.5} />
                   </button>
@@ -173,25 +172,25 @@ export default function OverviewTab({
         </div>
       )}
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-        <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
-          <h3 className="font-bold text-verdant-dark text-base">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-end justify-between px-2">
+          <h3 className="font-playfair font-black text-verdant-dark text-xl sm:text-2xl tracking-tight">
             Default Address
           </h3>
           {defaultAddress && (
             <button
               onClick={() => setTab("addresses")}
-              className="text-xs font-bold text-green uppercase tracking-widest hover:text-green-mid flex items-center gap-1"
+              className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-verdant-dark flex items-center gap-1 transition-colors"
             >
-              Manage <ChevronRight size={14} />
+              Manage <ChevronRight size={14} strokeWidth={2.5} />
             </button>
           )}
         </div>
 
         {!defaultAddress ? (
-          <div className="p-8 flex flex-col items-center text-center">
-            <div className="w-14 h-14 bg-gray-50 border border-gray-100 rounded-full flex items-center justify-center mb-4">
-              <MapPin className="w-6 h-6 text-gray-300" strokeWidth={2} />
+          <div className="bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 p-10 flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-white border-2 border-gray-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
+              <MapPin className="w-8 h-8 text-gray-300" strokeWidth={2} />
             </div>
             <p className="font-bold text-verdant-dark text-lg mb-2">
               No address saved
@@ -201,28 +200,39 @@ export default function OverviewTab({
             </p>
             <button
               onClick={() => setTab("addresses")}
-              className="text-xs font-bold uppercase tracking-widest border-2 border-gray-200 bg-white text-verdant-dark px-6 py-3 rounded-xl hover:border-green hover:text-green transition-colors"
+              className="text-[10px] font-bold uppercase tracking-widest bg-white border-2 border-gray-200 text-verdant-dark px-6 py-3.5 rounded-xl hover:border-green hover:text-green transition-colors shadow-sm"
             >
               Add Address
             </button>
           </div>
         ) : (
-          <div className="p-6 flex items-start gap-4">
-            <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <MapPin size={20} className="text-gray-400" strokeWidth={2} />
+          <div className="bg-green/5 rounded-3xl border-2 border-green shadow-sm p-6 sm:p-8 flex items-start gap-5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-green text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-bl-2xl z-10 flex items-center gap-1.5 shadow-sm">
+              <CheckCircle2 size={14} strokeWidth={3} /> Default
             </div>
-            <div className="flex-1 min-w-0 pt-1">
-              <p className="text-sm font-bold text-verdant-dark mb-1">
+
+            <div className="w-14 h-14 rounded-2xl bg-green text-white border-2 border-green-light flex items-center justify-center flex-shrink-0 shadow-sm">
+              <MapPin size={24} strokeWidth={2.5} />
+            </div>
+
+            <div className="flex-1 min-w-0 pt-1.5">
+              <p className="font-playfair font-black text-verdant-dark text-2xl leading-tight truncate">
                 {defaultAddress.firstName} {defaultAddress.lastName}
               </p>
-              <p className="text-sm font-medium text-gray-600 leading-relaxed mb-2">
-                {defaultAddress.streetAddress}
-                <br />
-                {defaultAddress.state} State
+              <p className="text-[10px] font-bold uppercase tracking-widest mt-1.5 truncate text-green">
+                {defaultAddress.state}
               </p>
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                +234 {defaultAddress.phone1}
-              </p>
+
+              <div className="flex flex-col gap-4 mt-5">
+                <p className="text-sm font-medium text-gray-600 leading-relaxed">
+                  {defaultAddress.streetAddress}
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-xs font-bold text-verdant-dark tracking-wider bg-white w-fit px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
+                    {defaultAddress.phone1}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}

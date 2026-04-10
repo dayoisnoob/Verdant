@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export default function proxy(request: NextRequest) {
-  const token = request.cookies.get("refreshToken")?.value;
+  const isProd = process.env.NODE_ENV === "production";
+
+  const token = request.cookies.get(
+    isProd ? "__Secure-auth.refresh" : "auth.refresh",
+  )?.value;
 
   if (!token) {
     const loginUrl = new URL("/login", request.url);
