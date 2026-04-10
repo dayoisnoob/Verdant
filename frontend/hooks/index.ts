@@ -3,7 +3,6 @@ import {
   getUserOrders,
   getUserWishlist,
   logout as logoutApi,
-  refreshAccessToken,
 } from "@/lib/api";
 import { DELIVERY_FEE, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { useAuthStore, useCartStore, useGuestCartStore } from "@/store/store";
@@ -97,27 +96,6 @@ export const useWishlistToggle = (productId: string) => {
   };
 
   return { wishlisted, toggle };
-};
-
-export const useAppReady = () => {
-  const isHydrated = useAuthStore((s) => s.isHydrated);
-  const user = useAuthStore((s) => s.user);
-  const [tokenReady, setTokenReady] = useState(false);
-
-  useEffect(() => {
-    if (!isHydrated) return;
-
-    if (!user) {
-      Promise.resolve().then(() => setTokenReady(true));
-      return;
-    }
-
-    refreshAccessToken()
-      .then(() => setTokenReady(true))
-      .catch(() => setTokenReady(true));
-  }, [isHydrated, user]);
-
-  return isHydrated && tokenReady;
 };
 
 export const useOrders = () => {
