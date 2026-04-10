@@ -34,7 +34,7 @@ export default function LoginPage() {
     setNotVerified(false);
     try {
       await login(data);
-      const redirect = searchParams.get("redirect") || "/";
+      const redirect = searchParams.get("redirect") || "/basket";
       router.replace(redirect);
     } catch (err) {
       if (err instanceof ApiError) {
