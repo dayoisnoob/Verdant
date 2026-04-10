@@ -7,10 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 
-export default function LoginPage() {
+function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
     setBannerError("");
     setNotVerified(false);
     try {
-      // await login(data);
+      await login(data);
       const redirect = searchParams.get("redirect") || "/basket";
       router.replace(redirect);
     } catch (err) {
@@ -249,5 +249,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPageWrapper() {
+  return (
+    <Suspense>
+      <LoginPage />
+    </Suspense>
   );
 }

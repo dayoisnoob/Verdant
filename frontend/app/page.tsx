@@ -8,12 +8,10 @@ import Navbar from "@/components/Navbar";
 import ProductSection from "@/components/ProductSection";
 import { FeaturedSkeleton, HeroSkeleton } from "@/components/Skeletons";
 import { getBestSelling, getPaginatedProducts, getTrending } from "@/lib/api";
-import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
 import { Recycle, Sprout, Tractor } from "lucide-react";
 
 export default function HomePage() {
-  console.log(useAuthStore.getState().accessToken);
   const {
     data,
     isLoading: featuredLoading,
