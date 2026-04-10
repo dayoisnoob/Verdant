@@ -2,8 +2,6 @@ import type { CookieOptions } from 'express';
 import { env } from './config/env';
 
 const isProd = env.NODE_ENV === 'production';
-export const REFRESH_COOKIE = isProd ? '__auth.refresh' : 'auth.refresh';
-export const ACCESS_COOKIE = isProd ? '__auth.access' : 'auth.access';
 
 export const COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,

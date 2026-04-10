@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { ACCESS_COOKIE, COOKIE_OPTIONS, REFRESH_COOKIE } from '../constants.ts';
+import { COOKIE_OPTIONS } from '../constants.ts';
 import { AuthService } from '../services/auth.service';
 import { ApiError, ApiResponse } from '../utils/api-response';
 import { env } from '../config/env.ts';
@@ -51,8 +51,8 @@ export class AuthController {
     );
 
     res
-      .cookie(REFRESH_COOKIE, result.refreshToken, COOKIE_OPTIONS)
-      .cookie(ACCESS_COOKIE, result.accessToken, {
+      .cookie('__auth.refresh', result.refreshToken, COOKIE_OPTIONS)
+      .cookie('__auth.access', result.accessToken, {
         ...COOKIE_OPTIONS,
         httpOnly: false,
       })
@@ -76,10 +76,7 @@ export class AuthController {
   }
 
   static async refreshAccessToken(req: Request, res: Response) {
-    const isProd = env.NODE_ENV === 'production';
-
-    const refreshToken =
-      req.cookies[isProd ? '__Secure-auth.refresh' : 'auth.refresh'];
+    const refreshToken = req.cookies['__auth.refresh'];
 
     if (!refreshToken) {
       throw new ApiError(401, 'Authentication required. Please sign in.');
@@ -91,8 +88,8 @@ export class AuthController {
     );
 
     res
-      .cookie(REFRESH_COOKIE, result.refreshToken, COOKIE_OPTIONS)
-      .cookie(ACCESS_COOKIE, result.accessToken, {
+      .cookie('__auth.refresh', result.refreshToken, COOKIE_OPTIONS)
+      .cookie('__auth.access', result.accessToken, {
         ...COOKIE_OPTIONS,
         httpOnly: false,
       })

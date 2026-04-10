@@ -10,10 +10,7 @@ export const authenticate = (
   next: NextFunction
 ) => {
   try {
-    const isProd = env.NODE_ENV === 'production';
-
-    const accessToken =
-      req.cookies[isProd ? '__Secure-auth.access' : 'auth.access'];
+    const accessToken = req.cookies['__auth.access'];
 
     if (!accessToken?.trim()) {
       throw new ApiError(

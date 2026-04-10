@@ -90,7 +90,7 @@ function LoginPage() {
           <div className="px-6 py-8 sm:p-10">
             <div className="text-center mb-8">
               <h1 className="font-playfair font-black text-verdant-dark text-3xl mb-2">
-                Welcome Backs
+                Welcome Back
               </h1>
               <p className="text-gray-500 font-medium text-sm">
                 No account?{" "}
