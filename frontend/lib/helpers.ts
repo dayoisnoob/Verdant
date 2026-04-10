@@ -41,16 +41,6 @@ export const initiateLogin = async (res: UserApi) => {
   useAuthStore.getState().login(res.user, res.accessToken);
 
   try {
-    const guestItems = useGuestCartStore.getState().items;
-    if (guestItems.length > 0) {
-      await mergeGuestCart(guestItems);
-      useGuestCartStore.getState().clearCart();
-      useGuestCartStore.persist.clearStorage();
-    }
-
-    // const { cart, totals } = await getCart();
-
-    // useCartStore.getState().setCart(cart, totals);
   } catch (err) {
     console.error("Cart sync failed after login", err);
   }
