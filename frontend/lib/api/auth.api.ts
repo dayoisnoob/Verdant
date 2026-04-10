@@ -2,7 +2,6 @@ import { UserApi, UserData } from "@/types";
 import { RegistrationForm } from "@/validations";
 import { apiFetch } from "../apiFetch";
 import { initiateLogin } from "../helpers";
-import { useAuthStore } from "@/store/store";
 
 export const login = async (data: { email: string; password: string }) => {
   const res = await apiFetch<UserApi>(`/api/auth/login`, {
