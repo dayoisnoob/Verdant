@@ -33,7 +33,7 @@ export default function LoginPage() {
     setBannerError("");
     setNotVerified(false);
     try {
-      await login(data);
+      // await login(data);
       const redirect = searchParams.get("redirect") || "/basket";
       router.replace(redirect);
     } catch (err) {
