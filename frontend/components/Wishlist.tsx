@@ -32,7 +32,7 @@ const WishlistCardSkeleton = () => (
 );
 
 const WishlistCard = ({ p }: { p: WishlistApi }) => {
-  const { wishlisted, toggle } = useWishlistToggle(p.id);
+  const { wishlisted, toggle, isToggling } = useWishlistToggle(p.id);
   const { addItem } = useCart();
   const [isAdding, setIsAdding] = useState(false);
 
@@ -78,19 +78,28 @@ const WishlistCard = ({ p }: { p: WishlistApi }) => {
 
       <button
         onClick={toggle}
+        disabled={isToggling}
         aria-label="Toggle wishlist"
-        className={`absolute top-3 right-3 w-9 h-9 rounded-full border flex items-center justify-center transition-colors shadow-sm z-20 disabled:opacity-50 ${
+        className={`absolute top-3 right-3 w-9 h-9 rounded-full border flex items-center justify-center transition-colors shadow-sm z-20 disabled:cursor-not-allowed ${
           wishlisted
             ? "bg-white border-gray-100"
             : "bg-white border-gray-100 hover:bg-gray-50"
         }`}
       >
-        <Heart
-          size={18}
-          fill={wishlisted ? "#f97316" : "none"}
-          className={wishlisted ? "text-orange-500" : "text-gray-400"}
-          strokeWidth={2.5}
-        />
+        {isToggling ? (
+          <Loader2
+            size={18}
+            strokeWidth={2.5}
+            className="animate-spin text-gray-400"
+          />
+        ) : (
+          <Heart
+            size={18}
+            fill={wishlisted ? "#f97316" : "none"}
+            className={wishlisted ? "text-orange-500" : "text-gray-400"}
+            strokeWidth={2.5}
+          />
+        )}
       </button>
 
       <div className="flex flex-col flex-1 p-5 gap-3">
@@ -234,7 +243,6 @@ const Wishlist = ({
     );
   }
 
-  // Standalone Page (e.g., /wishlist)
   return (
     <div className="bg-cream min-h-screen flex flex-col">
       <Navbar />

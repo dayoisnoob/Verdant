@@ -1,13 +1,13 @@
 "use client";
 
 import { useCart, useWishlistToggle } from "@/hooks";
+import { LOW_PRODUCT_THRESHOLD } from "@/lib/constants";
 import { ProductCard as ProductCardType } from "@/types";
-import { Clock, Heart, ShoppingBag } from "lucide-react";
+import { Clock, Heart, Loader2, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { StarRating } from "./StarRating";
-import { LOW_PRODUCT_THRESHOLD } from "@/lib/constants";
 
 function discountPct(price: number, original: number) {
   return Math.round((1 - price / original) * 100);
@@ -19,18 +19,13 @@ export default function ProductCard({
   product: ProductCardType;
 }) {
   const { addItem } = useCart();
-  const { wishlisted, toggle } = useWishlistToggle(p.id);
+  const { wishlisted, toggle, isToggling } = useWishlistToggle(p.id);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!p.inStock) return;
     addItem(p);
     toast.success(`${p.name} added to basket`);
-  };
-
-  const handleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    toggle(e);
   };
 
   return (
@@ -74,16 +69,24 @@ export default function ProductCard({
         </div>
 
         <button
-          onClick={handleWishlist}
+          onClick={toggle}
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white border border-gray-100 flex items-center justify-center transition-colors shadow-sm z-20 hover:bg-gray-50"
         >
-          <Heart
-            size={18}
-            fill={wishlisted ? "#f97316" : "none"}
-            strokeWidth={2.5}
-            className={wishlisted ? "text-orange-500" : "text-gray-400"}
-          />
+          {isToggling ? (
+            <Loader2
+              size={18}
+              strokeWidth={2.5}
+              className="animate-spin text-gray-400"
+            />
+          ) : (
+            <Heart
+              size={18}
+              fill={wishlisted ? "#f97316" : "none"}
+              className={wishlisted ? "text-orange-500" : "text-gray-400"}
+              strokeWidth={2.5}
+            />
+          )}
         </button>
       </div>
 

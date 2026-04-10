@@ -93,20 +93,26 @@ export const useWishlistToggle = (productId: string) => {
   const queryClient = useQueryClient();
   const wishlisted = wishlist.some((l) => l.id === productId);
 
+  const [isToggling, setIsToggling] = useState(false);
+
   const toggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     try {
+      setIsToggling(true);
+
       await addToWishlist(productId);
       await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
       toast.success("Wishlist updated");
     } catch {
       toast.error("Failed to update wishlist");
+    } finally {
+      setIsToggling(false);
     }
   };
 
-  return { wishlisted, toggle };
+  return { wishlisted, toggle, isToggling };
 };
 
 export const useOrders = () => {
