@@ -158,35 +158,6 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
-              {[
-                { label: "App Store", sub: "Download on the", icon: Apple },
-                { label: "Google Play", sub: "Get it on", icon: Play },
-              ].map((a) => (
-                <a
-                  key={a.label}
-                  href="#"
-                  className="flex items-center gap-3 border border-white/10 rounded-xl px-4 py-3 hover:border-green hover:bg-white/5 transition-all duration-200 w-full sm:w-auto lg:w-full"
-                >
-                  <div className="text-white">
-                    <a.icon
-                      className="w-6 h-6"
-                      fill="currentColor"
-                      strokeWidth={1}
-                    />
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-0.5">
-                      {a.sub}
-                    </div>
-                    <div className="text-sm text-white font-bold leading-none">
-                      {a.label}
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
           </div>
         </div>
 
