@@ -11,7 +11,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const setIsLoading = useCartStore((state) => state.setIsLoading);
 
   useEffect(() => {
-    if (!user || !accessToken) {
+    if (!user) {
       setIsLoading(false);
       return;
     }
