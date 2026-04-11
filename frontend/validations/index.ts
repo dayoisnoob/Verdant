@@ -28,9 +28,13 @@ export const loginSchema = z.object({
 export const checkoutSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().optional(),
-  streetAddress: z.string().min(1, "Address is required"),
-  phone1: z.string().min(10, "Enter a valid phone number"),
-  phone2: z.string().optional(),
+  streetAddress: z.string().min(5, "Enter a full street address"),
+  phone1: z.string().regex(nigerianPhoneRegex, "Enter a valid Nigerian number"),
+  phone2: z
+    .string()
+    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number")
+    .optional()
+    .or(z.literal("")),
   state: z.string().min(1, "Select a state"),
   deliveryNotes: z.string().optional(),
 });
