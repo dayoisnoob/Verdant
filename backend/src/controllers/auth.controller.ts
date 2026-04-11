@@ -96,7 +96,7 @@ export class AuthController {
   }
 
   static async logout(req: Request, res: Response) {
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = req.cookies['__auth.refresh'];
 
     if (!refreshToken) {
       throw new ApiError(401, 'Authentication required. Please sign in.');
@@ -107,8 +107,13 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.clearCookie('refreshToken', COOKIE_OPTIONS);
-    res.json(new ApiResponse(200, result.message));
+    res
+      .clearCookie('__auth.refresh', COOKIE_OPTIONS)
+      .clearCookie('__auth.access', {
+        ...COOKIE_OPTIONS,
+        httpOnly: false,
+      })
+      .json(new ApiResponse(200, result.message));
   }
 
   static async logoutAll(req: Request, res: Response) {
@@ -119,8 +124,13 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.clearCookie('refreshToken', COOKIE_OPTIONS);
-    res.json(new ApiResponse(200, result.message));
+    res
+      .clearCookie('__auth.refresh', COOKIE_OPTIONS)
+      .clearCookie('__auth.access', {
+        ...COOKIE_OPTIONS,
+        httpOnly: false,
+      })
+      .json(new ApiResponse(200, result.message));
   }
 
   static async forgotPassword(req: Request, res: Response) {
@@ -141,7 +151,7 @@ export class AuthController {
       throw new ApiError(400, 'Verification token is missing.');
     }
 
-    const result = await AuthService.resetPassword(
+    await AuthService.resetPassword(
       token,
       req.body.newPassword,
       AuthController.deviceInfo(req)
