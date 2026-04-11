@@ -35,7 +35,7 @@ function LoginPage() {
     try {
       await login(data);
       const redirect = searchParams.get("redirect") || "/";
-      router.replace(redirect);
+      window.location.replace(redirect);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.statusCode === 401) {

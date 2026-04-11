@@ -36,12 +36,17 @@ export class AuthController {
       AuthController.deviceInfo(req)
     );
 
-    res.cookie('refreshToken', result.refreshToken, COOKIE_OPTIONS).json(
-      new ApiResponse(200, 'Email verified successfully', {
-        user: result.user,
-        accessToken: result.accessToken,
+    res
+      .cookie('__auth.refresh', result.refreshToken, COOKIE_OPTIONS)
+      .cookie('__auth.access', result.accessToken, {
+        ...COOKIE_OPTIONS,
+        httpOnly: false,
       })
-    );
+      .json(
+        new ApiResponse(200, 'Email verified successfully', {
+          user: result.user,
+        })
+      );
   }
 
   static async login(req: Request, res: Response) {
@@ -196,7 +201,7 @@ export class AuthController {
 
     await AuthService.deleteUser(userId, password);
 
-    res.clearCookie('refreshToken', COOKIE_OPTIONS);
+    res.clearCookie('__auth.refresh', COOKIE_OPTIONS);
     res.json(new ApiResponse(200, 'User successfully deleted'));
   }
 }
