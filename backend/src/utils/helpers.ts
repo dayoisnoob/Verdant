@@ -28,5 +28,9 @@ export const formatNigerianPhoneNumber = (
 ): string => {
   if (!phoneNumber) return '';
 
-  return `+234 ${phoneNumber?.replace(/[^\d+]/g, '')}`;
+  const trimmed = phoneNumber.trim();
+  if (trimmed.startsWith('0')) return '+234 ' + trimmed.slice(1);
+  if (trimmed.startsWith('234')) return '+' + trimmed;
+  if (trimmed.startsWith('+234')) return trimmed;
+  return '+234 ' + trimmed;
 };

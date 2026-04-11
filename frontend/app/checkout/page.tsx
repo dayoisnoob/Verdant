@@ -393,7 +393,6 @@ export default function CheckoutPage() {
                         </Field>
                         <Field
                           label="Last Name"
-                          optional
                           error={errors.lastName?.message}
                         >
                           <input
@@ -424,7 +423,7 @@ export default function CheckoutPage() {
                         >
                           <PhoneInput
                             {...register("phone1")}
-                            placeholder="080 0000 0000"
+                            placeholder="81 2345 6789"
                           />
                         </Field>
                         <Field
@@ -434,7 +433,7 @@ export default function CheckoutPage() {
                         >
                           <PhoneInput
                             {...register("phone2")}
-                            placeholder="070 0000 0000"
+                            placeholder="71 2345 6789"
                           />
                         </Field>
                       </div>

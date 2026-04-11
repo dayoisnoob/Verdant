@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const nigerianPhoneRegex = /^[789]\d{9}$/;
+const nigerianPhoneRegex = /^(0?[789][01]\d{8})$/;
 
 export const registrationSchema = z
   .object({
@@ -38,12 +38,10 @@ export const checkoutSchema = z.object({
 export const addressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().optional(),
-  phone1: z
-    .string()
-    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number e.g. 8012345678"),
+  phone1: z.string().regex(nigerianPhoneRegex, "Enter a valid Nigerian number"),
   phone2: z
     .string()
-    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number e.g. 8012345678")
+    .regex(nigerianPhoneRegex, "Enter a valid Nigerian number")
     .optional()
     .or(z.literal("")),
   streetAddress: z.string().min(5, "Enter a full street address"),

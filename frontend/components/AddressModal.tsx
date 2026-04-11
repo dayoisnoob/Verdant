@@ -203,14 +203,12 @@ export default function AddressModal({
           </button>
         </div>
 
-        {/* Scrollable Form Area */}
         <div className="overflow-y-auto custom-scrollbar p-6 sm:p-8">
           <form id="address-form" onSubmit={handleSubmit(onSubmit)}>
             <AddressFields register={register} errors={errors} />
           </form>
         </div>
 
-        {/* Fixed Footer */}
         <div className="px-6 py-5 sm:px-8 bg-white border-t-2 border-gray-100 flex flex-col sm:flex-row gap-3 flex-shrink-0">
           <button
             type="submit"

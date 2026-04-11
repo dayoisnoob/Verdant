@@ -40,7 +40,7 @@ const NIGERIAN_STATES = [
   'Zamfara',
 ] as const;
 
-const nigerianPhoneRegex = /^[789]\d{9}$/;
+const nigerianPhoneRegex = /^(0?[789][01]\d{8})$/;
 
 export const addressSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),

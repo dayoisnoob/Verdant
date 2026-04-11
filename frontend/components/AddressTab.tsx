@@ -15,7 +15,6 @@ export default function AddressesTab() {
     queryFn: () => getUserAddresses(),
   });
 
-  // Centralized state for both Adding and Editing
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     editingAddress: AddressApi | null;
@@ -69,7 +68,6 @@ export default function AddressesTab() {
         </button>
       </div>
 
-      {/* ── Content Area ── */}
       {addresses.length === 0 ? (
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center text-center px-6">
           <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
@@ -101,7 +99,6 @@ export default function AddressesTab() {
         </div>
       )}
 
-      {/* ── Global Modal ── */}
       <AddressModal
         isOpen={modalState.isOpen}
         onClose={closeModal}
