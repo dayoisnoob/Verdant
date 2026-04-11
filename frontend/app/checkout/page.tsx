@@ -708,13 +708,13 @@ export default function CheckoutPage() {
                               fill
                               className="object-cover"
                             />
-                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-verdant-dark text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                              {i.quantity}
-                            </span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-verdant-dark truncate">
-                              {i.name}
+                              {i.name}{" "}
+                              <span className="text-gray-500 text-sm font-medium">
+                                x{i.quantity}
+                              </span>
                             </p>
                             <p className="text-xs text-gray-500 font-medium mt-0.5">
                               {i.unit}
