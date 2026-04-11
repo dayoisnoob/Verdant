@@ -11,7 +11,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import PasswordStrengthBar from "react-password-strength-bar";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -145,15 +144,6 @@ export default function SignupPage() {
                     )}
                   </button>
                 </div>
-
-                {password && (
-                  <div className="mt-1">
-                    <PasswordStrengthBar
-                      password={password}
-                      className="!mb-0"
-                    />
-                  </div>
-                )}
 
                 {errors.password && (
                   <p className="text-xs font-medium text-red-500 mt-0.5">
