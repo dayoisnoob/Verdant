@@ -11,8 +11,6 @@ import { Loader2, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-/* ── Form UI Components ── */
-
 const inputCls =
   "w-full border-2 border-gray-100 bg-gray-50 rounded-xl px-4 py-3.5 text-sm outline-none focus:border-green focus:bg-white transition-all text-verdant-dark font-bold placeholder:text-gray-300";
 
@@ -26,7 +24,7 @@ const Field = ({
   children: React.ReactNode;
 }) => (
   <div className="flex flex-col gap-1.5 w-full">
-    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+    <label className="text-[10px] font-medium uppercase tracking-widest text-gray-400">
       {label}
     </label>
     {children}
@@ -51,7 +49,7 @@ const AddressFields = ({
           className={inputCls}
         />
       </Field>
-      <Field label="Last name (optional)" error={errors.lastName?.message}>
+      <Field label="Last name" error={errors.lastName?.message}>
         <input
           {...register("lastName")}
           type="text"
@@ -95,7 +93,7 @@ const AddressFields = ({
           <input
             {...register("phone1")}
             type="tel"
-            placeholder="080 0000 0000"
+            placeholder="081 2345 6789"
             className="flex-1 min-w-0 px-4 py-3.5 text-sm font-bold outline-none bg-transparent text-verdant-dark placeholder:text-gray-300"
           />
         </div>
@@ -108,7 +106,7 @@ const AddressFields = ({
           <input
             {...register("phone2")}
             type="tel"
-            placeholder="070 0000 0000"
+            placeholder="071 2345 6789"
             className="flex-1 min-w-0 px-4 py-3.5 text-sm font-bold outline-none bg-transparent text-verdant-dark placeholder:text-gray-300"
           />
         </div>
@@ -116,8 +114,6 @@ const AddressFields = ({
     </div>
   </div>
 );
-
-/* ── Main Modal Component ── */
 
 interface AddressModalProps {
   isOpen: boolean;
@@ -146,9 +142,9 @@ export default function AddressModal({
     defaultValues: isEditing
       ? {
           firstName: addressToEdit.firstName,
-          lastName: addressToEdit.lastName ?? "",
-          phone1: addressToEdit.phone1.replace(/^\+234/, ""),
-          phone2: addressToEdit.phone2?.replace(/^\+234/, "") ?? "",
+          lastName: addressToEdit.lastName,
+          phone1: addressToEdit.phone1,
+          phone2: addressToEdit.phone2,
           streetAddress: addressToEdit.streetAddress,
           state: addressToEdit.state,
         }
@@ -190,7 +186,6 @@ export default function AddressModal({
         className="bg-white rounded-3xl w-full max-w-lg shadow-2xl flex flex-col overflow-hidden max-h-full animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 sm:px-8 sm:py-6 border-b-2 border-gray-100 bg-gray-50 flex-shrink-0">
           <h2 className="font-playfair font-black text-verdant-dark text-2xl">
             {isEditing ? "Edit Address" : "Add New Address"}

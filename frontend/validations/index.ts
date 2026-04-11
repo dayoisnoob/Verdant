@@ -5,7 +5,7 @@ const nigerianPhoneRegex = /^(0?[789][01]\d{8})$/;
 export const registrationSchema = z
   .object({
     firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().optional(),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
     password: z
       .string()
@@ -27,7 +27,7 @@ export const loginSchema = z.object({
 
 export const checkoutSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().optional(),
+  lastName: z.string().min(1, "Last name is required"),
   streetAddress: z.string().min(5, "Enter a full street address"),
   phone1: z.string().regex(nigerianPhoneRegex, "Enter a valid Nigerian number"),
   phone2: z
@@ -41,7 +41,7 @@ export const checkoutSchema = z.object({
 
 export const addressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().optional(),
+  lastName: z.string().min(1, "Last name is required"),
   phone1: z.string().regex(nigerianPhoneRegex, "Enter a valid Nigerian number"),
   phone2: z
     .string()
