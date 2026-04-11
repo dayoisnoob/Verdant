@@ -30,7 +30,6 @@ export default function AddressesTab() {
   const closeModal = () =>
     setModalState({ isOpen: false, editingAddress: null });
 
-  // We pass this to the modal so it can handle the try/catch and loading states
   const handleEditSubmit = async (id: string, data: AddressFormData) => {
     await updateUserAddress({ addressId: id, data });
   };
@@ -48,7 +47,6 @@ export default function AddressesTab() {
 
   return (
     <div className="flex flex-col gap-6 w-full relative">
-      {/* ── Header Area ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2 sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0">
           <div className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest border-2 bg-green border-green text-white shadow-sm whitespace-nowrap">

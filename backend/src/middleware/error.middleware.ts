@@ -2,16 +2,16 @@ import type { NextFunction, Request, Response } from 'express';
 import { ApiError } from '../utils/api-response';
 import { logger } from '../config/logger';
 
-export function notFoundError(req: Request, res: Response) {
+export const notFoundError = (req: Request, res: Response) => {
   throw new ApiError(404, `Route: ${req.originalUrl} not found`);
-}
+};
 
-export function globalErrorHandler(
+export const globalErrorHandler = (
   err: Error,
   req: Request,
   res: Response,
   next: NextFunction
-) {
+) => {
   let error: ApiError;
 
   if (err instanceof ApiError) {
@@ -42,4 +42,4 @@ export function globalErrorHandler(
   };
 
   res.status(statusCode).json(response);
-}
+};

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import BlurImage from "./BlurImage";
 
 export function OrderCard({ order }: { order: Order }) {
   const [expanded, setExpanded] = useState(false);
@@ -78,7 +79,7 @@ export function OrderCard({ order }: { order: Order }) {
                   } z-${10 - idx}`}
                 >
                   {item.image ? (
-                    <Image
+                    <BlurImage
                       src={item.image}
                       alt={item.productName ?? "Product"}
                       fill
@@ -148,7 +149,7 @@ export function OrderCard({ order }: { order: Order }) {
                     >
                       <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-white border-2 border-gray-100 flex items-center justify-center">
                         {item.image ? (
-                          <Image
+                          <BlurImage
                             src={item.image}
                             alt={item.productName}
                             fill

@@ -2,7 +2,6 @@ import type { Request, Response } from 'express';
 import { COOKIE_OPTIONS } from '../constants.ts';
 import { AuthService } from '../services/auth.service';
 import { ApiError, ApiResponse } from '../utils/api-response';
-import { env } from '../config/env.ts';
 
 export class AuthController {
   static deviceInfo(req: Request) {
