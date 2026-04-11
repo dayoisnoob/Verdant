@@ -18,12 +18,13 @@ export interface AuthCartStore {
 
 export interface GuestCartStore {
   items: StoreCartItem[];
+  isHydrated: boolean;
 
   addItem: (product: ProductCard, quantity?: number) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
-  itemCount: () => number;
+  setHydrated: () => void;
 }
 
 export interface EmailStore {
@@ -40,12 +41,10 @@ export interface AuthStore {
     isVerified: boolean;
     createdAt: Date;
   } | null;
-  accessToken: string | null;
   isHydrated: boolean;
 
   updateUser: (user: UserData) => void;
-  setAccessToken: (token: string) => void;
-  login: (user: UserData, accessToken: string) => void;
+  login: (user: UserData) => void;
   logout: () => void;
   setHydrated: () => void;
 }

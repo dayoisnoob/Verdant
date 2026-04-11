@@ -58,7 +58,7 @@ export default function AddressCard({
       className={`relative rounded-3xl border-2 transition-all duration-300 overflow-hidden flex flex-col h-full ${
         address.isDefault
           ? "bg-green/5 border-green shadow-sm"
-          : "bg-white border-gray-100 hover:border-gray-200"
+          : "bg-white/85 border-gray-100 hover:border-gray-200"
       }`}
     >
       {address.isDefault && (
@@ -93,15 +93,15 @@ export default function AddressCard({
         </div>
 
         <div className="pl-[76px] flex flex-col gap-4">
-          <p className="text-sm font-medium text-gray-600 leading-relaxed">
+          <p className="text-lg font-medium text-gray-600 leading-relaxed">
             {address.streetAddress}
           </p>
-          <div className="flex flex-col gap-1.5">
-            <p className="text-xs font-bold text-verdant-dark tracking-wider bg-white w-fit px-3 py-1.5 rounded-lg border border-gray-100">
+          <div className="flex gap-1.5">
+            <p className="text-xs font-bold text-verdant-dark tracking-wider bg-green/45 w-fit px-3 py-1.5 rounded-lg border border-gray-100">
               {address.phone1}
             </p>
             {address.phone2 && (
-              <p className="text-xs font-bold text-verdant-dark tracking-wider bg-white w-fit px-3 py-1.5 rounded-lg border border-gray-100">
+              <p className="text-xs font-bold text-verdant-dark tracking-wider bg-green/45 w-fit px-3 py-1.5 rounded-lg border border-gray-100">
                 {address.phone2}
               </p>
             )}

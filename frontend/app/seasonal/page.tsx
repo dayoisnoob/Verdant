@@ -36,8 +36,6 @@ export default function SeasonalPage() {
 
   if (!PRODUCTS) return null;
 
-  console.log(PRODUCTS);
-
   const seasonalProducts = PRODUCTS.filter(
     (p) => p.isSeasonal && p.tags.some((t) => season.tags.includes(t)),
   );

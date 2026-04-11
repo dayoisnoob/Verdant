@@ -90,3 +90,19 @@ export const FeaturedSkeleton = () => {
     </section>
   );
 };
+
+export const AddressSkeleton = () => {
+  return (
+    <div className="w-full rounded-xl border-2 border-gray-100 p-5 animate-pulse flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <div className="w-5 h-5 rounded-full bg-gray-200" />
+        <div className="h-5 w-40 bg-gray-200 rounded-md" />
+      </div>
+      <div className="space-y-2 ml-8">
+        <div className="h-4 w-32 bg-gray-100 rounded-md" />
+        <div className="h-4 w-24 bg-gray-100 rounded-md" />
+        <div className="h-4 w-48 bg-gray-100 rounded-md" />
+      </div>
+    </div>
+  );
+};

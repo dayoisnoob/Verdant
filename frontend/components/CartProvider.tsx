@@ -7,15 +7,19 @@ import { useEffect } from "react";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const user = useAuthStore((state) => state.user);
+  const isAuthHydrated = useAuthStore((state) => state.isHydrated);
   const setIsLoading = useCartStore((state) => state.setIsLoading);
 
   useEffect(() => {
+    if (!isAuthHydrated) return;
+
     if (!user) {
       setIsLoading(false);
       return;
     }
 
     const rehydrate = async () => {
+      setIsLoading(true);
       try {
         const { cart, totals } = await getCart();
         useCartStore.getState().setCart(cart, totals);
@@ -29,7 +33,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     rehydrate();
-  }, [setIsLoading, user]);
+  }, [isAuthHydrated, user, setIsLoading]);
 
   return <>{children}</>;
 };

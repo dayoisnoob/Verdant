@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
-import "./globals.css";
 import { Toaster } from "sonner";
+import "./globals.css";
 import AppProviders from "@/components/AppProviders";
 
 const playfair = Playfair_Display({
@@ -19,11 +19,9 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Verdant — Farm Fresh Produce",
-  description:
-    "Farm-fresh produce delivered. Straight from local farms to your table — seasonal produce, picked at peak ripeness.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

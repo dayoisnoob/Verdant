@@ -1,5 +1,5 @@
 import { useAuthStore, useGuestCartStore } from "@/store/store";
-import { UserApi } from "@/types";
+import { ProductCard, UserApi } from "@/types";
 import { ApiError } from "@/util";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
@@ -38,7 +38,7 @@ export function handleFormError<T extends FieldValues>(
 }
 
 export const initiateLogin = async (res: UserApi) => {
-  useAuthStore.getState().login(res.user, res.accessToken);
+  useAuthStore.getState().login(res.user);
 
   try {
     const guestItems = useGuestCartStore.getState().items;
@@ -51,3 +51,17 @@ export const initiateLogin = async (res: UserApi) => {
     console.error("Cart sync failed after login", err);
   }
 };
+
+export const formatNewCartItem = (product: ProductCard, quantity: number) => ({
+  id: crypto.randomUUID(),
+  productId: product.id,
+  name: product.name,
+  slug: product.slug,
+  stock: product.stock,
+  imageUrl: product.images[0].url,
+  unit: product.unit,
+  farm: product.farm,
+  isOrganic: product.isOrganic,
+  pricePence: product.price,
+  quantity,
+});

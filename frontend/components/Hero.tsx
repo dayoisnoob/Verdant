@@ -2,6 +2,7 @@ import { Product } from "@/types";
 import { ArrowRight, Clock, MapPin, Sprout } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import BlurImage from "./BlurImage";
 
 interface HeroProps {
   featuredProducts: Product[];
@@ -71,7 +72,7 @@ export default function Hero({ featuredProducts }: HeroProps) {
       </div>
 
       <div className="flex-1 relative w-full min-h-[500px] lg:min-h-full border-t lg:border-t-0 lg:border-l border-gray-200 bg-gray-50">
-        <Image
+        <BlurImage
           src={hero.images[0].url}
           alt={hero.images[0].alt}
           fill

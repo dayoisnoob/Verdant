@@ -21,26 +21,29 @@ import { Suspense, useEffect, useState } from "react";
 
 function ProductCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse flex flex-col">
+    <div className="bg-white rounded-2xl border-2 border-gray-100 overflow-hidden animate-pulse flex flex-col h-full">
       <div className="w-full aspect-[4/3] bg-gray-100" />
-      <div className="p-5 flex flex-col gap-4 flex-1">
-        <div className="flex justify-between gap-4">
+      <div className="p-3 sm:p-5 flex flex-col gap-3 sm:gap-4 flex-1">
+        <div className="flex justify-between gap-2 sm:gap-4">
           <div className="h-3 w-1/3 bg-gray-200 rounded-md" />
           <div className="h-3 w-1/4 bg-gray-200 rounded-md" />
         </div>
-        <div className="h-5 w-3/4 bg-gray-200 rounded-lg mt-1" />
-        <div className="flex gap-1.5 mt-1">
+        <div className="h-4 sm:h-5 w-3/4 bg-gray-200 rounded-lg mt-1" />
+        <div className="flex gap-1 sm:gap-1.5 mt-1">
           {[1, 2, 3, 4, 5].map((s) => (
-            <div key={s} className="h-3.5 w-3.5 bg-gray-200 rounded-sm" />
+            <div
+              key={s}
+              className="h-3 w-3 sm:h-3.5 sm:w-3.5 bg-gray-200 rounded-sm"
+            />
           ))}
         </div>
         <div className="flex-1" />
-        <div className="flex justify-between items-end pt-4 mt-2 border-t border-gray-100">
-          <div className="flex flex-col gap-2">
-            <div className="h-5 w-16 bg-gray-200 rounded-lg" />
-            <div className="h-3 w-10 bg-gray-100 rounded-md" />
+        <div className="flex justify-between items-end pt-3 sm:pt-4 mt-2 border-t-2 border-gray-50">
+          <div className="flex flex-col gap-1.5 sm:gap-2">
+            <div className="h-4 sm:h-5 w-12 sm:w-16 bg-gray-200 rounded-lg" />
+            <div className="h-2.5 sm:h-3 w-8 sm:w-10 bg-gray-100 rounded-md" />
           </div>
-          <div className="h-9 w-24 bg-gray-200 rounded-xl" />
+          <div className="h-8 w-20 sm:h-9 sm:w-24 bg-gray-200 rounded-xl" />
         </div>
       </div>
     </div>
@@ -49,7 +52,8 @@ function ProductCardSkeleton() {
 
 function ProductGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    // 🚨 Changed to grid-cols-2 on mobile and tightened the gap
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
       {Array.from({ length: 8 }).map((_, i) => (
         <ProductCardSkeleton key={i} />
       ))}
@@ -152,7 +156,8 @@ function ShopContent() {
       <Navbar />
 
       <main className="flex-1 pt-24 pb-20">
-        <div className="px-6 sm:px-10 lg:px-16 xl:px-20 max-w-[1600px] mx-auto">
+        {/* 🚨 Adjusted padding to px-4 on mobile for better 2-column spacing */}
+        <div className="px-4 sm:px-10 lg:px-16 xl:px-20 max-w-[1600px] mx-auto">
           <div className="py-8 md:py-12 border-b border-gray-200">
             <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-4">
               Our Produce
@@ -278,7 +283,8 @@ function ShopContent() {
               </div>
             )}
 
-            <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2 -mx-6 px-6 sm:mx-0 sm:px-0">
+            {/* 🚨 Adjusted margin/padding to match new px-4 layout */}
+            <div className="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
               {["All", ...CATEGORIES].map((cat) => (
                 <button
                   key={cat}
@@ -295,11 +301,12 @@ function ShopContent() {
             </div>
           </div>
 
-          <div className="pt-10">
+          <div className="pt-8 sm:pt-10">
             {isLoading ? (
               <ProductGridSkeleton />
             ) : PRODUCTS.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+              // 🚨 Changed to grid-cols-2 on mobile and tightened the gap
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                 {PRODUCTS.map((p) => (
                   <ProductCard key={p.slug} product={p} />
                 ))}
@@ -329,7 +336,7 @@ function ShopContent() {
           </div>
 
           {pagination && !isLoading && PRODUCTS.length > 0 && (
-            <div className="mt-16 pb-8">
+            <div className="mt-12 sm:mt-16 pb-8">
               <Pagination
                 currentPage={currentPage}
                 totalPages={pagination.totalPages}

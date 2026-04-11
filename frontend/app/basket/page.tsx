@@ -27,8 +27,6 @@ export default function CartPage() {
     isLoading,
   } = useCart();
 
-  console.log(cartItems);
-
   const productIds = cartItems.map((i) => i.productId);
 
   const { data: suggested } = useQuery({

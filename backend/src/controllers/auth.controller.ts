@@ -59,7 +59,6 @@ export class AuthController {
       .json(
         new ApiResponse(200, 'Login successful', {
           user: result.user,
-          accessToken: result.accessToken,
         })
       );
   }
@@ -93,11 +92,7 @@ export class AuthController {
         ...COOKIE_OPTIONS,
         httpOnly: false,
       })
-      .json(
-        new ApiResponse(200, 'Access token successfully refreshed', {
-          accessToken: result.accessToken,
-        })
-      );
+      .json(new ApiResponse(200, 'Access token successfully refreshed'));
   }
 
   static async logout(req: Request, res: Response) {

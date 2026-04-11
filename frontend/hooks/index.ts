@@ -16,18 +16,25 @@ import { toast } from "sonner";
 
 export const useCart = (discount: number = 0) => {
   const user = useAuthStore((state) => state.user);
+  const isHydrated = useGuestCartStore((state) => state.isHydrated);
+  const isAuthHydrated = useAuthStore((state) => state.isHydrated);
 
-  const authUserCart = useCartStore();
-  const guestUserCart = useGuestCartStore();
+  const authCart = useCartStore();
+  const guestCart = useGuestCartStore();
 
-  const cart = user ? authUserCart : guestUserCart;
-  const itemsQuantity = cart.items.reduce(
+  const activeCart = user ? authCart : guestCart;
+
+  const itemsQuantity = activeCart.items.reduce(
     (sum, item) => sum + item.quantity,
     0,
   );
-  const isLoading = user ? authUserCart.isLoading : false;
+  const isLoading = !isAuthHydrated
+    ? true
+    : user
+      ? authCart.isLoading
+      : !guestCart.isHydrated;
 
-  const subtotal = cart.items.reduce(
+  const subtotal = activeCart.items.reduce(
     (sum, i) => sum + i.pricePence * i.quantity,
     0,
   );
@@ -36,28 +43,29 @@ export const useCart = (discount: number = 0) => {
   const total = discounted + delivery;
 
   return {
-    items: cart.items,
+    items: activeCart.items,
     subtotal,
     delivery,
     total,
     isLoading,
+    isHydrated,
     subtotalFormatted: (subtotal / 100).toFixed(2),
     deliveryFormatted: (delivery / 100).toFixed(2),
     totalFormatted: (total / 100).toFixed(2),
     itemsQuantity,
-    addItem: cart.addItem,
-    removeItem: cart.removeItem,
-    updateQuantity: cart.updateQuantity,
-    clearCart: cart.clearCart,
+    addItem: activeCart.addItem,
+    removeItem: activeCart.removeItem,
+    updateQuantity: activeCart.updateQuantity,
+    clearCart: activeCart.clearCart,
   };
 };
 
 export const useAllProducts = () => {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["all-products"],
     queryFn: () => getAllProducts(),
   });
-  return { data };
+  return { data, isLoading };
 };
 
 export const useLogout = () => {
@@ -72,10 +80,11 @@ export const useLogout = () => {
 
 export const useWishlist = () => {
   const user = useAuthStore((state) => state.user);
+  const isAuthHydrated = useAuthStore((state) => state.isHydrated);
 
   const {
     data: wishlist = [],
-    isLoading,
+    isLoading: isQueryLoading,
     isError: wishlistError,
     refetch: refetchWishlist,
   } = useQuery({
@@ -84,6 +93,8 @@ export const useWishlist = () => {
     queryFn: getUserWishlist,
     staleTime: 1000 * 60 * 5,
   });
+
+  const isLoading = !isAuthHydrated ? true : !!user && isQueryLoading;
 
   return { wishlist, isLoading, wishlistError, refetchWishlist };
 };

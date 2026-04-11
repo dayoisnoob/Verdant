@@ -30,6 +30,7 @@ export default function Navbar() {
 
   const logout = useLogout();
   const user = useAuthStore((s) => s.user);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
   const { itemsQuantity, isLoading } = useCart();
 
   const firstName = user?.firstName?.split(" ")[0] ?? "";
@@ -108,27 +109,42 @@ export default function Navbar() {
 
             <div className="hidden md:block relative" ref={dropdownRef}>
               <button
-                onClick={() => setAccountOpen(!accountOpen)}
+                onClick={() => isHydrated && setAccountOpen(!accountOpen)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-colors border ${
-                  accountOpen
-                    ? "bg-gray-50 border-gray-200 text-verdant-dark"
-                    : "bg-transparent border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-200 hover:text-verdant-dark"
+                  !isHydrated
+                    ? "bg-transparent border-transparent cursor-default"
+                    : accountOpen
+                      ? "bg-gray-50 border-gray-200 text-verdant-dark"
+                      : "bg-transparent border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-200 hover:text-verdant-dark"
                 }`}
               >
-                {user ? (
-                  <div className="w-6 h-6 rounded-full bg-verdant-dark flex items-center justify-center text-white text-[10px] flex-shrink-0">
-                    {firstName.charAt(0).toUpperCase()}
-                  </div>
+                {!isHydrated ? (
+                  <>
+                    <div className="w-6 h-6 rounded-full bg-gray-200 animate-pulse flex-shrink-0" />
+                    <div className="hidden lg:block w-14 h-3 bg-gray-200 rounded-md animate-pulse" />
+                    <ChevronDown size={14} className="text-gray-200" />
+                  </>
+                ) : user ? (
+                  <>
+                    <div className="w-6 h-6 rounded-full bg-verdant-dark flex items-center justify-center text-white text-[10px] flex-shrink-0">
+                      {firstName.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="hidden lg:inline">{firstName}</span>
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${accountOpen ? "rotate-180" : ""}`}
+                    />
+                  </>
                 ) : (
-                  <User size={16} strokeWidth={2.5} />
+                  <>
+                    <User size={16} strokeWidth={2.5} />
+                    <span className="hidden lg:inline">Account</span>
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${accountOpen ? "rotate-180" : ""}`}
+                    />
+                  </>
                 )}
-                <span className="hidden lg:inline">
-                  {user ? firstName : "Account"}
-                </span>
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-200 ${accountOpen ? "rotate-180" : ""}`}
-                />
               </button>
 
               {accountOpen && (
@@ -276,7 +292,15 @@ export default function Navbar() {
         </div>
 
         <div className="px-6 pt-6">
-          {user ? (
+          {!isHydrated ? (
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex items-center gap-4 animate-pulse">
+              <div className="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0" />
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <div className="h-4 w-24 bg-gray-200 rounded-md" />
+                <div className="h-3 w-32 bg-gray-200 rounded-md" />
+              </div>
+            </div>
+          ) : user ? (
             <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-verdant-dark flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                 {firstName.charAt(0).toUpperCase()}
@@ -328,7 +352,19 @@ export default function Navbar() {
             ))}
           </ul>
 
-          {user && (
+          {!isHydrated ? (
+            <>
+              <div className="w-16 h-3 bg-gray-200 rounded-md animate-pulse mb-4 mt-8" />
+              <ul className="flex flex-col gap-2 px-2">
+                {[1, 2, 3].map((i) => (
+                  <li key={i} className="flex items-center gap-3 px-2 py-4">
+                    <div className="w-4 h-4 bg-gray-200 rounded-md animate-pulse" />
+                    <div className="w-24 h-4 bg-gray-200 rounded-md animate-pulse" />
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : user ? (
             <>
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 mt-8">
                 Account
@@ -364,7 +400,7 @@ export default function Navbar() {
                 ))}
               </ul>
             </>
-          )}
+          ) : null}
         </nav>
 
         <div className="px-6 pb-8 pt-6 border-t border-gray-100 bg-white flex flex-col gap-4">
@@ -386,7 +422,9 @@ export default function Navbar() {
             ) : null}
           </Link>
 
-          {user && (
+          {!isHydrated ? (
+            <div className="w-full h-12 bg-gray-100 rounded-xl animate-pulse" />
+          ) : user ? (
             <button
               onClick={handleLogout}
               className="flex items-center justify-center gap-2 w-full bg-white border-2 border-red-100 text-red-500 py-3.5 rounded-xl text-sm font-bold hover:bg-red-50 transition-colors"
@@ -394,7 +432,7 @@ export default function Navbar() {
               <LogOut size={16} strokeWidth={2.5} />
               Sign out
             </button>
-          )}
+          ) : null}
         </div>
       </aside>
 

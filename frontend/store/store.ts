@@ -1,6 +1,6 @@
 import { addItemToCart, removeItemFromCart, updateItem } from "@/lib/api";
+import { formatNewCartItem } from "@/lib/helpers";
 import { AuthCartStore, AuthStore, GuestCartStore } from "@/types";
-import { StoreCartItem } from "@/types/cart.types";
 import { EmailStore } from "@/types/store.types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -19,22 +19,7 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
       get().updateQuantity(product.id, quantity);
     } else {
       set((state) => ({
-        items: [
-          ...state.items,
-          {
-            id: crypto.randomUUID(),
-            productId: product.id,
-            name: product.name,
-            slug: product.slug,
-            stock: product.stock,
-            imageUrl: product.images[0].url,
-            unit: product.unit,
-            farm: product.farm,
-            isOrganic: product.isOrganic,
-            pricePence: product.price,
-            quantity,
-          },
-        ],
+        items: [...state.items, formatNewCartItem(product, quantity)],
       }));
     }
 
@@ -95,8 +80,9 @@ export const useCartStore = create<AuthCartStore>((set, get) => ({
 
 export const useGuestCartStore = create(
   persist<GuestCartStore>(
-    (set, get) => ({
+    (set) => ({
       items: [],
+      isHydrated: false,
 
       addItem: (product, quantity = 1) => {
         set((state) => {
@@ -112,21 +98,9 @@ export const useGuestCartStore = create(
             };
           }
 
-          const item: StoreCartItem = {
-            id: crypto.randomUUID(),
-            productId: product.id,
-            name: product.name,
-            slug: product.slug,
-            stock: product.stock,
-            imageUrl: product.images[0].url,
-            unit: product.unit,
-            farm: product.farm,
-            isOrganic: product.isOrganic,
-            pricePence: product.price,
-            quantity,
+          return {
+            items: [...state.items, formatNewCartItem(product, quantity)],
           };
-
-          return { items: [...state.items, item] };
         });
       },
 
@@ -155,10 +129,14 @@ export const useGuestCartStore = create(
         });
       },
 
-      itemCount: () =>
-        get().items.reduce((sum, item) => sum + item.quantity, 0),
+      setHydrated: () => set({ isHydrated: true }),
     }),
-    { name: "guest-cart" },
+    {
+      name: "guest-cart",
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
+    },
   ),
 );
 
@@ -166,17 +144,14 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,
-      accessToken: null,
       isHydrated: false,
 
-      login: (user, accessToken) => set({ user, accessToken }),
+      login: (user) => set({ user }),
 
       updateUser: (user) => set({ user }),
 
-      setAccessToken: (token) => set({ accessToken: token }),
-
       logout: () => {
-        set({ user: null, accessToken: null });
+        set({ user: null });
         useCartStore.getState().clearCart();
       },
 

@@ -37,9 +37,10 @@ const RelatedProducts = ({
         </Link>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 sm:overflow-visible sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0">
+      {/* ── 🚨 FIX: Hides the scrollbar but keeps it swipable, added native app snapping! ── */}
+      <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0">
         {relatedProducts?.map((p) => (
-          <div key={p.slug} className="min-w-[280px] sm:min-w-0">
+          <div key={p.slug} className="min-w-[280px] sm:min-w-0 snap-center">
             <ProductCard product={p} />
           </div>
         ))}

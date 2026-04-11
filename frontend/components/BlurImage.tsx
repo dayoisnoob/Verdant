@@ -4,6 +4,18 @@ import { Image as ImageIcon } from "lucide-react";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 
+const unsplashLoader = ({
+  src,
+  width,
+  quality,
+}: {
+  src: string;
+  width: number;
+  quality?: number;
+}) => {
+  return `${src}?auto=format&fit=crop&w=${width}&q=${quality || 75}`;
+};
+
 export default function BlurImage({
   src,
   alt,
@@ -30,6 +42,8 @@ export default function BlurImage({
       <Image
         src={src}
         alt={alt}
+        fill
+        loader={unsplashLoader}
         onLoad={() => setIsLoading(false)}
         onError={() => setError(true)}
         className={`

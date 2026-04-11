@@ -1,10 +1,12 @@
 "use client";
 
+import BlurImage from "@/components/BlurImage";
 import { CheckoutSteps } from "@/components/CheckoutSteps";
 import Container from "@/components/Container";
 import { ErrorState } from "@/components/ErrorState";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { AddressSkeleton } from "@/components/Skeletons";
 import UnavailableItemModal, {
   UnavailableItem,
 } from "@/components/unavailableItemModal";
@@ -31,7 +33,6 @@ import {
   Truck,
   BanknoteArrowDown,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -164,13 +165,15 @@ export default function CheckoutPage() {
     delivery,
     deliveryFormatted,
     totalFormatted,
+    isLoading,
+    isHydrated,
   } = useCart(couponDiscount);
 
   useEffect(() => {
-    if (cartItems && !cartItems.length) {
+    if (!isLoading && !cartItems.length) {
       router.push("/basket");
     }
-  }, [cartItems, cartItems.length, router]);
+  }, [isLoading, cartItems.length, router]);
 
   const {
     data: addresses = [],
@@ -182,7 +185,8 @@ export default function CheckoutPage() {
     queryFn: async () => await getUserAddresses(),
   });
 
-  const shouldShowForm = showNewForm || addresses.length === 0;
+  const shouldShowForm =
+    !addressesLoading && (showNewForm || addresses.length === 0);
   const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
   const selectedAddressId = manualSelection ?? defaultAddress?.id ?? null;
 
@@ -193,23 +197,6 @@ export default function CheckoutPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutForm>({ resolver: zodResolver(checkoutSchema) });
-
-  if (addressesLoading) {
-    return (
-      <>
-        <Navbar />
-        <div className="min-h-screen bg-cream flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-green animate-spin" />
-            <p className="text-sm font-medium text-verdant-muted tracking-wide">
-              Preparing your checkout...
-            </p>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
 
   if (addressesError) {
     return (
@@ -351,12 +338,26 @@ export default function CheckoutPage() {
 
           <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             <div className="w-full lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
-              {shouldShowForm ? (
+              {addressesLoading ? (
+                <div className="bg-white/85 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                  <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
+                    <div>
+                      <div className="h-7 w-40 bg-gray-200 rounded-lg animate-pulse" />
+                      <div className="h-4 w-60 bg-gray-100 rounded-md animate-pulse mt-2" />
+                    </div>
+                  </div>
+                  <div className="p-6 bg-gray-50/30 flex flex-col gap-4">
+                    <AddressSkeleton />
+                    <AddressSkeleton />
+                    <AddressSkeleton />
+                  </div>
+                </div>
+              ) : shouldShowForm ? (
                 <form
                   onSubmit={handleSubmit(onSubmit)}
                   className="flex flex-col gap-6"
                 >
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                  <div className="bg-white/85 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-white">
                       <div>
                         <h2 className="font-playfair font-bold text-verdant-dark text-xl md:text-2xl">
@@ -474,7 +475,7 @@ export default function CheckoutPage() {
                 </form>
               ) : (
                 <div className="flex flex-col gap-6">
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                  <div className="bg-white/85 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
                       <div>
                         <h2 className="font-playfair font-bold text-verdant-dark text-xl md:text-2xl">
@@ -517,7 +518,7 @@ export default function CheckoutPage() {
                                 }`}
                               >
                                 {isSelected && (
-                                  <div className="w-2 h-2 rounded-full bg-white" />
+                                  <div className="w-2 h-2 rounded-full bg-white/85" />
                                 )}
                               </div>
 
@@ -586,35 +587,51 @@ export default function CheckoutPage() {
 
                 <div className="px-6 py-5 border-b border-gray-50 bg-gray-50/30">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-bold text-verdant-dark">
-                      {hasFreeDelivery
-                        ? "Free delivery unlocked! 🎉"
-                        : "Almost there..."}
-                    </span>
-                    {!hasFreeDelivery && (
-                      <span
-                        className={`text-sm font-bold ${
-                          hasFreeDelivery ? "text-green" : "text-gray-500"
-                        }`}
-                      >
-                        £{(subtotal / 100).toFixed(2)} / £
-                        {(FREE_SHIPPING_THRESHOLD / 100).toFixed(2)}
-                      </span>
+                    {!isHydrated ? (
+                      <>
+                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm font-bold text-verdant-dark">
+                          {hasFreeDelivery
+                            ? "Free delivery unlocked! 🎉"
+                            : "Almost there..."}
+                        </span>
+                        {!hasFreeDelivery && (
+                          <span
+                            className={`text-sm font-bold ${
+                              hasFreeDelivery ? "text-green" : "text-gray-500"
+                            }`}
+                          >
+                            £{(subtotal / 100).toFixed(2)} / £
+                            {(FREE_SHIPPING_THRESHOLD / 100).toFixed(2)}
+                          </span>
+                        )}
+                      </>
                     )}
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ${
-                        delivery <= 0 ? "bg-green" : "bg-green-light"
-                      }`}
-                      style={{ width: `${progressPct}%` }}
-                    />
-                  </div>
-                  {delivery > 0 && (
-                    <p className="text-xs text-gray-500 mt-2 font-medium">
-                      Add £{amountLeft} more to your cart to unlock free
-                      delivery.
-                    </p>
+
+                  {!isHydrated ? (
+                    <div className="h-2 bg-gray-200 rounded-full w-full animate-pulse mt-3" />
+                  ) : (
+                    <>
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-3">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${
+                            delivery <= 0 ? "bg-green" : "bg-green-light"
+                          }`}
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+                      {delivery > 0 && (
+                        <p className="text-xs text-gray-500 mt-2 font-medium">
+                          Add £{amountLeft} more to your cart to unlock free
+                          delivery.
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -632,7 +649,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={coupon}
                       onChange={handleCouponInput}
-                      disabled={!!couponDiscount}
+                      disabled={!!couponDiscount || !isHydrated}
                       placeholder="Promo code"
                       className="flex-1 bg-transparent outline-none px-4 py-3 text-sm font-bold text-verdant-dark placeholder:text-gray-400 disabled:opacity-60 uppercase tracking-wider"
                     />
@@ -646,7 +663,7 @@ export default function CheckoutPage() {
                     ) : (
                       <button
                         onClick={handleCoupon}
-                        disabled={!coupon.trim()}
+                        disabled={!coupon.trim() || !isHydrated}
                         className="px-5 text-xs font-bold text-green hover:bg-green/10 transition-colors disabled:opacity-50 disabled:hover:bg-transparent"
                       >
                         Apply
@@ -666,45 +683,67 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="px-6 py-2 max-h-[280px] overflow-y-auto custom-scrollbar">
-                  <div className="flex flex-col gap-4 py-4">
-                    {cartItems.map((i) => (
-                      <div key={i.slug} className="flex items-center gap-4">
-                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
-                          <Image
-                            src={i.imageUrl}
-                            alt={i.name}
-                            fill
-                            className="object-cover"
-                          />
-                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-verdant-dark text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                            {i.quantity}
-                          </span>
+                  {!isHydrated ? (
+                    <div className="flex flex-col gap-4 py-4">
+                      {[1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-4 animate-pulse"
+                        >
+                          <div className="w-14 h-14 bg-gray-100 rounded-xl" />
+                          <div className="flex-1 space-y-2">
+                            <div className="h-3 w-3/4 bg-gray-100 rounded" />
+                            <div className="h-2 w-1/2 bg-gray-50 rounded" />
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-verdant-dark truncate">
-                            {i.name}
-                          </p>
-                          <p className="text-xs text-gray-500 font-medium mt-0.5">
-                            {i.unit}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4 py-4">
+                      {cartItems.map((i) => (
+                        <div key={i.slug} className="flex items-center gap-4">
+                          <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
+                            <BlurImage
+                              src={i.imageUrl}
+                              alt={i.name}
+                              fill
+                              className="object-cover"
+                            />
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-verdant-dark text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                              {i.quantity}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-verdant-dark truncate">
+                              {i.name}
+                            </p>
+                            <p className="text-xs text-gray-500 font-medium mt-0.5">
+                              {i.unit}
+                            </p>
+                          </div>
+                          <p className="text-sm font-bold text-verdant-dark flex-shrink-0">
+                            £{((i.pricePence / 100) * i.quantity).toFixed(2)}
                           </p>
                         </div>
-                        <p className="text-sm font-bold text-verdant-dark flex-shrink-0">
-                          £{((i.pricePence / 100) * i.quantity).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="px-6 py-6 border-t border-gray-100 bg-gray-50/50 flex flex-col gap-3">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600 font-medium">Subtotal</span>
-                    <span className="font-bold text-verdant-dark">
-                      £{subtotalFormatted}
-                    </span>
+                    {!isHydrated ? (
+                      <div className="h-4 w-16 bg-gray-200 animate-pulse rounded" />
+                    ) : (
+                      <span className="font-bold text-verdant-dark">
+                        £{subtotalFormatted}
+                      </span>
+                    )}
                   </div>
-                  {couponDiscount > 0 && (
-                    <div className="flex justify-between text-sm">
+
+                  {couponDiscount > 0 && isHydrated && (
+                    <div className="flex justify-between items-center text-sm">
                       <span className="text-green font-bold">
                         Discount ({coupon.toUpperCase()})
                       </span>
@@ -713,26 +752,36 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between text-sm">
+
+                  <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600 font-medium">Delivery</span>
-                    <span
-                      className={`font-bold ${
-                        delivery === 0 ? "text-green" : "text-verdant-dark"
-                      }`}
-                    >
-                      {delivery === 0 ? "Free 🎉" : `£${deliveryFormatted}`}
-                    </span>
+                    {!isHydrated ? (
+                      <div className="h-4 w-12 bg-gray-200 animate-pulse rounded" />
+                    ) : (
+                      <span
+                        className={`font-bold ${
+                          delivery === 0 ? "text-green" : "text-verdant-dark"
+                        }`}
+                      >
+                        {delivery === 0 ? "Free 🎉" : `£${deliveryFormatted}`}
+                      </span>
+                    )}
                   </div>
+
                   <div className="h-px bg-gray-200 my-2" />
+
                   <div className="flex justify-between items-end">
                     <span className="font-bold text-verdant-dark text-base">
                       Total
                     </span>
                     <div className="text-right">
-                      <p className="font-playfair font-black text-green text-3xl leading-none">
-                        £{totalFormatted}
-                      </p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1"></p>
+                      {!isHydrated ? (
+                        <div className="h-8 w-24 bg-gray-200 animate-pulse rounded-lg mt-1" />
+                      ) : (
+                        <p className="font-playfair font-black text-green text-3xl leading-none">
+                          £{totalFormatted}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -772,7 +821,9 @@ export default function CheckoutPage() {
           type="button"
           loading={isProcessing}
           disabled={
-            isProcessing || (shouldShowForm ? false : !selectedAddressId)
+            isProcessing ||
+            (shouldShowForm ? false : !selectedAddressId) ||
+            !isHydrated
           }
           onClick={() => {
             if (shouldShowForm) {

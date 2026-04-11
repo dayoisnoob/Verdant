@@ -57,18 +57,18 @@ export default function HomePage() {
       <div className="bg-cream min-h-screen flex flex-col">
         <Navbar />
 
-        <main className="flex-1 pt-24 pb-20 flex flex-col gap-12 lg:gap-16">
+        <main className="flex-1 pt-24 pb-20 flex flex-col gap-10 lg:gap-16">
           {featuredLoading ? (
             <HeroSkeleton />
           ) : isContentEmpty ? (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mx-4 sm:mx-8 md:mx-16 lg:mx-20 py-32 flex flex-col items-center justify-center text-center px-6">
-              <div className="w-20 h-20 bg-green/5 rounded-full flex items-center justify-center mb-6 border border-green/10">
+            <div className="bg-white rounded-3xl border-2 border-gray-100 shadow-sm mx-4 sm:mx-8 md:mx-16 lg:mx-20 py-24 sm:py-32 flex flex-col items-center justify-center text-center px-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green/5 rounded-full flex items-center justify-center mb-6 border-2 border-green/10">
                 <Sprout className="w-8 h-8 text-green" />
               </div>
-              <h2 className="font-playfair font-bold text-verdant-dark text-3xl">
+              <h2 className="font-playfair font-black text-verdant-dark text-2xl sm:text-3xl">
                 No produce yet
               </h2>
-              <p className="text-gray-500 text-sm mt-3 max-w-sm font-medium">
+              <p className="text-gray-500 text-xs sm:text-sm mt-3 max-w-sm font-medium leading-relaxed">
                 Looks like the fields are still being prepared. Check back soon
                 for our fresh harvest.
               </p>
@@ -113,8 +113,9 @@ export default function HomePage() {
             </div>
           )}
 
-          <div className="bg-green rounded-2xl mx-4 sm:mx-8 md:mx-16 lg:mx-20 px-8 py-12 sm:px-12 lg:px-16 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+          {/* ── 🚨 FIX: Features stack horizontally on mobile to save space! ── */}
+          <div className="bg-verdant-dark rounded-3xl mx-4 sm:mx-8 md:mx-16 lg:mx-20 px-6 py-10 sm:px-12 lg:px-16 shadow-sm border-b-4 border-green">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
               {[
                 {
                   icon: Sprout,
@@ -132,16 +133,21 @@ export default function HomePage() {
                   desc: "Compostable boxes, no plastic. Good for you, better for the soil.",
                 },
               ].map((v) => (
-                <div key={v.title} className="flex flex-col items-start gap-4">
-                  <v.icon
-                    className="w-7 h-7 text-green-light"
-                    strokeWidth={2}
-                  />
+                <div
+                  key={v.title}
+                  className="flex flex-row md:flex-col items-start gap-4 sm:gap-5"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <v.icon
+                      className="w-6 h-6 text-green-light"
+                      strokeWidth={2}
+                    />
+                  </div>
                   <div>
-                    <h3 className="font-bold text-white text-base mb-2">
+                    <h3 className="font-black text-white text-base sm:text-lg mb-1.5">
                       {v.title}
                     </h3>
-                    <p className="text-white/80 text-sm leading-relaxed font-medium">
+                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed font-medium">
                       {v.desc}
                     </p>
                   </div>
@@ -150,15 +156,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mx-4 sm:mx-8 md:mx-16 lg:mx-20 px-6 py-16 sm:px-12 lg:px-20">
+          <div className="bg-white rounded-3xl border-2 border-gray-100 shadow-sm mx-4 sm:mx-8 md:mx-16 lg:mx-20 px-6 py-12 sm:px-12 lg:px-20">
             <div className="max-w-xl mx-auto text-center">
-              <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-4">
+              <p className="text-[10px] sm:text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-3 sm:mb-4">
                 Harvest Notes
               </p>
               <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl mb-4">
                 What&apos;s growing this week
               </h2>
-              <p className="text-gray-500 text-sm leading-relaxed mb-10 font-medium">
+              <p className="text-gray-500 text-xs sm:text-sm leading-relaxed mb-8 sm:mb-10 font-medium">
                 Weekly updates on what&apos;s in season, which farms are
                 harvesting, and early access to limited produce — straight to
                 your inbox.
@@ -168,16 +174,16 @@ export default function HomePage() {
                   type="email"
                   placeholder="your@email.com"
                   required
-                  className="flex-1 border border-gray-200 bg-gray-50/50 rounded-xl px-5 py-4 text-sm outline-none focus:border-green focus:ring-4 focus:ring-green/10 transition-all hover:bg-white text-verdant-dark placeholder:text-gray-400 font-medium"
+                  className="flex-1 border-2 border-gray-100 bg-gray-50 rounded-xl px-5 py-3.5 sm:py-4 text-sm outline-none focus:border-green transition-all hover:bg-white text-verdant-dark placeholder:text-gray-400 font-medium"
                 />
                 <button
                   type="submit"
-                  className="bg-green text-white px-8 py-4 rounded-xl text-sm font-bold hover:bg-green-mid transition-all shadow-sm whitespace-nowrap"
+                  className="bg-green text-white px-8 py-3.5 sm:py-4 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest hover:bg-green-mid transition-all shadow-sm whitespace-nowrap"
                 >
                   Subscribe
                 </button>
               </form>
-              <p className="text-[11px] font-bold text-gray-400 mt-5 uppercase tracking-wider">
+              <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 mt-4 sm:mt-5 uppercase tracking-widest">
                 No spam. Unsubscribe anytime.
               </p>
             </div>

@@ -9,7 +9,6 @@ export interface UserData {
 
 export interface UserApi {
   user: UserData;
-  accessToken: string;
 }
 
 export interface User {
@@ -17,8 +16,4 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
-}
-
-export interface RefreshTokenApi {
-  accessToken: string;
 }

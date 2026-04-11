@@ -25,7 +25,6 @@ const QuantityStepper = ({
       removeItem(productId);
     } else {
       updateQuantity(productId, -1);
-      console.log(qtyInCart);
       toast.success("Item updated successfully");
     }
   };

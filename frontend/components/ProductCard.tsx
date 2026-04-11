@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { StarRating } from "./StarRating";
+import BlurImage from "./BlurImage";
 
 function discountPct(price: number, original: number) {
   return Math.round((1 - price / original) * 100);
@@ -34,7 +35,7 @@ export default function ProductCard({
       className="group flex flex-col bg-white rounded-2xl border border-gray-200 hover:border-green/40 hover:shadow-sm transition-all duration-200 overflow-hidden"
     >
       <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-50 border-b border-gray-100">
-        <Image
+        <BlurImage
           src={p.images[0].url}
           alt={p.images[0].alt}
           fill

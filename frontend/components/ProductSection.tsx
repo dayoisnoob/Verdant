@@ -1,51 +1,57 @@
-import Link from "next/link";
 import ProductCard from "./ProductCard";
-import { ProductCard as ProductCardType, ProductSectionProps } from "@/types";
+import { ProductCard as PCType } from "@/types";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
-const ProductSection = ({
+interface ProductSectionProps {
+  label: string;
+  title: string;
+  description?: string;
+  products: PCType[];
+}
+
+export default function ProductSection({
   label,
   title,
   description,
   products,
-}: ProductSectionProps) => {
+}: ProductSectionProps) {
+  if (!products || products.length === 0) return null;
+
   return (
-    <div className="bg-white/80 rounded-2xl mx-4 px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
-        <div>
-          <p className="text-[0.65rem] tracking-[0.15em] uppercase text-green mb-2">
+    <section className="px-4 sm:px-8 md:px-16 lg:px-20 max-w-[1600px] mx-auto w-full">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-10">
+        <div className="max-w-2xl">
+          <p className="text-[10px] sm:text-[11px] font-bold tracking-[0.15em] uppercase text-green mb-2 sm:mb-3">
             {label}
           </p>
           <h2 className="font-playfair font-black text-verdant-dark text-3xl sm:text-4xl">
             {title}
           </h2>
-          <p className="text-verdant-muted text-sm mt-2 max-w-sm">
-            {description || ""}
-          </p>
+          {description && (
+            <p className="text-gray-500 font-medium text-sm mt-3 leading-relaxed">
+              {description}
+            </p>
+          )}
         </div>
         <Link
           href="/shop"
-          className="text-green text-sm font-medium hover:opacity-65 transition-opacity self-start sm:self-auto"
+          className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-green hover:text-green-mid transition-colors flex items-center gap-1.5 whitespace-nowrap"
         >
-          Browse all produce →
+          View all <ChevronRight size={14} strokeWidth={2.5} />
         </Link>
       </div>
 
-      {products ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {products.map((p: ProductCardType) => (
-            <ProductCard key={p.slug} product={p} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-16 text-verdant-muted text-sm">
-          No featured products right now.{" "}
-          <Link href="/shop" className="text-green font-medium hover:underline">
-            Browse everything →
-          </Link>
-        </div>
-      )}
-    </div>
+      <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+        {products.map((p) => (
+          <div
+            key={p.slug}
+            className="min-w-[240px] sm:min-w-0 snap-center h-full"
+          >
+            <ProductCard product={p} />
+          </div>
+        ))}
+      </div>
+    </section>
   );
-};
-
-export default ProductSection;
+}
