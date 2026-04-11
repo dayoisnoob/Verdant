@@ -1,5 +1,5 @@
 export type { AddressApi } from "./address.types";
-export type { RefreshTokenApi, User, UserApi, UserData } from "./auth.types";
+export type { User, UserApi, UserData } from "./auth.types";
 export type { CartResponse, GuestCart, TotalsResponse } from "./cart.types";
 export type {
   CustomerOrder,
