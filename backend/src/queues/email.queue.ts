@@ -37,7 +37,11 @@ export const emailWorker = new Worker<EmailJob>(
       'Email job completed'
     );
   },
-  { connection: bullMQConnection }
+  {
+    connection: bullMQConnection,
+    drainDelay: 300,
+    stalledInterval: 60000,
+  }
 );
 
 emailWorker.on('failed', (job, err) => {
