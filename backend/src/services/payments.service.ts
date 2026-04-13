@@ -4,7 +4,12 @@ import { db } from '../config/db';
 import { env } from '../config/env';
 import { logger } from '../config/logger';
 import { stripe } from '../config/stripe';
-import { couponRedemptionsTable, productsTable } from '../db';
+import {
+  cartItemsTable,
+  cartsTable,
+  couponRedemptionsTable,
+  productsTable,
+} from '../db';
 import { couponsTable } from '../db/schema/coupons';
 import { ApiError } from '../utils/api-response';
 import { CartService } from './cart.service';
@@ -25,27 +30,35 @@ interface OutOfStockItems {
 export class PaymentService {
   static async createCheckoutSession(
     userId: string,
-    items: LineItems[],
     addressId: string,
     couponCode?: string,
     deliveryNotes?: string
   ) {
-    const productIds = items.map((i) => i.productId);
-    const products = await db
+    const cartItems = await db
       .select()
+      .from(cartItemsTable)
+      .innerJoin(cartsTable, eq(cartItemsTable.cartId, cartsTable.id))
+      .where(eq(cartsTable.userId, userId));
+
+    if (cartItems.length === 0) {
+      throw new ApiError(400, 'Your cart is empty');
+    }
+
+    const productIds = cartItems.map((i) => i.cart_items.productId);
+    const products = await db
+      .select({ id: productsTable.id, inStock: productsTable.inStock })
       .from(productsTable)
       .where(inArray(productsTable.id, productIds));
 
     const outOfStockItems: OutOfStockItems[] = [];
 
-    items.forEach((i) => {
-      const product = products.find((p) => p.id === i.productId);
-
+    cartItems.forEach((i) => {
+      const product = products.find((p) => p.id === i.cart_items.productId);
       if (!product || !product.inStock) {
         outOfStockItems.push({
-          id: product?.id,
-          name: product?.name,
-          image: product?.images?.[0]?.url || '',
+          id: i.cart_items.productId,
+          name: i.cart_items.name,
+          image: i.cart_items.imageUrl ?? '',
           issue: 'out_of_stock',
         });
       }
@@ -63,28 +76,19 @@ export class PaymentService {
     const discountPence = cartTotals.discountPence;
     const deliveryPence = cartTotals.deliveryPence;
 
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(
-      (item) => {
-        const product = products.find((p) => p.id === item.productId);
-
-        if (!product) {
-          throw new ApiError(404, 'Product not found');
-        }
-
-        return {
-          price_data: {
-            currency: 'gbp',
-            product_data: {
-              name: product.name,
-              images: product.images[0]?.url ? [product.images[0]?.url] : [],
-              metadata: { productId: product.id },
-            },
-            unit_amount: Math.round(+product.price),
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+      cartItems.map((item) => ({
+        price_data: {
+          currency: 'gbp',
+          product_data: {
+            name: item.cart_items.name,
+            images: item.cart_items.imageUrl ? [item.cart_items.imageUrl] : [],
+            metadata: { productId: item.cart_items.productId },
           },
-          quantity: item.quantity,
-        };
-      }
-    );
+          unit_amount: Math.round(+item.cart_items.pricePence),
+        },
+        quantity: item.cart_items.quantity,
+      }));
 
     if (deliveryPence > 0) {
       lineItems.push({

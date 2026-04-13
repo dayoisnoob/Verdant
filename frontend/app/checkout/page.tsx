@@ -100,12 +100,7 @@ export default function CheckoutPage() {
     if (!selectedAddressId) return;
     setIsPaying(true);
     try {
-      const items = cartItems.map((i) => ({
-        quantity: i.quantity,
-        productId: i.productId,
-      }));
       const res = await createCheckoutSession({
-        items,
         addressId: selectedAddressId,
         couponCode: coupon,
         deliveryNotes,

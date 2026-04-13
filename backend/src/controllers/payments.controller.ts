@@ -4,12 +4,11 @@ import { ApiResponse } from '../utils/api-response';
 
 export class PaymentController {
   static async createCheckoutSession(req: Request, res: Response) {
-    const { items, addressId, couponCode, deliveryNotes } = req.body;
+    const { addressId, couponCode, deliveryNotes } = req.body;
     const userId = req.user!.id;
 
     const url = await PaymentService.createCheckoutSession(
       userId,
-      items,
       addressId,
       couponCode,
       deliveryNotes
@@ -22,10 +21,7 @@ export class PaymentController {
     const signature = req.headers['stripe-signature'] as string;
 
     try {
-      const result = await PaymentService.handleWebhookEvent(
-        req.body,
-        signature
-      );
+      await PaymentService.handleWebhookEvent(req.body, signature);
 
       res.json({ received: true });
     } catch (err) {
