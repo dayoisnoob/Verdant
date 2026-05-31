@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 export default function proxy(request: NextRequest) {
   const token = request.cookies.get("__auth.refresh")?.value;
 
+
   if (!token) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
